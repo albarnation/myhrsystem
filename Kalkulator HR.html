@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kalkulator HR">
+<title>Kalkulator Kompensasi & Lembur HR</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg:#0F1417;
+    --panel:#161D21;
+    --panel-2:#1C2529;
+    --line:#2A3438;
+    --ink:#E7EEEF;
+    --ink-dim:#8CA0A6;
+    --teal:#3FC1B0;
+    --teal-dim:#274944;
+    --amber:#E0A458;
+    --red:#D96C5A;
+    --grid:#232D31;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+
+  .topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:22px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.14em;color:var(--teal);
+    text-transform:uppercase;margin-bottom:6px;
+  }
+  h1{font-size:24px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em;}
+  .subtitle{color:var(--ink-dim);font-size:13px;}
+
+  select, input{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-radius:7px;
+    padding:9px 11px;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    width:100%;
+  }
+  input:focus, select:focus{outline:1px solid var(--teal);}
+
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:14px;}
+  .tab-btn{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink-dim);
+    border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .tab-btn.active{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+  .tab-btn:hover{color:var(--ink);}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px;display:none;}
+  .panel.active{display:block;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .panel h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin:0;font-family:'JetBrains Mono',monospace;font-weight:600;}
+  .panel .desc{font-size:11.5px;color:var(--ink-dim);margin-top:3px;}
+
+  .section-label{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-dim);margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--grid);
+  }
+  .section-label:first-of-type{margin-top:0;padding-top:0;border-top:none;}
+
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;padding:7px 0;}
+  .field-row label{font-size:12.5px;color:var(--ink-dim);}
+  .field-row.wide{grid-template-columns:1fr;}
+  .field-row.wide label{margin-bottom:4px;}
+
+  .btn-primary{
+    background:#F33A6A;color:#fff;border:none;border-radius:7px;font-weight:700;
+    font-size:13px;cursor:pointer;padding:11px 18px;font-family:'Space Grotesk',sans-serif;margin-top:14px;
+  }
+  .btn-primary:hover{opacity:.9;}
+
+  .out-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;}
+  .out-table td{padding:8px 6px;border-bottom:1px solid var(--grid);}
+  .out-table td:first-child{color:var(--ink-dim);}
+  .out-table td:last-child{text-align:right;font-family:'JetBrains Mono',monospace;}
+  .out-table tr.sub td{color:var(--ink-dim);font-size:11.5px;}
+  .out-table tr.sub td:first-child{padding-left:16px;}
+  .out-table tr.total td{border-top:1px solid var(--line);border-bottom:none;font-weight:700;padding-top:12px;}
+  .out-table tr.total td:last-child{color:var(--teal);font-size:14.5px;}
+  .out-table tr.grand td{font-weight:700;}
+  .out-table tr.grand td:last-child{color:var(--teal);font-size:16px;}
+
+  table.detail{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+  table.detail th{
+    text-align:left;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--ink-dim);padding:8px 6px;border-bottom:1px solid var(--line);
+  }
+  table.detail td{padding:8px 6px;border-bottom:1px solid var(--grid);}
+  table.detail td.num, table.detail th.num{text-align:right;font-family:'JetBrains Mono',monospace;}
+  table.detail tr.subtotal td{font-weight:700;border-top:1px solid var(--line);color:var(--teal);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr;} .field-row{grid-template-columns:1fr;} .field-row label{margin-bottom:3px;}}
+
+  .note{font-size:11.5px;color:var(--ink-dim);margin-top:14px;line-height:1.55;padding-top:12px;border-top:1px solid var(--grid);}
+  .ref-toggle{font-size:11px;color:var(--teal);cursor:pointer;font-family:'JetBrains Mono',monospace;margin-top:8px;display:inline-block;}
+  .ref-box{display:none;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:8px;font-size:11.5px;}
+  .ref-box.show{display:block;}
+  .ref-box table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;}
+  .ref-box th,.ref-box td{padding:4px 6px;text-align:left;color:var(--ink-dim);}
+  .ref-box th{color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;}
+  .pill{display:inline-block;background:var(--teal-dim);color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:20px;margin-left:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <div class="eyebrow">HR // Kompensasi & Lembur</div>
+      <h1>Kalkulator Kompensasi & Lembur Karyawan</h1>
+      <div class="subtitle">PKWT · Pesangon PHK · Lembur Hari Biasa · Lembur Hari Libur · Gaji Harian — sesuai PP 35/2021 & PP 68/2009</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="pkwt">Kompensasi PKWT</button>
+    <button class="tab-btn" data-tab="phk">Pesangon PHK</button>
+    <button class="tab-btn" data-tab="lemburbiasa">Lembur Hari Biasa</button>
+    <button class="tab-btn" data-tab="lemburlibur">Lembur Hari Libur</button>
+    <button class="tab-btn" data-tab="gajiharian">Gaji Harian</button>
+  </div>
+
+  <!-- ============ PKWT ============ -->
+  <div class="panel active" id="panel-pkwt">
+    <div class="panel-head"><h2>Kalkulator Kompensasi PKWT</h2></div>
+    <div class="desc">Uang kompensasi berakhirnya kontrak (PKWT) — PP 35/2021 Pasal 15-16.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row"><label>Gaji + Tunjangan Tetap</label><input type="text" id="pkwt_gaji" class="rp-input" value="7000000"></div>
+    <div class="field-row"><label>Masa Kerja (Bulan)</label><input type="number" id="pkwt_bulan" value="12" min="0"></div>
+
+    <button class="btn-primary" onclick="calcPKWT()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="pkwt_out">
+      <tr><td>Uang Kompensasi PKWT</td><td id="pkwt_kompensasi">Rp0,00</td></tr>
+      <tr><td>PAJAK (Estimasi PPh 21 Final — PP 68/2009)</td><td id="pkwt_pajak">Rp0,00</td></tr>
+      <tr class="grand"><td>TOTAL PENERIMAAN</td><td id="pkwt_total">Rp0,00</td></tr>
+    </table>
+    <div class="note">Kompensasi = (Masa Kerja dalam bulan ÷ 12) × Gaji + Tunjangan Tetap. Estimasi pajak memakai tarif progresif final atas pesangon (PP 68/2009) sebagai acuan; untuk kompensasi PKWT bernilai kecil umumnya Rp0.</div>
+  </div>
+
+  <!-- ============ PHK ============ -->
+  <div class="panel" id="panel-phk">
+    <div class="panel-head"><h2>Kalkulator Pesangon PHK</h2></div>
+    <div class="desc">Uang Pesangon (UP) + Uang Penghargaan Masa Kerja (UPMK) + Uang Penggantian Hak (UPH) — PP 35/2021 Pasal 40-42.</div>
+
+    <div class="section-label">Data Karyawan</div>
+    <div class="field-row"><label>Nama Karyawan</label><input type="text" id="phk_nama" value="Budi Santoso"></div>
+    <div class="field-row"><label>Tanggal Mulai Kerja</label><input type="date" id="phk_mulai" value="2006-01-01"></div>
+    <div class="field-row"><label>Tanggal PHK / Perhitungan</label><input type="date" id="phk_akhir"></div>
+    <div class="field-row"><label>Gaji + Tunjangan Tetap</label><input type="text" class="rp-input" id="phk_gaji" value="10000000"></div>
+
+    <div class="section-label">Faktor & Pembagi</div>
+    <div class="field-row">
+      <label>Faktor Pesangon (alasan PHK)</label>
+      <select id="phk_faktor">
+        <option value="0.5">0,5x</option>
+        <option value="0.75">0,75x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.75">1,75x</option>
+        <option value="2">2x</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <label>Berhak UPMK?</label>
+      <select id="phk_upmk_hak"><option value="1" selected>Ya</option><option value="0">Tidak</option></select>
+    </div>
+    <div class="field-row">
+      <label>Sertakan Penggantian Perumahan & Pengobatan (15%)?</label>
+      <select id="phk_perumahan"><option value="1" selected>Ya</option><option value="0">Tidak</option></select>
+    </div>
+    <div class="field-row"><label>Ongkos Pulang ke Tempat Penerimaan Kerja</label><input type="text" class="rp-input" id="phk_ongkos" value="0"></div>
+    <div class="field-row"><label>Sisa Cuti Belum Diambil (hari)</label><input type="number" id="phk_cuti" value="12" min="0"></div>
+    <div class="field-row"><label>Pembagi Upah Harian (hari kerja/bulan)</label><input type="number" id="phk_pembagi" value="26" min="1"></div>
+
+    <div class="section-label">Golongan Bulan Upah <span class="pill">auto, bisa diubah manual</span></div>
+    <div class="field-row"><label>Masa Kerja (Tahun Penuh / Bulan)</label><input type="text" id="phk_masakerja" value="—" disabled></div>
+    <div class="field-row"><label>Golongan Bulan Upah UP</label><input type="number" id="phk_golup" step="0.25" min="0"></div>
+    <div class="field-row"><label>Golongan Bulan Upah UPMK</label><input type="number" id="phk_golupmk" step="0.25" min="0"></div>
+    <span class="ref-toggle" onclick="document.getElementById('phk_ref').classList.toggle('show')">Lihat tabel acuan golongan ▾</span>
+    <div class="ref-box" id="phk_ref">
+      <b style="color:var(--ink)">Tabel UP (Pasal 40 ayat 2)</b>
+      <table><tr><th>Masa Kerja</th><th>Bulan Upah</th></tr>
+        <tr><td>&lt;1 th</td><td>1</td></tr><tr><td>1-2 th</td><td>2</td></tr><tr><td>2-3 th</td><td>3</td></tr>
+        <tr><td>3-4 th</td><td>4</td></tr><tr><td>4-5 th</td><td>5</td></tr><tr><td>5-6 th</td><td>6</td></tr>
+        <tr><td>6-7 th</td><td>7</td></tr><tr><td>7-8 th</td><td>8</td></tr><tr><td>≥8 th</td><td>9</td></tr>
+      </table>
+      <b style="color:var(--ink)">Tabel UPMK (Pasal 40 ayat 3)</b>
+      <table><tr><th>Masa Kerja</th><th>Bulan Upah</th></tr>
+        <tr><td>&lt;3 th</td><td>0</td></tr><tr><td>3-6 th</td><td>2</td></tr><tr><td>6-9 th</td><td>3</td></tr>
+        <tr><td>9-12 th</td><td>4</td></tr><tr><td>12-15 th</td><td>5</td></tr><tr><td>15-18 th</td><td>6</td></tr>
+        <tr><td>18-21 th</td><td>7</td></tr><tr><td>21-24 th</td><td>8</td></tr><tr><td>≥24 th</td><td>10</td></tr>
+      </table>
+      <div style="margin-top:6px;">Golongan terisi otomatis dari masa kerja, silakan sesuaikan bila alasan PHK memakai ketentuan khusus.</div>
+    </div>
+
+    <button class="btn-primary" onclick="calcPHK()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="phk_out">
+      <tr><td>Uang Pesangon (UP)</td><td id="phk_up">Rp0,00</td></tr>
+      <tr><td>Uang Penghargaan Masa Kerja (UPMK)</td><td id="phk_upmk">Rp0,00</td></tr>
+      <tr><td>Rate Cuti per Hari</td><td id="phk_ratecuti">Rp0,00</td></tr>
+      <tr class="sub"><td>– Penggantian Cuti Belum Diambil</td><td id="phk_gcuti">Rp0,00</td></tr>
+      <tr class="sub"><td>– Ongkos Pulang</td><td id="phk_gongkos">Rp0,00</td></tr>
+      <tr class="sub"><td>– Penggantian Perumahan & Pengobatan (15%)</td><td id="phk_gperumahan">Rp0,00</td></tr>
+      <tr><td>Uang Penggantian Hak (UPH)</td><td id="phk_uph">Rp0,00</td></tr>
+      <tr class="total"><td>SUB TOTAL</td><td id="phk_subtotal">Rp0,00</td></tr>
+      <tr><td>PAJAK (PPh 21 Final atas Pesangon — PP 68/2009)</td><td id="phk_pajak">Rp0,00</td></tr>
+      <tr class="grand"><td>TOTAL PENERIMAAN</td><td id="phk_total">Rp0,00</td></tr>
+    </table>
+    <div class="note">UP = Golongan UP × Gaji × Faktor Pesangon. UPMK = Golongan UPMK × Gaji × Faktor Pesangon (jika berhak). PPh 21 final progresif: 0% s/d Rp50 juta, 5% di atas Rp50–100 juta, 15% di atas Rp100–500 juta, 25% di atas Rp500 juta (dihitung berjenjang per lapisan).</div>
+  </div>
+
+  <!-- ============ LEMBUR HARI BIASA ============ -->
+  <div class="panel" id="panel-lemburbiasa">
+    <div class="panel-head"><h2>Rincian Lembur Hari Biasa</h2></div>
+    <div class="desc">Upah lembur pada hari kerja biasa — pengali 1,5x (jam pertama) dan 2x (jam kedua dst), Kepmenaker/PP 35/2021.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row"><label>Gaji + Tunjangan Tetap</label><input type="text" class="rp-input" id="lb_gaji" value="7000000"></div>
+    <div class="field-row"><label>Hari Kerja Perbulan (informasi)</label><input type="number" id="lb_harikerja" value="26" min="1"></div>
+    <div class="field-row"><label>Jumlah Jam Lembur — Jam Pertama</label><input type="number" id="lb_jam1" value="1" min="0" max="1" step="1"></div>
+    <div class="field-row"><label>Jumlah Jam Lembur — Jam Kedua dst</label><input type="number" id="lb_jam2" value="1" min="0"></div>
+
+    <button class="btn-primary" onclick="calcLemburBiasa()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="detail" id="lb_out">
+      <thead><tr><th>Keterangan</th><th class="num">Gaji + Tunjangan</th><th class="num">Hari Kerja/Bln</th><th class="num">Upah/Hari</th><th class="num">Upah/Jam</th><th class="num">Jumlah Jam</th><th class="num">Pengali</th><th class="num">Total Uang</th></tr></thead>
+      <tbody>
+        <tr><td>Jam Pertama</td><td class="num" id="lb1_gaji">-</td><td class="num" id="lb1_hk">-</td><td class="num" id="lb1_uh">-</td><td class="num" id="lb1_uj">-</td><td class="num" id="lb1_jam">-</td><td class="num">1,5x</td><td class="num" id="lb1_total">-</td></tr>
+        <tr><td>Jam Kedua dst</td><td class="num" id="lb2_gaji">-</td><td class="num" id="lb2_hk">-</td><td class="num" id="lb2_uh">-</td><td class="num" id="lb2_uj">-</td><td class="num" id="lb2_jam">-</td><td class="num">2x</td><td class="num" id="lb2_total">-</td></tr>
+        <tr class="subtotal"><td colspan="5">SUBTOTAL LEMBUR HARI BIASA</td><td class="num" id="lb_totjam">-</td><td></td><td class="num" id="lb_grand">-</td></tr>
+      </tbody>
+    </table>
+    <div class="note">Upah per jam = Gaji ÷ 173 (pembagi baku PP 35/2021, terlepas dari jumlah hari kerja aktual). Jam pertama dihitung 1,5×, jam kedua dan seterusnya dihitung 2× per jam.</div>
+  </div>
+
+  <!-- ============ LEMBUR HARI LIBUR ============ -->
+  <div class="panel" id="panel-lemburlibur">
+    <div class="panel-head"><h2>Rincian Lembur Hari Libur</h2></div>
+    <div class="desc">Upah lembur pada hari libur resmi/istirahat mingguan (5 hari kerja/minggu) — pengali 2x / 3x / 4x, PP 35/2021 Pasal 31.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row"><label>Gaji + Tunjangan Tetap</label><input type="text" class="rp-input" id="ll_gaji" value="7000000"></div>
+    <div class="field-row"><label>Jam ke 1–8</label><input type="number" id="ll_jam18" value="1" min="0" max="8"></div>
+    <div class="field-row"><label>Jam ke-9</label><input type="number" id="ll_jam9" value="1" min="0" max="1"></div>
+    <div class="field-row"><label>Jam ke-10 dst</label><input type="number" id="ll_jam10" value="1" min="0"></div>
+
+    <button class="btn-primary" onclick="calcLemburLibur()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="detail" id="ll_out">
+      <thead><tr><th>Keterangan</th><th class="num">Gaji + Tunjangan</th><th class="num">Pembagi</th><th class="num">Upah/Hari</th><th class="num">Upah/Jam</th><th class="num">Jumlah Jam</th><th class="num">Pengali</th><th class="num">Total Uang</th></tr></thead>
+      <tbody>
+        <tr><td>Jam 1 - 8</td><td class="num" id="ll1_gaji">-</td><td class="num">173</td><td class="num" id="ll1_uh">-</td><td class="num" id="ll1_uj">-</td><td class="num" id="ll1_jam">-</td><td class="num">2x</td><td class="num" id="ll1_total">-</td></tr>
+        <tr><td>Jam Ke-9</td><td class="num" id="ll2_gaji">-</td><td class="num">173</td><td class="num" id="ll2_uh">-</td><td class="num" id="ll2_uj">-</td><td class="num" id="ll2_jam">-</td><td class="num">3x</td><td class="num" id="ll2_total">-</td></tr>
+        <tr><td>Jam Ke-10 dst</td><td class="num" id="ll3_gaji">-</td><td class="num">173</td><td class="num" id="ll3_uh">-</td><td class="num" id="ll3_uj">-</td><td class="num" id="ll3_jam">-</td><td class="num">4x</td><td class="num" id="ll3_total">-</td></tr>
+        <tr class="subtotal"><td colspan="5">SUBTOTAL LEMBUR HARI LIBUR</td><td class="num" id="ll_totjam">-</td><td></td><td class="num" id="ll_grand">-</td></tr>
+      </tbody>
+    </table>
+    <div class="note">Berlaku untuk jadwal 5 hari kerja/minggu (hari libur jatuh pada hari kerja 8 jam). Upah per jam = Gaji ÷ 173.</div>
+  </div>
+
+  <!-- ============ GAJI HARIAN ============ -->
+  <div class="panel" id="panel-gajiharian">
+    <div class="panel-head"><h2>Kalkulator Perhitungan Gaji Harian</h2></div>
+    <div class="desc">Upah harian proporsional — untuk karyawan baru/keluar di tengah bulan, cuti tanpa upah, atau pekerja harian lepas.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row"><label>Gaji + Tunjangan Tetap (Bulanan)</label><input type="text" class="rp-input" id="gh_gaji" value="7000000"></div>
+    <div class="field-row">
+      <label>Metode Pembagi</label>
+      <select id="gh_metode" onchange="toggleGHCustom()">
+        <option value="25">25 hari (6 hari kerja/minggu — Kepmenakertrans 102/2004)</option>
+        <option value="21">21 hari (5 hari kerja/minggu)</option>
+        <option value="30">30 hari (kalender)</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <div class="field-row" id="gh_custom_row" style="display:none;"><label>Pembagi Custom (hari)</label><input type="number" id="gh_custom" value="26" min="1"></div>
+    <div class="field-row"><label>Jumlah Hari yang Dihitung</label><input type="number" id="gh_jumlahhari" value="10" min="0" step="0.5"></div>
+
+    <button class="btn-primary" onclick="calcGajiHarian()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="gh_out">
+      <tr><td>Upah per Hari</td><td id="gh_upahhari">Rp0,00</td></tr>
+      <tr><td>Jumlah Hari Dihitung</td><td id="gh_hari">0</td></tr>
+      <tr class="grand"><td>TOTAL UPAH</td><td id="gh_total">Rp0,00</td></tr>
+    </table>
+    <div class="note">Upah per hari = Gaji + Tunjangan Tetap ÷ Pembagi. Total = Upah per Hari × Jumlah Hari yang Dihitung.</div>
+  </div>
+
+  <div class="note" style="text-align:center;border-top:none;">File offline — semua perhitungan berjalan langsung di browser, tidak ada data yang dikirim ke internet. Formula mengacu pada UU Cipta Kerja, PP 35/2021, dan PP 68/2009; gunakan sebagai alat bantu, tetap verifikasi dengan tabel acuan internal perusahaan untuk kasus khusus.</div>
+  <div class="note" style="text-align:center;border-top:none;padding-top:0;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;">System Oleh : Muhammad Albar</div>
+
+</div>
+
+<script>
+// ---------- helpers ----------
+function fmtRp(n){
+  if(isNaN(n)) n=0;
+  return 'Rp' + n.toLocaleString('id-ID',{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function parseRp(id){
+  const raw = document.getElementById(id).value;
+  const n = parseInt(String(raw).replace(/\D/g,''), 10);
+  return isNaN(n) ? 0 : n;
+}
+function bindRpInput(id){
+  const el = document.getElementById(id);
+  el.setAttribute('inputmode','numeric');
+  const formatLive = ()=>{
+    const cursorFromEnd = el.value.length - el.selectionStart;
+    const digits = el.value.replace(/\D/g,'');
+    const num = digits === '' ? 0 : parseInt(digits,10);
+    el.value = num === 0 ? '' : num.toLocaleString('id-ID');
+    const pos = Math.max(el.value.length - cursorFromEnd, 0);
+    el.setSelectionRange(pos,pos);
+  };
+  el.addEventListener('input', formatLive);
+  el.addEventListener('blur', ()=>{ if(el.value==='') el.value = '0'; });
+  // format initial value on load
+  const digits = el.value.replace(/\D/g,'');
+  el.value = digits === '' ? '' : parseInt(digits,10).toLocaleString('id-ID');
+}
+document.querySelectorAll('.rp-input').forEach(el=>bindRpInput(el.id));
+
+// tabs
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// PPh21 final progresif atas pesangon (PP 68/2009)
+function pphPesangon(amount){
+  let sisa = amount, pajak = 0;
+  const brackets = [50000000, 50000000, 400000000, Infinity];
+  const rates =    [0,        0.05,     0.15,      0.25];
+  for(let i=0;i<brackets.length;i++){
+    if(sisa<=0) break;
+    const taxable = Math.min(sisa, brackets[i]);
+    pajak += taxable * rates[i];
+    sisa -= taxable;
+  }
+  return pajak;
+}
+
+// ---------- PKWT ----------
+function calcPKWT(){
+  const gaji = parseRp('pkwt_gaji');
+  const bulan = parseFloat(document.getElementById('pkwt_bulan').value) || 0;
+  const kompensasi = (bulan/12) * gaji;
+  const pajak = pphPesangon(kompensasi);
+  const total = kompensasi - pajak;
+  document.getElementById('pkwt_kompensasi').textContent = fmtRp(kompensasi);
+  document.getElementById('pkwt_pajak').textContent = fmtRp(pajak);
+  document.getElementById('pkwt_total').textContent = fmtRp(total);
+}
+
+// ---------- PHK ----------
+function golonganUP(tahunPenuh){
+  const table=[[1,1],[2,2],[3,3],[4,4],[5,5],[6,6],[7,7],[8,8]];
+  for(const [batas,gol] of table){ if(tahunPenuh < batas) return gol; }
+  return 9;
+}
+function golonganUPMK(tahunPenuh){
+  if(tahunPenuh<3) return 0;
+  const table=[[6,2],[9,3],[12,4],[15,5],[18,6],[21,7],[24,8]];
+  for(const [batas,gol] of table){ if(tahunPenuh < batas) return gol; }
+  return 10;
+}
+function updateMasaKerjaPHK(){
+  const mulai = document.getElementById('phk_mulai').value;
+  const akhirEl = document.getElementById('phk_akhir');
+  if(!akhirEl.value){
+    const today = new Date();
+    akhirEl.value = today.toISOString().slice(0,10);
+  }
+  const akhir = akhirEl.value;
+  if(!mulai || !akhir) return;
+  const d1 = new Date(mulai), d2 = new Date(akhir);
+  let months = (d2.getFullYear()-d1.getFullYear())*12 + (d2.getMonth()-d1.getMonth());
+  if(d2.getDate() < d1.getDate()) months -= 1;
+  if(months<0) months=0;
+  const tahunPenuh = Math.floor(months/12);
+  const sisaBulan = months % 12;
+  document.getElementById('phk_masakerja').value = tahunPenuh + ' tahun ' + sisaBulan + ' bulan (' + months + ' bulan)';
+  document.getElementById('phk_golup').value = golonganUP(tahunPenuh);
+  document.getElementById('phk_golupmk').value = golonganUPMK(tahunPenuh);
+}
+document.getElementById('phk_mulai').addEventListener('change', updateMasaKerjaPHK);
+document.getElementById('phk_akhir').addEventListener('change', updateMasaKerjaPHK);
+window.addEventListener('DOMContentLoaded', updateMasaKerjaPHK);
+
+function calcPHK(){
+  const gaji = parseRp('phk_gaji');
+  const faktor = parseFloat(document.getElementById('phk_faktor').value);
+  const upmkHak = document.getElementById('phk_upmk_hak').value === '1';
+  const perumahan = document.getElementById('phk_perumahan').value === '1';
+  const ongkos = parseRp('phk_ongkos');
+  const cutiHari = parseFloat(document.getElementById('phk_cuti').value) || 0;
+  const pembagi = parseFloat(document.getElementById('phk_pembagi').value) || 26;
+  const golUP = parseFloat(document.getElementById('phk_golup').value) || 0;
+  const golUPMK = parseFloat(document.getElementById('phk_golupmk').value) || 0;
+
+  const up = golUP * gaji * faktor;
+  const upmk = upmkHak ? (golUPMK * gaji * faktor) : 0;
+
+  const rateCuti = gaji / pembagi;
+  const gantiCuti = rateCuti * cutiHari;
+  const gantiPerumahan = perumahan ? 0.15 * (up + upmk) : 0;
+  const uph = gantiCuti + ongkos + gantiPerumahan;
+
+  const subtotal = up + upmk + uph;
+  const pajak = pphPesangon(subtotal);
+  const total = subtotal - pajak;
+
+  document.getElementById('phk_up').textContent = fmtRp(up);
+  document.getElementById('phk_upmk').textContent = fmtRp(upmk);
+  document.getElementById('phk_ratecuti').textContent = fmtRp(rateCuti);
+  document.getElementById('phk_gcuti').textContent = fmtRp(gantiCuti);
+  document.getElementById('phk_gongkos').textContent = fmtRp(ongkos);
+  document.getElementById('phk_gperumahan').textContent = fmtRp(gantiPerumahan);
+  document.getElementById('phk_uph').textContent = fmtRp(uph);
+  document.getElementById('phk_subtotal').textContent = fmtRp(subtotal);
+  document.getElementById('phk_pajak').textContent = fmtRp(pajak);
+  document.getElementById('phk_total').textContent = fmtRp(total);
+}
+
+// ---------- LEMBUR HARI BIASA ----------
+function calcLemburBiasa(){
+  const gaji = parseRp('lb_gaji');
+  const hariKerja = parseFloat(document.getElementById('lb_harikerja').value) || 26;
+  const jam1 = parseFloat(document.getElementById('lb_jam1').value) || 0;
+  const jam2 = parseFloat(document.getElementById('lb_jam2').value) || 0;
+
+  const upahHari = gaji / hariKerja;
+  const upahJam = gaji / 173;
+
+  const total1 = upahJam * 1.5 * jam1;
+  const total2 = upahJam * 2 * jam2;
+
+  document.getElementById('lb1_gaji').textContent = fmtRp(gaji);
+  document.getElementById('lb1_hk').textContent = hariKerja;
+  document.getElementById('lb1_uh').textContent = fmtRp(upahHari);
+  document.getElementById('lb1_uj').textContent = fmtRp(upahJam);
+  document.getElementById('lb1_jam').textContent = jam1;
+  document.getElementById('lb1_total').textContent = fmtRp(total1);
+
+  document.getElementById('lb2_gaji').textContent = fmtRp(gaji);
+  document.getElementById('lb2_hk').textContent = hariKerja;
+  document.getElementById('lb2_uh').textContent = fmtRp(upahHari);
+  document.getElementById('lb2_uj').textContent = fmtRp(upahJam);
+  document.getElementById('lb2_jam').textContent = jam2;
+  document.getElementById('lb2_total').textContent = fmtRp(total2);
+
+  document.getElementById('lb_totjam').textContent = (jam1+jam2);
+  document.getElementById('lb_grand').textContent = fmtRp(total1+total2);
+}
+
+// ---------- LEMBUR HARI LIBUR ----------
+function calcLemburLibur(){
+  const gaji = parseRp('ll_gaji');
+  const jam18 = parseFloat(document.getElementById('ll_jam18').value) || 0;
+  const jam9 = parseFloat(document.getElementById('ll_jam9').value) || 0;
+  const jam10 = parseFloat(document.getElementById('ll_jam10').value) || 0;
+
+  const upahHari = gaji / 173 * 8 / 8; // informational, upah/jam basis 173
+  const upahJam = gaji / 173;
+
+  const t1 = upahJam * 2 * jam18;
+  const t2 = upahJam * 3 * jam9;
+  const t3 = upahJam * 4 * jam10;
+
+  ['ll1','ll2','ll3'].forEach(p=>{
+    document.getElementById(p+'_gaji').textContent = fmtRp(gaji);
+    document.getElementById(p+'_uh').textContent = fmtRp(upahJam);
+    document.getElementById(p+'_uj').textContent = fmtRp(upahJam);
+  });
+  document.getElementById('ll1_jam').textContent = jam18;
+  document.getElementById('ll2_jam').textContent = jam9;
+  document.getElementById('ll3_jam').textContent = jam10;
+  document.getElementById('ll1_total').textContent = fmtRp(t1);
+  document.getElementById('ll2_total').textContent = fmtRp(t2);
+  document.getElementById('ll3_total').textContent = fmtRp(t3);
+
+  document.getElementById('ll_totjam').textContent = (jam18+jam9+jam10);
+  document.getElementById('ll_grand').textContent = fmtRp(t1+t2+t3);
+}
+
+// ---------- GAJI HARIAN ----------
+function toggleGHCustom(){
+  const metode = document.getElementById('gh_metode').value;
+  document.getElementById('gh_custom_row').style.display = (metode==='custom') ? 'grid' : 'none';
+}
+function calcGajiHarian(){
+  const gaji = parseRp('gh_gaji');
+  const metode = document.getElementById('gh_metode').value;
+  const pembagi = metode==='custom' ? (parseFloat(document.getElementById('gh_custom').value)||1) : parseFloat(metode);
+  const jumlahHari = parseFloat(document.getElementById('gh_jumlahhari').value) || 0;
+
+  const upahHari = gaji / pembagi;
+  const total = upahHari * jumlahHari;
+
+  document.getElementById('gh_upahhari').textContent = fmtRp(upahHari);
+  document.getElementById('gh_hari').textContent = jumlahHari;
+  document.getElementById('gh_total').textContent = fmtRp(total);
+}
+
+// initial calc with example values
+calcPKWT();
+calcLemburBiasa();
+calcLemburLibur();
+calcGajiHarian();
+</script>
+</body>
+</html>
