@@ -237,6 +237,7 @@
     <button class="tab-btn" data-tab="pph21">PPh 21 Bulanan</button>
     <button class="tab-btn" data-tab="bpjs">BPJS</button>
     <button class="tab-btn" data-tab="cuti">Cuti Tahunan</button>
+    <button class="tab-btn" data-tab="rekap">Rekap Biaya (Narasi)</button>
   </div>
 
   <!-- ============ PKWT ============ -->
@@ -531,6 +532,39 @@
     <div class="note">Cuti tahunan minimal 12 hari kerja berhak diambil setelah masa kerja 12 bulan terus-menerus (UU No. 13/2003 jo. UU Cipta Kerja Pasal 79). Akrual dihitung proporsional per bulan penuh sejak karyawan berhak (Jatah ÷ 12 × jumlah bulan berjalan pada periode cuti saat ini). Kebijakan perusahaan/PKB dapat memberi jatah lebih besar dari ketentuan minimum ini.</div>
   </div>
 
+  <!-- ============ REKAP BIAYA (PARSING NARASI) ============ -->
+  <div class="panel" id="panel-rekap">
+    <div class="panel-head"><h2>Rekap Biaya Otomatis (Parsing Narasi)</h2></div>
+    <div class="desc">Tempel narasi teks, unggah screenshot/foto nota, atau tempel gambar (Ctrl+V) — sistem otomatis mengekstrak deskripsi dan nominal dari setiap butir, lalu menjumlahkan totalnya.</div>
+
+    <div class="section-label">Upload / Tempel Screenshot Nota (Opsional)</div>
+    <div id="rekap_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      📋 Klik untuk pilih gambar, seret file ke sini, atau tekan <b>Ctrl+V</b> di sini untuk tempel screenshot
+      <input type="file" id="rekap_file_input" accept="image/*" style="display:none;">
+    </div>
+    <div id="rekap_ocr_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+    <div id="rekap_ocr_preview" style="margin-top:8px;"></div>
+
+    <div class="section-label" style="margin-top:16px;">Input Narasi (Teks)</div>
+    <textarea id="rekap_input" rows="7" style="width:100%;box-sizing:border-box;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px;font-family:inherit;font-size:13px;line-height:1.6;">Biaya Transportasi — Rp 2.000.000
+Biaya Pemateri — Rp 10.000.000
+Biaya Lain -lain — Rp 1.000.000</textarea>
+
+    <button class="btn-primary" onclick="calcRekap()" style="margin-top:10px;">Parse &amp; Hitung</button>
+
+    <div class="section-label">Hasil Parsing</div>
+    <table class="detail" id="rekap_table">
+      <thead><tr><th>No</th><th>Deskripsi</th><th class="num">Nominal</th></tr></thead>
+      <tbody id="rekap_body"></tbody>
+    </table>
+    <table class="out-table" style="margin-top:10px;">
+      <tr><td>Jumlah Item Terbaca</td><td id="rekap_count">0 item</td></tr>
+      <tr class="grand"><td>TOTAL KESELURUHAN (dihitung ulang)</td><td id="rekap_total">Rp0,00</td></tr>
+      <tr id="rekap_check_row" style="display:none;"><td>Total Tertulis di Narasi</td><td id="rekap_declared">-</td></tr>
+    </table>
+    <div class="note">Mendukung tiga format teks sekaligus: (1) narasi bernomor "&lt;nomor&gt;. &lt;deskripsi&gt; : &lt;nominal&gt;" dalam satu baris panjang maupun berbaris; (2) satu item per baris tanpa nomor, tanda titik dua opsional (mis. "Biaya Transportasi 2.000.000"); (3) format bullet dengan pemisah "—" (mis. "* Biaya Pemateri — Rp 10.000.000"). Baris yang diawali kata "Total" otomatis dikenali sebagai total tertulis (bukan item) dan dibandingkan dengan total hasil perhitungan ulang. Fitur baca screenshot/gambar memakai OCR (Tesseract.js) yang dimuat dari internet saat pertama kali dipakai (butuh koneksi sekali saja, setelah itu tersimpan di cache browser); perhitungan angkanya sendiri tetap berjalan offline di browser. Hasil OCR bisa kurang akurat untuk tulisan tangan atau gambar buram — selalu periksa ulang teks sebelum klik "Parse & Hitung".</div>
+  </div>
+
   <div class="about-box">
     <div class="section-label">Tentang Saya</div>
     <div class="about-links">
@@ -541,7 +575,7 @@
   </div>
 
   <div class="note" style="text-align:center;border-top:none;">File offline — semua perhitungan berjalan langsung di browser, tidak ada data yang dikirim ke internet. Formula mengacu pada UU Cipta Kerja, PP 35/2021, dan PP 68/2009; gunakan sebagai alat bantu, tetap verifikasi dengan tabel acuan internal perusahaan untuk kasus khusus.</div>
-  <div class="note" style="text-align:center;border-top:none;padding-top:0;font-family:'Roboto',sans-serif;letter-spacing:.04em;">System Oleh : <span style="font-weight:500;color:var(--ink);">Muhammad Albar</span></div>
+  <div class="note" style="text-align:center;border-top:none;padding-top:0;font-family:'Roboto',sans-serif;letter-spacing:.04em;">System Oleh : <span style="color:var(--ink);">Muhammad Albar</span></div>
 
 </div>
 
@@ -962,6 +996,168 @@ function calcCuti(){
   document.getElementById('cuti_total').textContent = total.toFixed(2) + ' hari';
 }
 
+// ---------- REKAP BIAYA (PARSING NARASI) ----------
+// -- OCR gambar/screenshot (opsional, memuat Tesseract.js dari internet saat pertama dipakai) --
+let tesseractLoadPromise = null;
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(tesseractLoadPromise) return tesseractLoadPromise;
+  tesseractLoadPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Gagal memuat mesin OCR — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ini.'));
+    document.head.appendChild(s);
+  });
+  return tesseractLoadPromise;
+}
+
+function setOcrStatus(msg, isError){
+  const el = document.getElementById('rekap_ocr_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+async function processOcrImage(file){
+  if(!file || !file.type || !file.type.startsWith('image/')){
+    setOcrStatus('File yang ditempel/diunggah bukan berupa gambar.', true);
+    return;
+  }
+  const previewEl = document.getElementById('rekap_ocr_preview');
+  const url = URL.createObjectURL(file);
+  previewEl.innerHTML = '<img src="'+url+'" style="max-width:220px;max-height:150px;border-radius:6px;border:1px solid var(--line);">';
+
+  setOcrStatus('Memuat mesin OCR (butuh internet sekali di awal)...', false);
+  try{
+    await loadTesseract();
+  }catch(err){
+    setOcrStatus(err.message, true);
+    return;
+  }
+
+  setOcrStatus('Membaca teks dari gambar, mohon tunggu...', false);
+  try{
+    const { data: { text } } = await Tesseract.recognize(file, 'ind', {
+      logger: (info)=>{
+        if(info.status === 'recognizing text' && info.progress != null){
+          setOcrStatus('Membaca teks... ' + Math.round(info.progress*100) + '%', false);
+        }
+      }
+    });
+    const cleaned = text.trim();
+    if(!cleaned){
+      setOcrStatus('Tidak ada teks yang terbaca dari gambar. Coba gambar yang lebih jelas/tidak miring.', true);
+      return;
+    }
+    document.getElementById('rekap_input').value = cleaned;
+    setOcrStatus('Selesai — teks berhasil diekstrak. Periksa hasilnya lalu klik "Parse & Hitung" (sudah dijalankan otomatis).', false);
+    calcRekap();
+  }catch(err){
+    setOcrStatus('OCR gagal: ' + err.message, true);
+  }
+}
+
+(function setupRekapDropzone(){
+  const dz = document.getElementById('rekap_dropzone');
+  const fileInput = document.getElementById('rekap_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files[0]) processOcrImage(e.target.files[0]);
+  });
+
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--teal)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) processOcrImage(e.dataTransfer.files[0]);
+  });
+
+  function handlePasteEvent(e){
+    const panel = document.getElementById('panel-rekap');
+    if(!panel || !panel.classList.contains('active')) return;
+    const items = (e.clipboardData || window.clipboardData) ? (e.clipboardData || window.clipboardData).items : null;
+    if(!items) return;
+    for(const item of items){
+      if(item.type && item.type.startsWith('image/')){
+        const file = item.getAsFile();
+        if(file){ e.preventDefault(); processOcrImage(file); }
+        return;
+      }
+    }
+  }
+  dz.addEventListener('paste', handlePasteEvent);
+  document.addEventListener('paste', handlePasteEvent);
+})();
+
+// -- Parsing teks narasi --
+function parseRekapNarasi(text){
+  // Strategi A: format bernomor "N. deskripsi : nominal" (boleh satu baris panjang atau berbaris)
+  let items = [];
+  const reNum = /(\d+)\.\s*(.+?)\s*:\s*(?:Rp\.?\s*)?(\d[\d.,]*)(?=\s*(?:\d+\.\s|$))/g;
+  let m;
+  while((m = reNum.exec(text)) !== null){
+    const amount = parseInt(m[3].replace(/[.,]/g,''),10) || 0;
+    items.push({no:m[1], desc:m[2].trim(), amount});
+  }
+  if(items.length > 0){
+    items.sort((a,b)=> parseInt(a.no,10) - parseInt(b.no,10));
+    return {items, declaredTotal:null};
+  }
+
+  // Strategi B: satu item per baris — boleh bullet (*, -, •), nomor opsional, pemisah ":" atau "—"/"-", tanpa nomor pun bisa
+  const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l.length>0);
+  const reLine = /^(?:[*\-•]\s*)?(?:(\d+)\.\s*)?(.+?)\s*(?:[:\-–—]\s*)?(?:Rp\.?\s*)?(\d[\d.,]*)\s*$/i;
+  let declaredTotal = null;
+  lines.forEach((line)=>{
+    const mm = line.match(reLine);
+    if(mm){
+      const desc = mm[2].trim();
+      const amount = parseInt(mm[3].replace(/[.,]/g,''),10) || 0;
+      if(/^total\b/i.test(desc)){
+        declaredTotal = amount;
+        return;
+      }
+      const no = mm[1] || String(items.length+1);
+      items.push({no, desc, amount});
+    }
+  });
+  return {items, declaredTotal};
+}
+
+function calcRekap(){
+  const text = document.getElementById('rekap_input').value;
+  const { items, declaredTotal } = parseRekapNarasi(text);
+  const tbody = document.getElementById('rekap_body');
+  tbody.innerHTML = '';
+  let total = 0;
+  items.forEach(it=>{
+    total += it.amount;
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+it.no+'</td><td>'+it.desc+'</td><td class="num">'+fmtRp(it.amount)+'</td>';
+    tbody.appendChild(tr);
+  });
+  if(items.length === 0){
+    tbody.innerHTML = '<tr><td colspan="3" style="color:#F33A6A;">Tidak ada item terbaca — periksa kembali format narasi.</td></tr>';
+  }
+  document.getElementById('rekap_count').textContent = items.length + ' item';
+  document.getElementById('rekap_total').textContent = fmtRp(total);
+
+  const checkRow = document.getElementById('rekap_check_row');
+  if(declaredTotal !== null){
+    checkRow.style.display = '';
+    const match = declaredTotal === total;
+    document.getElementById('rekap_declared').innerHTML = fmtRp(declaredTotal) +
+      (match ? ' <span style="color:#4CD97B;">(cocok ✓)</span>' : ' <span style="color:#F33A6A;">(selisih ' + fmtRp(Math.abs(declaredTotal-total)) + ')</span>');
+  } else {
+    checkRow.style.display = 'none';
+  }
+}
+
 // initial calc with example values
 calcPKWT();
 calcLemburBiasa();
@@ -971,6 +1167,7 @@ calcTHR();
 calcPPh21();
 calcBPJS();
 calcCuti();
+calcRekap();
 </script>
 </body>
 </html>
