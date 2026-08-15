@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kalkulator HR">
-<title>Kalkulator HR</title>
+<title>Kalkulator Kompensasi & Lembur HR</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@500;600&display=swap');
 
   :root{
     --bg:#0A0A0C;
@@ -39,7 +39,7 @@
     --ink:#17171A;
     --ink-dim:#6D6D74;
     --ink-faint:#A3A3A8;
-    --accent:#4F53D6;
+    --accent:#DE3163;
     --accent-ink:#FFFFFF;
     --accent-soft:#ECEDFB;
     --success:#1E9E6E;
@@ -52,13 +52,13 @@
   ::selection{background:var(--accent);color:#fff;}
   body{
     margin:0;background:var(--bg);color:var(--ink);
-    font-family:'Inter',sans-serif;padding:36px 20px 70px;
+    font-family:'Poppins',sans-serif;padding:36px 20px 70px;
     transition:background .25s ease, color .25s ease;-webkit-font-smoothing:antialiased;
     letter-spacing:-.005em;
   }
   .wrap{max-width:980px;margin:0 auto;}
   .num, .rp-input, .out-table td:last-child, table.detail td.num, table.detail th.num, #rekap_declared, #rekap_total, #rekap_count{
-    font-family:'Roboto Mono','Inter',monospace;font-variant-numeric:tabular-nums;
+    font-family:'Roboto Mono','Poppins',monospace;font-variant-numeric:tabular-nums;
   }
 
   /* ---------- topbar ---------- */
@@ -66,7 +66,7 @@
   .brand-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
   .brand-mark{
     width:26px;height:26px;border-radius:7px;flex-shrink:0;
-    background:var(--ink);color:var(--bg);
+    background:#DC143C;color:#FFFFFF;
     display:flex;align-items:center;justify-content:center;font-weight:700;
     font-size:11px;letter-spacing:-.02em;
   }
@@ -81,7 +81,7 @@
   .clock-dot{width:5px;height:5px;border-radius:50%;background:var(--success);animation:pulseDot 2.4s ease-in-out infinite;}
   @keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-  h1{font-family:'Inter',sans-serif;font-size:23px;font-weight:600;margin:0 0 7px;letter-spacing:-.02em;line-height:1.25;}
+  h1{font-family:'Poppins',sans-serif;font-size:23px;font-weight:600;margin:0 0 7px;letter-spacing:-.02em;line-height:1.25;}
   .subtitle{color:var(--ink-dim);font-size:12.5px;line-height:1.65;max-width:520px;font-weight:400;}
 
   .topbar-actions{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
@@ -89,7 +89,7 @@
     display:inline-flex;align-items:center;gap:7px;
     background:transparent;border:1px solid var(--line);color:var(--ink-dim);
     border-radius:20px;padding:7px 14px;font-size:11.5px;font-weight:500;cursor:pointer;
-    font-family:'Inter',sans-serif;white-space:nowrap;transition:border-color .15s ease, color .15s ease;
+    font-family:'Poppins',sans-serif;white-space:nowrap;transition:border-color .15s ease, color .15s ease;
   }
   .mode-toggle:hover{border-color:var(--ink-faint);color:var(--ink);}
   .mode-toggle:active{transform:scale(.97);}
@@ -101,12 +101,12 @@
     color:var(--ink);
     border-radius:var(--radius-sm);
     padding:9px 11px;
-    font-family:'Inter',sans-serif;
+    font-family:'Poppins',sans-serif;
     font-size:13px;
     width:100%;
     transition:border-color .15s ease, box-shadow .15s ease;
   }
-  input.rp-input, input[type="number"]{font-family:'Roboto Mono','Inter',monospace;}
+  input.rp-input, input[type="number"]{font-family:'Roboto Mono','Poppins',monospace;}
   input:focus, select:focus, textarea:focus{
     outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);
   }
@@ -115,22 +115,29 @@
   /* ---------- tabs ---------- */
   .tabs{
     position:relative;display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:26px;
-    border-bottom:1px solid var(--line);scrollbar-width:none;
+    border-bottom:1px solid var(--line);padding-bottom:7px;
+    scrollbar-width:thin;scrollbar-color:var(--accent) transparent;
+    scroll-behavior:smooth;scroll-snap-type:x proximity;
+    -webkit-mask-image:linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
+    mask-image:linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
   }
-  .tabs::-webkit-scrollbar{display:none;}
+  .tabs::-webkit-scrollbar{height:5px;}
+  .tabs::-webkit-scrollbar-track{background:transparent;}
+  .tabs::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
+  .tabs::-webkit-scrollbar-thumb:hover{background:var(--ink-dim);}
   .tab-btn{
-    position:relative;flex-shrink:0;
+    position:relative;flex-shrink:0;scroll-snap-align:start;
     display:inline-flex;align-items:center;gap:6px;
     background:transparent;border:none;color:var(--ink-faint);
     padding:10px 13px;font-size:12px;font-weight:500;cursor:pointer;
-    font-family:'Inter',sans-serif;transition:color .15s ease;white-space:nowrap;
+    font-family:'Poppins',sans-serif;transition:color .15s ease;white-space:nowrap;
   }
   .tab-btn svg{width:14px;height:14px;flex-shrink:0;opacity:.65;transition:opacity .15s ease;}
   .tab-btn.active{color:var(--ink);}
   .tab-btn.active svg{opacity:.9;}
   .tab-btn:hover{color:var(--ink-dim);}
   .tab-indicator{
-    position:absolute;bottom:-1px;height:1.5px;background:var(--accent);
+    position:absolute;bottom:6px;height:1.5px;background:var(--accent);
     border-radius:2px;transition:left .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1);
   }
 
@@ -145,7 +152,7 @@
 
   .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;}
   .panel h2{
-    font-family:'Inter',sans-serif;font-size:15px;font-weight:600;
+    font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;
     letter-spacing:-.01em;color:var(--ink);margin:0;
   }
   .panel .desc{font-size:11.5px;color:var(--ink-dim);margin-top:4px;line-height:1.6;}
@@ -153,12 +160,12 @@
   .live-badge{
     display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;letter-spacing:.05em;
     color:var(--success);background:var(--success-soft);border-radius:20px;padding:4px 9px;flex-shrink:0;
-    text-transform:uppercase;font-family:'Inter',sans-serif;
+    text-transform:uppercase;font-family:'Poppins',sans-serif;
   }
   .live-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--success);animation:pulseDot 2s ease-in-out infinite;}
 
   .section-label{
-    font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
     color:var(--ink-faint);margin:20px 0 11px;padding-top:16px;border-top:1px solid var(--line-soft);
   }
   .section-label:first-of-type{margin-top:0;padding-top:0;border-top:none;}
@@ -171,7 +178,7 @@
   .btn-primary{
     background:var(--accent);color:#fff;border:none;
     border-radius:var(--radius-sm);font-weight:600;
-    font-size:13px;cursor:pointer;padding:10px 19px;font-family:'Inter',sans-serif;margin-top:16px;
+    font-size:13px;cursor:pointer;padding:10px 19px;font-family:'Poppins',sans-serif;margin-top:16px;
     transition:opacity .15s ease, transform .1s ease;
   }
   .btn-primary:hover{opacity:.88;}
@@ -180,7 +187,7 @@
   .btn-ghost{
     display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--line);color:var(--ink-dim);
     border-radius:var(--radius-sm);font-size:11.5px;font-weight:500;cursor:pointer;padding:9px 14px;
-    font-family:'Inter',sans-serif;margin-top:16px;margin-left:8px;transition:border-color .15s ease, color .15s ease;
+    font-family:'Poppins',sans-serif;margin-top:16px;margin-left:8px;transition:border-color .15s ease, color .15s ease;
   }
   .btn-ghost:hover{border-color:var(--ink-faint);color:var(--ink);}
   .btn-ghost:active{transform:scale(.97);}
@@ -201,7 +208,7 @@
 
   table.detail{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px;}
   table.detail th{
-    text-align:left;font-family:'Inter',sans-serif;font-size:9.5px;letter-spacing:.05em;font-weight:600;
+    text-align:left;font-family:'Poppins',sans-serif;font-size:9.5px;letter-spacing:.05em;font-weight:600;
     text-transform:uppercase;color:var(--ink-faint);padding:8px 4px;border-bottom:1px solid var(--line);
   }
   table.detail td{padding:10px 4px;border-bottom:1px solid var(--line-soft);transition:color .35s ease;}
@@ -221,14 +228,14 @@
 
   .note{font-size:11.5px;color:var(--ink-faint);margin-top:16px;line-height:1.65;padding-top:14px;border-top:1px solid var(--line-soft);}
   .ref-toggle{
-    font-size:11px;color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;
+    font-size:11px;color:var(--accent);cursor:pointer;font-family:'Poppins',sans-serif;font-weight:500;
     margin-top:9px;display:inline-flex;align-items:center;gap:4px;
   }
   .ref-box{display:none;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:13px 15px;margin-top:9px;font-size:11.5px;}
   .ref-box.show{display:block;animation:panelIn .25s ease;}
   .ref-box table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;}
   .ref-box th,.ref-box td{padding:4px 6px;text-align:left;color:var(--ink-dim);}
-  .ref-box th{color:var(--ink);font-family:'Inter',sans-serif;font-weight:600;font-size:9.5px;text-transform:uppercase;}
+  .ref-box th{color:var(--ink);font-family:'Poppins',sans-serif;font-weight:600;font-size:9.5px;text-transform:uppercase;}
 
   .about-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-top:16px;}
   .about-box .section-label{margin-top:0;padding-top:0;border-top:none;}
@@ -240,7 +247,7 @@
     transition:border-color .15s ease, color .15s ease;
   }
   .about-links a:hover{border-color:var(--accent);color:var(--accent);}
-  .pill{display:inline-block;background:var(--accent-soft);color:var(--accent);font-family:'Inter',sans-serif;font-weight:500;font-size:10px;padding:2px 9px;border-radius:20px;margin-left:8px;}
+  .pill{display:inline-block;background:var(--accent-soft);color:var(--accent);font-family:'Poppins',sans-serif;font-weight:500;font-size:10px;padding:2px 9px;border-radius:20px;margin-left:8px;}
 
   /* ---------- OCR dropzone ---------- */
   #rekap_dropzone{transition:border-color .15s ease, background-color .15s ease;}
@@ -265,9 +272,9 @@
     <div>
       <div class="brand-row">
         <div class="brand-mark">HR</div>
-        <div class="eyebrow">Global Marindo Perkasa · HR Suite</div>
+        <div class="eyebrow">HR Suite</div>
       </div>
-      <h1>Kalkulator Kompensasi & Lembur Karyawan</h1>
+      <h1>Kalkulator Human Resource</h1>
       <div class="subtitle">PKWT · Pesangon PHK · Lembur · Gaji Harian · THR · PPh 21 · BPJS · Cuti Tahunan — sesuai regulasi ketenagakerjaan &amp; perpajakan terkini</div>
     </div>
     <div class="topbar-actions">
@@ -625,7 +632,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
   </div>
 
   <div class="note" style="text-align:center;border-top:none;">File offline — semua perhitungan berjalan langsung di browser, tidak ada data yang dikirim ke internet. Formula mengacu pada UU Cipta Kerja, PP 35/2021, dan PP 68/2009; gunakan sebagai alat bantu, tetap verifikasi dengan tabel acuan internal perusahaan untuk kasus khusus.</div>
-  <div class="note" style="text-align:center;border-top:none;padding-top:0;font-family:'Roboto',sans-serif;letter-spacing:.04em;">System Oleh : <span style="color:var(--ink);">Muhammad Albar</span></div>
+  <div class="note" style="text-align:center;border-top:none;padding-top:0;font-family:'Poppins',sans-serif;letter-spacing:.04em;color:var(--ink-faint);">System Oleh : <span style="font-family:'Poppins',sans-serif;">Muhammad Albar</span></div>
 
 </div>
 
