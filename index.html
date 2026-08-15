@@ -307,6 +307,8 @@
     <button class="tab-btn" data-tab="cuti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M9 15l2 2 4-4"/></svg>Cuti Tahunan</button>
     <button class="tab-btn" data-tab="rekap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3V3z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Rekap Biaya (Narasi)</button>
     <button class="tab-btn" data-tab="gajipersen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>Kenaikan/Penurunan Gaji</button>
+    <button class="tab-btn" data-tab="usia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg>Usia Karyawan</button>
+    <button class="tab-btn" data-tab="gajibersih"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v.01M18 14v.01"/></svg>Gaji Bersih</button>
   </div>
 
   <!-- ============ PKWT ============ -->
@@ -672,6 +674,66 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <div class="note">Kenaikan: Gaji Baru = Gaji Saat Ini × (1 + persen÷100). Penurunan: Gaji Baru = Gaji Saat Ini × (1 − persen÷100). Untuk mode sebaliknya, persentase dihitung dari selisih (Gaji Baru − Gaji Lama) ÷ Gaji Lama × 100%. Berguna untuk simulasi kenaikan gaji tahunan, penyesuaian UMK, atau perhitungan pemotongan gaji.</div>
   </div>
 
+  <!-- ============ USIA KARYAWAN ============ -->
+  <div class="panel" id="panel-usia">
+    <div class="panel-head"><h2>Kalkulator Usia Karyawan</h2></div>
+    <div class="desc">Hitung usia karyawan secara presisi, cek syarat usia minimum kerja, dan estimasi sisa masa kerja hingga usia pensiun.</div>
+
+    <div class="section-label">Data Karyawan</div>
+    <div class="field-row"><label>Tanggal Lahir</label><input type="date" id="usia_lahir" value="1995-01-01"></div>
+    <div class="field-row"><label>Tanggal Perhitungan</label><input type="date" id="usia_akhir"></div>
+    <div class="field-row"><label>Usia Pensiun (tahun)</label><input type="number" id="usia_pensiun" value="56" min="1"></div>
+
+    <button class="btn-primary" onclick="calcUsia()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="usia_out">
+      <tr><td>Status Usia Kerja</td><td id="usia_status">-</td></tr>
+      <tr><td>Perkiraan Tanggal Pensiun</td><td id="usia_tgl_pensiun">-</td></tr>
+      <tr><td>Sisa Masa Kerja hingga Pensiun</td><td id="usia_sisa_pensiun">-</td></tr>
+      <tr class="grand"><td>USIA SAAT INI</td><td id="usia_total">-</td></tr>
+    </table>
+    <div class="note">Syarat usia kerja minimum 18 tahun sesuai UU No. 13/2003 Pasal 68-69 (dengan pengecualian terbatas untuk usia 15-18 tahun pada pekerjaan ringan tertentu). Usia pensiun default 56 tahun mengikuti standar Program Jaminan Pensiun BPJS Ketenagakerjaan (naik bertahap tiap 3 tahun hingga maksimal 65 tahun) — sesuaikan angka ini dengan kebijakan pensiun internal perusahaan bila berbeda.</div>
+  </div>
+
+  <!-- ============ GAJI BERSIH (TAKE-HOME PAY) ============ -->
+  <div class="panel" id="panel-gajibersih">
+    <div class="panel-head"><h2>Kalkulator Gaji Bersih (Take-Home Pay)</h2></div>
+    <div class="desc">Estimasi gaji bersih setelah potongan PPh 21 (TER), BPJS Ketenagakerjaan, BPJS Kesehatan, dan potongan lain-lain.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row"><label>Gaji Pokok + Tunjangan Tetap (Bruto)</label><input type="text" class="rp-input" id="gb_bruto" value="10000000"></div>
+    <div class="field-row"><label>Status PTKP</label>
+      <select id="gb_status">
+        <option value="TK0">TK/0 — Lajang, tanpa tanggungan</option>
+        <option value="TK1">TK/1 — Lajang, 1 tanggungan</option>
+        <option value="TK2">TK/2 — Lajang, 2 tanggungan</option>
+        <option value="TK3">TK/3 — Lajang, 3 tanggungan</option>
+        <option value="K0" selected>K/0 — Kawin, tanpa tanggungan</option>
+        <option value="K1">K/1 — Kawin, 1 tanggungan</option>
+        <option value="K2">K/2 — Kawin, 2 tanggungan</option>
+        <option value="K3">K/3 — Kawin, 3 tanggungan</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Sertakan Potongan BPJS Ketenagakerjaan (JHT+JP)?</label><select id="gb_bpjstk"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
+    <div class="field-row"><label>Sertakan Potongan BPJS Kesehatan?</label><select id="gb_bpjskes"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
+    <div class="field-row"><label>Potongan Lain-lain (pinjaman/kasbon dll)</label><input type="text" class="rp-input" id="gb_lain" value="0"></div>
+
+    <button class="btn-primary" onclick="calcGajiBersih()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="gb_out">
+      <tr><td>Gaji Bruto</td><td id="gb_out_bruto">Rp0,00</td></tr>
+      <tr class="sub"><td>− Potongan BPJS Ketenagakerjaan (JHT 2% + JP 1%)</td><td id="gb_out_bpjstk">Rp0,00</td></tr>
+      <tr class="sub"><td>− Potongan BPJS Kesehatan (1%)</td><td id="gb_out_bpjskes">Rp0,00</td></tr>
+      <tr class="sub"><td>− PPh 21 (TER)</td><td id="gb_out_pph">Rp0,00</td></tr>
+      <tr class="sub"><td>− Potongan Lain-lain</td><td id="gb_out_lain">Rp0,00</td></tr>
+      <tr class="total"><td>Total Potongan</td><td id="gb_out_totpotongan">Rp0,00</td></tr>
+      <tr class="grand"><td>GAJI BERSIH (TAKE-HOME PAY)</td><td id="gb_out_bersih">Rp0,00</td></tr>
+    </table>
+    <div class="note">PPh 21 dihitung memakai metode TER (Tarif Efektif Rata-rata) bulan berjalan — sama seperti tab "PPh 21 Bulanan". Dasar iuran JP dibatasi maksimal Rp11.086.300 dan BPJS Kesehatan maksimal Rp12.000.000. Perhitungan ini estimasi; tidak memperhitungkan tunjangan tidak tetap, lembur, atau komponen non-rutin lain kecuali dimasukkan manual ke Gaji Bruto.</div>
+  </div>
+
   <div class="about-box">
     <div class="section-label">Tentang Saya</div>
     <div class="about-links">
@@ -827,7 +889,8 @@ function flashPanel(panelId){
     pkwt: window.calcPKWT, phk: window.calcPHK, lemburbiasa: window.calcLemburBiasa,
     lemburlibur: window.calcLemburLibur, gajiharian: window.calcGajiHarian, thr: window.calcTHR,
     pph21: window.calcPPh21, bpjs: window.calcBPJS, cuti: window.calcCuti, rekap: window.calcRekap,
-    gajipersen: function(){ if(typeof calcGajiPersen==='function') calcGajiPersen(); if(typeof calcGajiReverse==='function') calcGajiReverse(); }
+    gajipersen: function(){ if(typeof calcGajiPersen==='function') calcGajiPersen(); if(typeof calcGajiReverse==='function') calcGajiReverse(); },
+    usia: window.calcUsia, gajibersih: window.calcGajiBersih
   };
   Object.keys(calcMap).forEach(tabId=>{
     const fn = calcMap[tabId];
@@ -1409,6 +1472,94 @@ function calcGajiReverse(){
   document.getElementById('gp_persen2').textContent = (persen >= 0 ? '+' : '−') + Math.abs(persen).toFixed(2).replace('.', ',') + '%';
 }
 
+// ---------- USIA KARYAWAN ----------
+function updateUsiaDefaultDate(){
+  const akhirEl = document.getElementById('usia_akhir');
+  if(!akhirEl.value){ akhirEl.value = new Date().toISOString().slice(0,10); }
+}
+document.getElementById('usia_akhir').addEventListener('change', updateUsiaDefaultDate);
+window.addEventListener('DOMContentLoaded', updateUsiaDefaultDate);
+
+function calcUsia(){
+  const lahirStr = document.getElementById('usia_lahir').value;
+  const akhirEl = document.getElementById('usia_akhir');
+  if(!akhirEl.value){ akhirEl.value = new Date().toISOString().slice(0,10); }
+  const akhirStr = akhirEl.value;
+  if(!lahirStr || !akhirStr) return;
+  const pensiunUsia = parseFloat(document.getElementById('usia_pensiun').value) || 0;
+
+  const d1 = new Date(lahirStr), d2 = new Date(akhirStr);
+  let years = d2.getFullYear() - d1.getFullYear();
+  let months = d2.getMonth() - d1.getMonth();
+  let days = d2.getDate() - d1.getDate();
+  if(days < 0){
+    months -= 1;
+    const prevMonthDays = new Date(d2.getFullYear(), d2.getMonth(), 0).getDate();
+    days += prevMonthDays;
+  }
+  if(months < 0){ years -= 1; months += 12; }
+  if(years < 0){ years = 0; months = 0; days = 0; }
+
+  const status = years >= 18
+    ? 'Memenuhi syarat usia kerja (≥ 18 tahun)'
+    : 'Belum memenuhi usia kerja minimum (< 18 tahun)';
+
+  const tglPensiun = new Date(d1.getFullYear() + pensiunUsia, d1.getMonth(), d1.getDate());
+  const tglPensiunStr = tglPensiun.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+
+  let sisaText;
+  if(tglPensiun > d2){
+    let sy = tglPensiun.getFullYear() - d2.getFullYear();
+    let sm = tglPensiun.getMonth() - d2.getMonth();
+    let sd = tglPensiun.getDate() - d2.getDate();
+    if(sd < 0){ sm -= 1; const pm = new Date(tglPensiun.getFullYear(), tglPensiun.getMonth(), 0).getDate(); sd += pm; }
+    if(sm < 0){ sy -= 1; sm += 12; }
+    sisaText = sy + ' tahun ' + sm + ' bulan ' + sd + ' hari lagi';
+  } else {
+    sisaText = 'Sudah melewati usia pensiun';
+  }
+
+  document.getElementById('usia_status').textContent = status;
+  document.getElementById('usia_tgl_pensiun').textContent = tglPensiunStr;
+  document.getElementById('usia_sisa_pensiun').textContent = sisaText;
+  document.getElementById('usia_total').textContent = years + ' tahun ' + months + ' bulan ' + days + ' hari';
+}
+
+// ---------- GAJI BERSIH (TAKE-HOME PAY) ----------
+function calcGajiBersih(){
+  const bruto = parseRp('gb_bruto');
+  const status = document.getElementById('gb_status').value;
+  const includeBpjsTK = document.getElementById('gb_bpjstk').value === '1';
+  const includeBpjsKes = document.getElementById('gb_bpjskes').value === '1';
+  const lain = parseRp('gb_lain');
+
+  const JP_CAP = 11086300;
+  const KES_CAP = 12000000;
+
+  const jhtKar = includeBpjsTK ? bruto * 0.02 : 0;
+  const jpDasar = includeBpjsTK ? Math.min(bruto, JP_CAP) : 0;
+  const jpKar = includeBpjsTK ? jpDasar * 0.01 : 0;
+  const bpjsTkTotal = jhtKar + jpKar;
+
+  const kesDasar = includeBpjsKes ? Math.min(bruto, KES_CAP) : 0;
+  const bpjsKesTotal = includeBpjsKes ? kesDasar * 0.01 : 0;
+
+  const kategori = PTKP_TO_KATEGORI[status];
+  const rate = getTERRate(bruto, kategori);
+  const pph = bruto * (rate/100);
+
+  const totalPotongan = bpjsTkTotal + bpjsKesTotal + pph + lain;
+  const bersih = bruto - totalPotongan;
+
+  document.getElementById('gb_out_bruto').textContent = fmtRp(bruto);
+  document.getElementById('gb_out_bpjstk').textContent = fmtRp(bpjsTkTotal);
+  document.getElementById('gb_out_bpjskes').textContent = fmtRp(bpjsKesTotal);
+  document.getElementById('gb_out_pph').textContent = fmtRp(pph);
+  document.getElementById('gb_out_lain').textContent = fmtRp(lain);
+  document.getElementById('gb_out_totpotongan').textContent = fmtRp(totalPotongan);
+  document.getElementById('gb_out_bersih').textContent = fmtRp(bersih);
+}
+
 // initial calc with example values
 calcPKWT();
 calcLemburBiasa();
@@ -1421,6 +1572,8 @@ calcCuti();
 calcRekap();
 calcGajiPersen();
 calcGajiReverse();
+calcUsia();
+calcGajiBersih();
 </script>
 </body>
 </html>
