@@ -309,6 +309,7 @@
     <button class="tab-btn" data-tab="gajipersen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>Kenaikan/Penurunan Gaji</button>
     <button class="tab-btn" data-tab="usia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg>Usia Karyawan</button>
     <button class="tab-btn" data-tab="gajibersih"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v.01M18 14v.01"/></svg>Gaji Bersih</button>
+    <button class="tab-btn" data-tab="shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>Shortlink</button>
   </div>
 
   <!-- ============ PKWT ============ -->
@@ -732,6 +733,28 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <tr class="grand"><td>GAJI BERSIH (TAKE-HOME PAY)</td><td id="gb_out_bersih">Rp0,00</td></tr>
     </table>
     <div class="note">PPh 21 dihitung memakai metode TER (Tarif Efektif Rata-rata) bulan berjalan — sama seperti tab "PPh 21 Bulanan". Dasar iuran JP dibatasi maksimal Rp11.086.300 dan BPJS Kesehatan maksimal Rp12.000.000. Perhitungan ini estimasi; tidak memperhitungkan tunjangan tidak tetap, lembur, atau komponen non-rutin lain kecuali dimasukkan manual ke Gaji Bruto.</div>
+  </div>
+
+  <!-- ============ SHORTLINK (PEMENDEK URL) ============ -->
+  <div class="panel" id="panel-shortlink">
+    <div class="panel-head"><h2>Pemendek URL (Shortlink)</h2></div>
+    <div class="desc">Ubah tautan panjang jadi pendek — praktis untuk membagikan link portal HR, dokumen, atau formulir lewat WA/email. Fitur ini butuh koneksi internet karena diproses lewat layanan pemendek pihak ketiga.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row wide"><label>URL Panjang</label><input type="text" id="sl_url" placeholder="https://albarnation.github.io/myhrsystem/" value="https://albarnation.github.io/myhrsystem/"></div>
+
+    <button class="btn-primary" id="sl_btn" onclick="handleShorten()">Perpendek URL</button>
+
+    <div class="section-label">Hasil</div>
+    <div id="sl_status" style="font-size:11.5px;color:var(--ink-dim);margin-bottom:2px;"></div>
+    <div id="sl_result_box" style="display:none;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 14px;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;">
+      <a id="sl_result_link" href="#" target="_blank" rel="noopener" style="font-family:'Roboto Mono',monospace;font-weight:600;color:var(--accent);word-break:break-all;text-decoration:none;"></a>
+      <button type="button" class="btn-ghost" style="margin:0;flex-shrink:0;" onclick="copyShortlink()">Salin</button>
+    </div>
+
+    <div class="section-label">Riwayat (Maks. 5 Terakhir di Perangkat Ini)</div>
+    <div id="sl_history"></div>
+    <div class="note">Sistem mencoba beberapa layanan pemendek (CleanURI, is.gd, TinyURL) secara berurutan — kalau satu layanan gagal atau sedang bermasalah, otomatis dicoba layanan berikutnya. Riwayat hanya tersimpan lokal di browser/perangkat ini (localStorage), tidak dikirim atau disimpan oleh aplikasi ini ke server manapun. Contoh pemakaian: pendekkan tautan portal ini sendiri di <strong>https://albarnation.github.io/myhrsystem/</strong> supaya lebih mudah dibagikan.</div>
   </div>
 
   <div class="about-box">
@@ -1560,6 +1583,130 @@ function calcGajiBersih(){
   document.getElementById('gb_out_bersih').textContent = fmtRp(bersih);
 }
 
+// ---------- SHORTLINK (PEMENDEK URL) ----------
+const SL_HISTORY_KEY = 'hrCalcShortlinkHistory';
+
+function slEscapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function setSlStatus(msg, isError){
+  const el = document.getElementById('sl_status');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.style.color = isError ? 'var(--danger)' : 'var(--ink-dim)';
+}
+
+async function tryShortenCleanUri(longUrl){
+  const res = await fetch('https://cleanuri.com/api/v1/shorten', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({url: longUrl})
+  });
+  if(!res.ok) throw new Error('CleanURI gagal');
+  const data = await res.json();
+  if(!data || !data.result_url) throw new Error('CleanURI: respons tidak valid');
+  return {shortUrl: data.result_url, provider: 'CleanURI'};
+}
+
+async function tryShortenIsGd(longUrl){
+  const res = await fetch('https://is.gd/create.php?format=json&url=' + encodeURIComponent(longUrl));
+  if(!res.ok) throw new Error('is.gd gagal');
+  const data = await res.json();
+  if(!data || !data.shorturl) throw new Error('is.gd: respons tidak valid');
+  return {shortUrl: data.shorturl, provider: 'is.gd'};
+}
+
+async function tryShortenTinyUrl(longUrl){
+  const res = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl));
+  if(!res.ok) throw new Error('TinyURL gagal');
+  const text = (await res.text()).trim();
+  if(!text.startsWith('http')) throw new Error('TinyURL: respons tidak valid');
+  return {shortUrl: text, provider: 'TinyURL'};
+}
+
+async function shortenUrlMultiProvider(longUrl){
+  const providers = [tryShortenCleanUri, tryShortenIsGd, tryShortenTinyUrl];
+  for(const provider of providers){
+    try{
+      const result = await provider(longUrl);
+      if(result && result.shortUrl) return result;
+    }catch(e){ /* try next provider */ }
+  }
+  return null;
+}
+
+function slSaveHistory(longUrl, shortUrl, provider){
+  let hist = [];
+  try{ hist = JSON.parse(localStorage.getItem(SL_HISTORY_KEY) || '[]'); }catch(e){ hist = []; }
+  hist = hist.filter(h => h.short !== shortUrl);
+  hist.unshift({ long: longUrl, short: shortUrl, provider: provider, time: new Date().toISOString() });
+  hist = hist.slice(0, 5);
+  try{ localStorage.setItem(SL_HISTORY_KEY, JSON.stringify(hist)); }catch(e){ /* localStorage unavailable */ }
+}
+
+function slRenderHistory(){
+  const box = document.getElementById('sl_history');
+  if(!box) return;
+  let hist = [];
+  try{ hist = JSON.parse(localStorage.getItem(SL_HISTORY_KEY) || '[]'); }catch(e){ hist = []; }
+  if(hist.length === 0){
+    box.innerHTML = '<div style="font-size:11.5px;color:var(--ink-faint,var(--ink-dim));padding:4px 0;">Belum ada riwayat di perangkat ini.</div>';
+    return;
+  }
+  box.innerHTML = hist.map(h=>{
+    const longSafe = slEscapeHtml(h.long);
+    const shortLabel = slEscapeHtml(h.short.replace(/^https?:\/\//,''));
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:11.5px;">' +
+      '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:var(--ink-dim);" title="'+longSafe+'">' + longSafe + '</div>' +
+      '<a href="'+h.short+'" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;white-space:nowrap;text-decoration:none;font-family:\'Roboto Mono\',monospace;">' + shortLabel + '</a>' +
+    '</div>';
+  }).join('');
+}
+
+async function handleShorten(){
+  const raw = (document.getElementById('sl_url').value || '').trim();
+  if(!raw){ setSlStatus('Masukkan URL terlebih dahulu.', true); return; }
+
+  let longUrl = raw;
+  if(!/^https?:\/\//i.test(longUrl)){ longUrl = 'https://' + longUrl; }
+
+  const btn = document.getElementById('sl_btn');
+  const resultBox = document.getElementById('sl_result_box');
+  resultBox.style.display = 'none';
+  btn.disabled = true;
+  setSlStatus('Memendekkan URL, mohon tunggu...', false);
+
+  const result = await shortenUrlMultiProvider(longUrl);
+  btn.disabled = false;
+
+  if(result){
+    document.getElementById('sl_result_link').href = result.shortUrl;
+    document.getElementById('sl_result_link').textContent = result.shortUrl;
+    resultBox.style.display = 'flex';
+    setSlStatus('Berhasil dipendekkan via ' + result.provider + '.', false);
+    slSaveHistory(longUrl, result.shortUrl, result.provider);
+    slRenderHistory();
+  } else {
+    setSlStatus('Gagal memendekkan URL — semua layanan tidak merespons. Pastikan koneksi internet aktif dan coba lagi.', true);
+  }
+}
+
+function copyShortlink(){
+  const link = document.getElementById('sl_result_link');
+  const text = link ? link.textContent : '';
+  if(!text) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=> showToast('Shortlink disalin ke clipboard')).catch(()=> showToast('Gagal menyalin'));
+  } else {
+    showToast('Gagal menyalin');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', slRenderHistory);
+
 // initial calc with example values
 calcPKWT();
 calcLemburBiasa();
@@ -1574,6 +1721,7 @@ calcGajiPersen();
 calcGajiReverse();
 calcUsia();
 calcGajiBersih();
+slRenderHistory();
 </script>
 </body>
 </html>
