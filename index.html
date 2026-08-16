@@ -798,6 +798,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
 
     <div class="section-label">Input</div>
     <div class="field-row wide"><label>URL Panjang</label><input type="text" id="sl_url" placeholder="https://albarnation.github.io/myhrsystem/" value="https://albarnation.github.io/myhrsystem/"></div>
+    <div class="field-row wide"><label>Custom Back-half (mis. myhrsystem)</label><input type="text" id="sl_sid_alias" placeholder="myhrsystem"></div>
 
     <button class="btn-primary" id="sl_btn" onclick="handleShorten()">Perpendek URL</button>
 
@@ -810,7 +811,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
 
     <div class="section-label">Riwayat (Maks. 5 Terakhir di Perangkat Ini)</div>
     <div id="sl_history"></div>
-    <div class="note">Sistem mencoba beberapa layanan pemendek (CleanURI, is.gd, TinyURL) secara berurutan — kalau satu layanan gagal atau sedang bermasalah, otomatis dicoba layanan berikutnya. Riwayat hanya tersimpan lokal di browser/perangkat ini (localStorage), tidak dikirim atau disimpan oleh aplikasi ini ke server manapun. Contoh pemakaian: pendekkan tautan portal ini sendiri di <strong>https://albarnation.github.io/myhrsystem/</strong> supaya lebih mudah dibagikan.</div>
+    <div class="note">Diproses lewat s.id agar mendukung custom back-half; kalau gagal atau custom back-half sudah dipakai orang lain, otomatis lanjut ke layanan cadangan (CleanURI, is.gd, TinyURL) tanpa custom back-half. Riwayat hanya tersimpan lokal di browser/perangkat ini (localStorage), tidak dikirim atau disimpan oleh aplikasi ini ke server manapun selain langsung ke penyedia yang dipilih. Contoh pemakaian: pendekkan tautan portal ini sendiri di <strong>https://albarnation.github.io/myhrsystem/</strong> supaya lebih mudah dibagikan.</div>
   </div>
 
   <div class="about-box">
@@ -1652,6 +1653,7 @@ function calcGajiBersih(){
 
 // ---------- SHORTLINK (PEMENDEK URL) ----------
 const SL_HISTORY_KEY = 'hrCalcShortlinkHistory';
+const SID_API_KEY = 'sk_live_Wg8T4vNuDso1pvJNROvOikgBLPsGMMaY';
 
 function slEscapeHtml(str){
   const div = document.createElement('div');
@@ -1664,6 +1666,30 @@ function setSlStatus(msg, isError){
   if(!el) return;
   el.textContent = msg || '';
   el.style.color = isError ? 'var(--danger)' : 'var(--ink-dim)';
+}
+
+async function tryShortenSid(longUrl, apiKey, customAlias){
+  if(!apiKey) throw new Error('s.id dilewati: API key belum diisi');
+  const body = { long_url: longUrl };
+  if(customAlias){ body.custom = customAlias; }
+  const res = await fetch('https://api.s.id/v2/links', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify(body)
+  });
+  let data = null;
+  try{ data = await res.json(); }catch(e){ /* respons bukan JSON */ }
+  if(!res.ok){
+    const msg = (data && (data.message || data.error || data.error_message)) || ('HTTP ' + res.status);
+    throw new Error('s.id: ' + msg);
+  }
+  const short = data && (data.short_url || data.shortUrl || data.url ||
+    (data.data && (data.data.short_url || data.data.shortUrl || data.data.url)));
+  if(!short) throw new Error('s.id: respons tidak dikenali, cek konsol untuk detail.');
+  return {shortUrl: short, provider: 's.id'};
 }
 
 async function tryShortenCleanUri(longUrl){
@@ -1694,15 +1720,25 @@ async function tryShortenTinyUrl(longUrl){
   return {shortUrl: text, provider: 'TinyURL'};
 }
 
-async function shortenUrlMultiProvider(longUrl){
+async function shortenUrlMultiProvider(longUrl, sidApiKey, sidAlias){
+  let sidError = null;
+  if(sidApiKey){
+    try{
+      const result = await tryShortenSid(longUrl, sidApiKey, sidAlias);
+      if(result && result.shortUrl) return result;
+    }catch(e){ sidError = e; }
+  }
   const providers = [tryShortenCleanUri, tryShortenIsGd, tryShortenTinyUrl];
   for(const provider of providers){
     try{
       const result = await provider(longUrl);
-      if(result && result.shortUrl) return result;
+      if(result && result.shortUrl){
+        if(sidError) result.note = sidError.message;
+        return result;
+      }
     }catch(e){ /* try next provider */ }
   }
-  return null;
+  return sidError ? {error: sidError.message} : null;
 }
 
 function slSaveHistory(longUrl, shortUrl, provider){
@@ -1740,24 +1776,29 @@ async function handleShorten(){
   let longUrl = raw;
   if(!/^https?:\/\//i.test(longUrl)){ longUrl = 'https://' + longUrl; }
 
+  const sidAlias = (document.getElementById('sl_sid_alias').value || '').trim();
+
   const btn = document.getElementById('sl_btn');
   const resultBox = document.getElementById('sl_result_box');
   resultBox.style.display = 'none';
   btn.disabled = true;
   setSlStatus('Memendekkan URL, mohon tunggu...', false);
 
-  const result = await shortenUrlMultiProvider(longUrl);
+  const result = await shortenUrlMultiProvider(longUrl, SID_API_KEY, sidAlias);
   btn.disabled = false;
 
-  if(result){
+  if(result && result.shortUrl){
     document.getElementById('sl_result_link').href = result.shortUrl;
     document.getElementById('sl_result_link').textContent = result.shortUrl;
     resultBox.style.display = 'flex';
-    setSlStatus('Berhasil dipendekkan via ' + result.provider + '.', false);
+    let statusMsg = 'Berhasil dipendekkan via ' + result.provider + '.';
+    if(result.note) statusMsg += ' (s.id dilewati: ' + result.note + ')';
+    setSlStatus(statusMsg, !!result.note);
     slSaveHistory(longUrl, result.shortUrl, result.provider);
     slRenderHistory();
   } else {
-    setSlStatus('Gagal memendekkan URL — semua layanan tidak merespons. Pastikan koneksi internet aktif dan coba lagi.', true);
+    const extra = (result && result.error) ? (' Detail: ' + result.error) : '';
+    setSlStatus('Gagal memendekkan URL — semua layanan tidak merespons.' + extra + ' Pastikan koneksi internet aktif dan coba lagi.', true);
   }
 }
 
