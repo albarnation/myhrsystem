@@ -57,7 +57,77 @@
     overflow-anchor:none;
     letter-spacing:-.005em;
   }
-  .wrap{max-width:980px;margin:0 auto;}
+  .app-shell{max-width:1180px;margin:0 auto;display:flex;align-items:flex-start;gap:26px;}
+  .wrap{flex:1;min-width:0;}
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    width:224px;flex-shrink:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px 12px;position:sticky;top:24px;display:flex;flex-direction:column;gap:2px;
+    max-height:calc(100vh - 48px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--accent) transparent;
+    transition:width .25s cubic-bezier(.4,0,.2,1);
+  }
+  .sidebar::-webkit-scrollbar{width:4px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
+  .sidebar-brand{display:flex;align-items:center;gap:10px;padding:4px 4px 16px 8px;margin-bottom:8px;border-bottom:1px solid var(--line);}
+  .sidebar-brand-text{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;overflow:hidden;white-space:nowrap;}
+  .sidebar-brand-text .name{font-family:'Poppins',sans-serif;font-weight:600;font-size:12.5px;color:var(--ink);}
+  .sidebar-brand-text .tag{font-size:8.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;}
+  .sidebar-nav{display:flex;flex-direction:column;gap:2px;}
+  .side-link{
+    position:relative;display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    padding:9px 10px;border-radius:9px;border:none;background:transparent;cursor:pointer;
+    font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;color:var(--ink-dim);
+    transition:background-color .15s ease, color .15s ease;white-space:nowrap;overflow:hidden;
+  }
+  .side-link svg{width:15px;height:15px;flex-shrink:0;opacity:.7;transition:opacity .15s ease;}
+  .side-link .link-label{overflow:hidden;text-overflow:ellipsis;}
+  .side-link:hover{background:var(--panel-2);color:var(--ink);}
+  .side-link.active{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+  .side-link.active svg{opacity:1;}
+  .side-link.active::before{content:'';position:absolute;left:-12px;right:auto;top:50%;transform:translateY(-50%);width:3px;height:16px;border-radius:3px;background:var(--accent);}
+
+  .sidebar-collapse-btn{
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;width:26px;height:26px;border-radius:7px;
+    background:var(--panel-2);border:1px solid var(--line);color:var(--ink-dim);cursor:pointer;padding:0;
+    transition:transform .25s cubic-bezier(.4,0,.2,1), border-color .15s ease, color .15s ease;
+  }
+  .sidebar-collapse-btn:hover{color:var(--ink);border-color:var(--accent);}
+  .sidebar-collapse-btn svg{width:13px;height:13px;transition:transform .25s ease;}
+
+  .sidebar.collapsed{width:60px;}
+  .sidebar.collapsed .sidebar-brand{justify-content:center;padding-left:4px;padding-right:4px;}
+  .sidebar.collapsed .sidebar-brand-text{width:0;flex:0;opacity:0;pointer-events:none;}
+  .sidebar.collapsed .side-link{justify-content:center;padding-left:0;padding-right:0;}
+  .sidebar.collapsed .side-link .link-label{width:0;opacity:0;position:absolute;pointer-events:none;}
+  .sidebar.collapsed .sidebar-collapse-btn svg{transform:rotate(180deg);}
+
+  .sidebar-backdrop{position:fixed;inset:0;background:rgba(10,10,12,.55);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:40;}
+  .sidebar-backdrop.show{opacity:1;pointer-events:auto;}
+
+  .menu-toggle{
+    display:none;position:absolute;top:0;right:44px;width:34px;height:34px;border-radius:50%;padding:0;z-index:5;
+    align-items:center;justify-content:center;background:var(--panel-2);border:1px solid var(--line);cursor:pointer;
+    transition:border-color .2s ease, transform .15s ease;color:var(--ink-dim);
+  }
+  .menu-toggle:active{transform:scale(.9);}
+  .menu-toggle svg{width:15px;height:15px;}
+
+  @media(max-width:899px){
+    .app-shell{display:block;}
+    .sidebar{
+      position:fixed;top:0;left:0;right:auto;height:100vh;width:78vw;max-width:300px;border-radius:0;
+      border-right:1px solid var(--line);border-left:none;transform:translateX(-100%);
+      transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:50;
+    }
+    .sidebar.open{transform:translateX(0);box-shadow:0 0 50px rgba(0,0,0,.35);}
+    .menu-toggle{display:inline-flex;}
+    .topbar{padding-right:90px;}
+    .sidebar-collapse-btn{display:none;}
+  }
+  @media(min-width:900px){
+    .sidebar-backdrop{display:none;}
+  }
   .num, .rp-input, .out-table td:last-child, table.detail td.num, table.detail th.num, #rekap_declared, #rekap_total, #rekap_count{
     font-family:'Roboto Mono','Poppins',monospace;font-variant-numeric:tabular-nums;
   }
@@ -121,35 +191,6 @@
     outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);
   }
   input:disabled{opacity:.55;}
-
-  /* ---------- tabs ---------- */
-  .tabs{
-    position:relative;display:flex;gap:0;flex-wrap:nowrap;overflow-x:auto;margin-bottom:18px;
-    border-bottom:1px solid var(--line);padding-bottom:5px;
-    scrollbar-width:thin;scrollbar-color:var(--accent) transparent;
-    scroll-behavior:smooth;scroll-snap-type:x proximity;
-    -webkit-mask-image:linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
-    mask-image:linear-gradient(to right, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
-  }
-  .tabs::-webkit-scrollbar{height:4px;}
-  .tabs::-webkit-scrollbar-track{background:transparent;}
-  .tabs::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
-  .tabs::-webkit-scrollbar-thumb:hover{background:var(--ink-dim);}
-  .tab-btn{
-    position:relative;flex-shrink:0;scroll-snap-align:start;
-    display:inline-flex;align-items:center;gap:5px;
-    background:transparent;border:none;color:var(--ink-faint);
-    padding:7px 9px;font-size:11px;font-weight:500;cursor:pointer;
-    font-family:'Poppins',sans-serif;transition:color .15s ease;white-space:nowrap;
-  }
-  .tab-btn svg{width:12px;height:12px;flex-shrink:0;opacity:.65;transition:opacity .15s ease;}
-  .tab-btn.active{color:var(--ink);}
-  .tab-btn.active svg{opacity:.9;}
-  .tab-btn:hover{color:var(--ink-dim);}
-  .tab-indicator{
-    position:absolute;bottom:4px;height:1.5px;background:var(--accent);
-    border-radius:2px;transition:left .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1);
-  }
 
   /* ---------- panels ---------- */
   .panel{
@@ -276,9 +317,42 @@
 </style>
 </head>
 <body>
+<div class="app-shell">
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HR</div>
+      <div class="sidebar-brand-text">
+        <span class="name">Kalkulator HR</span>
+        <span class="tag">HR Suite</span>
+      </div>
+      <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" aria-label="Minimalkan menu" title="Minimalkan menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <nav class="sidebar-nav" id="tabsWrap">
+      <button class="side-link active" data-tab="pkwt" title="Kompensasi PKWT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg><span class="link-label">Kompensasi PKWT</span></button>
+      <button class="side-link" data-tab="phk" title="Pesangon PHK"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg><span class="link-label">Pesangon PHK</span></button>
+      <button class="side-link" data-tab="lemburbiasa" title="Lembur Hari Biasa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="link-label">Lembur Hari Biasa</span></button>
+      <button class="side-link" data-tab="lemburlibur" title="Lembur Hari Libur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span class="link-label">Lembur Hari Libur</span></button>
+      <button class="side-link" data-tab="gajiharian" title="Gaji Harian"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v3"/><path d="M3 7v11a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-4a2 2 0 1 0 0 4"/></svg><span class="link-label">Gaji Harian</span></button>
+      <button class="side-link" data-tab="thr" title="THR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="4"/><path d="M12 9v12M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/><path d="M12 9c-1.5-4-6-4-6-1s3 1 6 1zM12 9c1.5-4 6-4 6-1s-3 1-6 1z"/></svg><span class="link-label">THR</span></button>
+      <button class="side-link" data-tab="pph21" title="PPh 21 Bulanan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><circle cx="7" cy="7" r="2.3"/><circle cx="17" cy="17" r="2.3"/></svg><span class="link-label">PPh 21 Bulanan</span></button>
+      <button class="side-link" data-tab="bpjs" title="BPJS"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span class="link-label">BPJS</span></button>
+      <button class="side-link" data-tab="cuti" title="Cuti Tahunan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M9 15l2 2 4-4"/></svg><span class="link-label">Cuti Tahunan</span></button>
+      <button class="side-link" data-tab="rekap" title="Rekap Biaya (Narasi)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3V3z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span class="link-label">Rekap Biaya (Narasi)</span></button>
+      <button class="side-link" data-tab="gajipersen" title="Kenaikan/Penurunan Gaji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg><span class="link-label">Kenaikan/Penurunan Gaji</span></button>
+      <button class="side-link" data-tab="usia" title="Usia Karyawan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg><span class="link-label">Usia Karyawan</span></button>
+      <button class="side-link" data-tab="gajibersih" title="Gaji Bersih"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v.01M18 14v.01"/></svg><span class="link-label">Gaji Bersih</span></button>
+      <button class="side-link" data-tab="shortlink" title="Shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span class="link-label">Shortlink</span></button>
+    </nav>
+  </aside>
 <div class="wrap">
 
   <div class="topbar">
+    <button class="menu-toggle" id="menuToggle" onclick="openSidebar()" aria-label="Buka menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
     <button class="mode-toggle" id="modeToggle" onclick="toggleMode()" aria-label="Ganti mode tampilan" title="Ganti mode tampilan">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -292,24 +366,6 @@
       <div class="subtitle">PKWT · Pesangon PHK · Lembur · Gaji Harian · THR · PPh 21 · BPJS · Cuti Tahunan — sesuai regulasi ketenagakerjaan &amp; perpajakan terkini</div>
       <div class="clock-strip"><span class="clock-dot"></span><span id="liveClock">—</span></div>
     </div>
-  </div>
-
-  <div class="tabs" id="tabsWrap">
-    <span class="tab-indicator" id="tabIndicator"></span>
-    <button class="tab-btn active" data-tab="pkwt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>Kompensasi PKWT</button>
-    <button class="tab-btn" data-tab="phk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg>Pesangon PHK</button>
-    <button class="tab-btn" data-tab="lemburbiasa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Lembur Hari Biasa</button>
-    <button class="tab-btn" data-tab="lemburlibur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Lembur Hari Libur</button>
-    <button class="tab-btn" data-tab="gajiharian"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v3"/><path d="M3 7v11a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-4a2 2 0 1 0 0 4"/></svg>Gaji Harian</button>
-    <button class="tab-btn" data-tab="thr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="4"/><path d="M12 9v12M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/><path d="M12 9c-1.5-4-6-4-6-1s3 1 6 1zM12 9c1.5-4 6-4 6-1s-3 1-6 1z"/></svg>THR</button>
-    <button class="tab-btn" data-tab="pph21"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><circle cx="7" cy="7" r="2.3"/><circle cx="17" cy="17" r="2.3"/></svg>PPh 21 Bulanan</button>
-    <button class="tab-btn" data-tab="bpjs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>BPJS</button>
-    <button class="tab-btn" data-tab="cuti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M9 15l2 2 4-4"/></svg>Cuti Tahunan</button>
-    <button class="tab-btn" data-tab="rekap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3V3z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Rekap Biaya (Narasi)</button>
-    <button class="tab-btn" data-tab="gajipersen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg>Kenaikan/Penurunan Gaji</button>
-    <button class="tab-btn" data-tab="usia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg>Usia Karyawan</button>
-    <button class="tab-btn" data-tab="gajibersih"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v.01M18 14v.01"/></svg>Gaji Bersih</button>
-    <button class="tab-btn" data-tab="shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>Shortlink</button>
   </div>
 
   <!-- ============ PKWT ============ -->
@@ -770,6 +826,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
   <div class="note" style="text-align:center;border-top:none;padding-top:0;font-family:'Poppins',sans-serif;letter-spacing:.04em;color:var(--ink-faint);">System Oleh : <span style="font-family:'Poppins',sans-serif;">Muhammad Albar</span></div>
 
 </div>
+</div>
 
 <script>
 // ---------- dark/light mode ----------
@@ -821,31 +878,41 @@ function bindRpInput(id){
 }
 document.querySelectorAll('.rp-input').forEach(el=>bindRpInput(el.id));
 
-// tabs
-function moveTabIndicator(btn){
-  const wrap = document.getElementById('tabsWrap');
-  const ind = document.getElementById('tabIndicator');
-  if(!wrap || !ind || !btn) return;
-  const wrapRect = wrap.getBoundingClientRect();
-  const btnRect = btn.getBoundingClientRect();
-  ind.style.left = (btnRect.left - wrapRect.left + wrap.scrollLeft) + 'px';
-  ind.style.width = btnRect.width + 'px';
+// sidebar navigation
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('show');
 }
-document.querySelectorAll('.tab-btn').forEach(btn=>{
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+function toggleSidebarCollapse(){
+  const sidebar = document.getElementById('sidebar');
+  const collapsed = sidebar.classList.toggle('collapsed');
+  const btn = document.getElementById('sidebarCollapseBtn');
+  if(btn) btn.title = collapsed ? 'Perluas menu' : 'Minimalkan menu';
+  try{ localStorage.setItem('hrCalcSidebarCollapsed', collapsed ? '1' : '0'); }catch(e){ /* localStorage unavailable */ }
+}
+(function restoreSidebarCollapse(){
+  let collapsed = false;
+  try{ collapsed = localStorage.getItem('hrCalcSidebarCollapsed') === '1'; }catch(e){ collapsed = false; }
+  if(collapsed){
+    document.getElementById('sidebar').classList.add('collapsed');
+    const btn = document.getElementById('sidebarCollapseBtn');
+    if(btn) btn.title = 'Perluas menu';
+  }
+})();
+document.querySelectorAll('.side-link').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.side-link').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
-    moveTabIndicator(btn);
-    btn.scrollIntoView({block:'nearest', inline:'nearest', behavior:'smooth'});
+    btn.scrollIntoView({block:'nearest', behavior:'smooth'});
+    closeSidebar();
+    window.scrollTo({top:0, behavior:'smooth'});
   });
-});
-window.addEventListener('DOMContentLoaded', ()=>{
-  moveTabIndicator(document.querySelector('.tab-btn.active'));
-});
-window.addEventListener('resize', ()=>{
-  moveTabIndicator(document.querySelector('.tab-btn.active'));
 });
 
 // live clock
