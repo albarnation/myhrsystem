@@ -235,6 +235,11 @@
   .field-row.wide{grid-template-columns:1fr;}
   .field-row.wide label{margin-bottom:7px;}
 
+  .lem-switch{display:inline-flex;background:var(--panel-2);border-radius:var(--radius-sm);padding:3px;gap:2px;margin-top:2px;}
+  .lem-switch-btn{border:none;background:transparent;color:var(--ink-dim);font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:8px 18px;border-radius:8px;cursor:pointer;transition:background-color .15s ease,color .15s ease;}
+  .lem-switch-btn.active{background:var(--accent);color:#fff;}
+  .lem-switch-btn:hover:not(.active){color:var(--ink);}
+
   .btn-primary{
     background:var(--accent);color:#fff;border:none;
     border-radius:var(--radius-sm);font-weight:600;
@@ -343,8 +348,7 @@
       <div class="sidebar-group-label">HR &amp; Payroll</div>
       <button class="side-link active" data-tab="pkwt" title="Kompensasi PKWT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg><span class="link-label">Kompensasi PKWT</span></button>
       <button class="side-link" data-tab="phk" title="Pesangon PHK"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg><span class="link-label">Pesangon PHK</span></button>
-      <button class="side-link" data-tab="lemburbiasa" title="Lembur Hari Biasa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="link-label">Lembur Hari Biasa</span></button>
-      <button class="side-link" data-tab="lemburlibur" title="Lembur Hari Libur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span class="link-label">Lembur Hari Libur</span></button>
+      <button class="side-link" data-tab="lembur" title="Lembur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span class="link-label">Lembur</span></button>
       <button class="side-link" data-tab="gajiharian" title="Gaji Harian"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v3"/><path d="M3 7v11a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-4a2 2 0 1 0 0 4"/></svg><span class="link-label">Gaji Harian</span></button>
       <button class="side-link" data-tab="thr" title="THR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="4"/><path d="M12 9v12M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/><path d="M12 9c-1.5-4-6-4-6-1s3 1 6 1zM12 9c1.5-4 6-4 6-1s-3 1-6 1z"/></svg><span class="link-label">THR</span></button>
       <button class="side-link" data-tab="pph21" title="PPh 21 Bulanan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><circle cx="7" cy="7" r="2.3"/><circle cx="17" cy="17" r="2.3"/></svg><span class="link-label">PPh 21 Bulanan</span></button>
@@ -473,54 +477,59 @@
   </div>
 
   <!-- ============ LEMBUR HARI BIASA ============ -->
-  <div class="panel" id="panel-lemburbiasa">
-    <div class="panel-head"><h2>Rincian Lembur Hari Biasa</h2></div>
-    <div class="desc">Upah lembur pada hari kerja biasa — pengali 1,5x (jam pertama) dan 2x (jam kedua dst), Kepmenaker/PP 35/2021.</div>
+  <div class="panel" id="panel-lembur">
+    <div class="panel-head"><h2>Kalkulator Lembur</h2></div>
+    <div class="desc">Upah lembur — pilih jenis hari kerja di bawah. Ketentuan pengali berbeda antara hari kerja biasa dan hari libur/istirahat mingguan sesuai PP 35/2021.</div>
 
-    <div class="section-label">Input</div>
-    <div class="field-row"><label>Gaji + Tunjangan Tetap</label><input type="text" class="rp-input" id="lb_gaji" value="7000000"></div>
-    <div class="field-row"><label>Hari Kerja Perbulan (informasi)</label><input type="number" id="lb_harikerja" value="26" min="1"></div>
-    <div class="field-row"><label>Jumlah Jam Lembur — Jam Pertama</label><input type="number" id="lb_jam1" value="1" min="0" max="1" step="1"></div>
-    <div class="field-row"><label>Jumlah Jam Lembur — Jam Kedua dst</label><input type="number" id="lb_jam2" value="1" min="0"></div>
+    <div class="section-label">Gaji</div>
+    <div class="field-row"><label>Gaji + Tunjangan Tetap</label><input type="text" class="rp-input" id="lem_gaji" value="7000000"></div>
 
-    <button class="btn-primary" onclick="calcLemburBiasa()">Hitung</button>
+    <div class="section-label">Jenis Lembur</div>
+    <div class="lem-switch" role="tablist">
+      <button type="button" class="lem-switch-btn active" data-mode="biasa" onclick="toggleLemburMode('biasa')">Hari Biasa</button>
+      <button type="button" class="lem-switch-btn" data-mode="libur" onclick="toggleLemburMode('libur')">Hari Libur</button>
+    </div>
 
-    <div class="section-label">Output</div>
-    <table class="detail" id="lb_out">
-      <thead><tr><th>Keterangan</th><th class="num">Gaji + Tunjangan</th><th class="num">Hari Kerja/Bln</th><th class="num">Upah/Hari</th><th class="num">Upah/Jam</th><th class="num">Jumlah Jam</th><th class="num">Pengali</th><th class="num">Total Uang</th></tr></thead>
-      <tbody>
-        <tr><td>Jam Pertama</td><td class="num" id="lb1_gaji">-</td><td class="num" id="lb1_hk">-</td><td class="num" id="lb1_uh">-</td><td class="num" id="lb1_uj">-</td><td class="num" id="lb1_jam">-</td><td class="num">1,5x</td><td class="num" id="lb1_total">-</td></tr>
-        <tr><td>Jam Kedua dst</td><td class="num" id="lb2_gaji">-</td><td class="num" id="lb2_hk">-</td><td class="num" id="lb2_uh">-</td><td class="num" id="lb2_uj">-</td><td class="num" id="lb2_jam">-</td><td class="num">2x</td><td class="num" id="lb2_total">-</td></tr>
-        <tr class="subtotal"><td colspan="5">SUBTOTAL LEMBUR HARI BIASA</td><td class="num" id="lb_totjam">-</td><td></td><td class="num" id="lb_grand">-</td></tr>
-      </tbody>
-    </table>
-    <div class="note">Upah per jam = Gaji ÷ 173 (pembagi baku PP 35/2021, terlepas dari jumlah hari kerja aktual). Jam pertama dihitung 1,5×, jam kedua dan seterusnya dihitung 2× per jam.</div>
-  </div>
+    <div id="lembur_biasa_section">
+      <div class="desc" style="margin-top:10px;">Pengali 1,5x (jam pertama) dan 2x (jam kedua dst), Kepmenaker/PP 35/2021.</div>
+      <div class="field-row"><label>Hari Kerja Perbulan (informasi)</label><input type="number" id="lb_harikerja" value="26" min="1"></div>
+      <div class="field-row"><label>Jumlah Jam Lembur — Jam Pertama</label><input type="number" id="lb_jam1" value="1" min="0" max="1" step="1"></div>
+      <div class="field-row"><label>Jumlah Jam Lembur — Jam Kedua dst</label><input type="number" id="lb_jam2" value="1" min="0"></div>
 
-  <!-- ============ LEMBUR HARI LIBUR ============ -->
-  <div class="panel" id="panel-lemburlibur">
-    <div class="panel-head"><h2>Rincian Lembur Hari Libur</h2></div>
-    <div class="desc">Upah lembur pada hari libur resmi/istirahat mingguan (5 hari kerja/minggu) — pengali 2x / 3x / 4x, PP 35/2021 Pasal 31.</div>
+      <button class="btn-primary" onclick="calcLemburBiasa()">Hitung</button>
 
-    <div class="section-label">Input</div>
-    <div class="field-row"><label>Gaji + Tunjangan Tetap</label><input type="text" class="rp-input" id="ll_gaji" value="7000000"></div>
-    <div class="field-row"><label>Jam ke 1–8</label><input type="number" id="ll_jam18" value="1" min="0" max="8"></div>
-    <div class="field-row"><label>Jam ke-9</label><input type="number" id="ll_jam9" value="1" min="0" max="1"></div>
-    <div class="field-row"><label>Jam ke-10 dst</label><input type="number" id="ll_jam10" value="1" min="0"></div>
+      <div class="section-label">Output</div>
+      <table class="detail" id="lb_out">
+        <thead><tr><th>Keterangan</th><th class="num">Gaji + Tunjangan</th><th class="num">Hari Kerja/Bln</th><th class="num">Upah/Hari</th><th class="num">Upah/Jam</th><th class="num">Jumlah Jam</th><th class="num">Pengali</th><th class="num">Total Uang</th></tr></thead>
+        <tbody>
+          <tr><td>Jam Pertama</td><td class="num" id="lb1_gaji">-</td><td class="num" id="lb1_hk">-</td><td class="num" id="lb1_uh">-</td><td class="num" id="lb1_uj">-</td><td class="num" id="lb1_jam">-</td><td class="num">1,5x</td><td class="num" id="lb1_total">-</td></tr>
+          <tr><td>Jam Kedua dst</td><td class="num" id="lb2_gaji">-</td><td class="num" id="lb2_hk">-</td><td class="num" id="lb2_uh">-</td><td class="num" id="lb2_uj">-</td><td class="num" id="lb2_jam">-</td><td class="num">2x</td><td class="num" id="lb2_total">-</td></tr>
+          <tr class="subtotal"><td colspan="5">SUBTOTAL LEMBUR HARI BIASA</td><td class="num" id="lb_totjam">-</td><td></td><td class="num" id="lb_grand">-</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Upah per jam = Gaji ÷ 173 (pembagi baku PP 35/2021, terlepas dari jumlah hari kerja aktual). Jam pertama dihitung 1,5×, jam kedua dan seterusnya dihitung 2× per jam.</div>
+    </div>
 
-    <button class="btn-primary" onclick="calcLemburLibur()">Hitung</button>
+    <div id="lembur_libur_section" style="display:none;">
+      <div class="desc" style="margin-top:10px;">Berlaku hari libur resmi/istirahat mingguan (5 hari kerja/minggu) — pengali 2x / 3x / 4x, PP 35/2021 Pasal 31.</div>
+      <div class="field-row"><label>Jam ke 1–8</label><input type="number" id="ll_jam18" value="1" min="0" max="8"></div>
+      <div class="field-row"><label>Jam ke-9</label><input type="number" id="ll_jam9" value="1" min="0" max="1"></div>
+      <div class="field-row"><label>Jam ke-10 dst</label><input type="number" id="ll_jam10" value="1" min="0"></div>
 
-    <div class="section-label">Output</div>
-    <table class="detail" id="ll_out">
-      <thead><tr><th>Keterangan</th><th class="num">Gaji + Tunjangan</th><th class="num">Pembagi</th><th class="num">Upah/Hari</th><th class="num">Upah/Jam</th><th class="num">Jumlah Jam</th><th class="num">Pengali</th><th class="num">Total Uang</th></tr></thead>
-      <tbody>
-        <tr><td>Jam 1 - 8</td><td class="num" id="ll1_gaji">-</td><td class="num">173</td><td class="num" id="ll1_uh">-</td><td class="num" id="ll1_uj">-</td><td class="num" id="ll1_jam">-</td><td class="num">2x</td><td class="num" id="ll1_total">-</td></tr>
-        <tr><td>Jam Ke-9</td><td class="num" id="ll2_gaji">-</td><td class="num">173</td><td class="num" id="ll2_uh">-</td><td class="num" id="ll2_uj">-</td><td class="num" id="ll2_jam">-</td><td class="num">3x</td><td class="num" id="ll2_total">-</td></tr>
-        <tr><td>Jam Ke-10 dst</td><td class="num" id="ll3_gaji">-</td><td class="num">173</td><td class="num" id="ll3_uh">-</td><td class="num" id="ll3_uj">-</td><td class="num" id="ll3_jam">-</td><td class="num">4x</td><td class="num" id="ll3_total">-</td></tr>
-        <tr class="subtotal"><td colspan="5">SUBTOTAL LEMBUR HARI LIBUR</td><td class="num" id="ll_totjam">-</td><td></td><td class="num" id="ll_grand">-</td></tr>
-      </tbody>
-    </table>
-    <div class="note">Berlaku untuk jadwal 5 hari kerja/minggu (hari libur jatuh pada hari kerja 8 jam). Upah per jam = Gaji ÷ 173.</div>
+      <button class="btn-primary" onclick="calcLemburLibur()">Hitung</button>
+
+      <div class="section-label">Output</div>
+      <table class="detail" id="ll_out">
+        <thead><tr><th>Keterangan</th><th class="num">Gaji + Tunjangan</th><th class="num">Pembagi</th><th class="num">Upah/Hari</th><th class="num">Upah/Jam</th><th class="num">Jumlah Jam</th><th class="num">Pengali</th><th class="num">Total Uang</th></tr></thead>
+        <tbody>
+          <tr><td>Jam 1 - 8</td><td class="num" id="ll1_gaji">-</td><td class="num">173</td><td class="num" id="ll1_uh">-</td><td class="num" id="ll1_uj">-</td><td class="num" id="ll1_jam">-</td><td class="num">2x</td><td class="num" id="ll1_total">-</td></tr>
+          <tr><td>Jam Ke-9</td><td class="num" id="ll2_gaji">-</td><td class="num">173</td><td class="num" id="ll2_uh">-</td><td class="num" id="ll2_uj">-</td><td class="num" id="ll2_jam">-</td><td class="num">3x</td><td class="num" id="ll2_total">-</td></tr>
+          <tr><td>Jam Ke-10 dst</td><td class="num" id="ll3_gaji">-</td><td class="num">173</td><td class="num" id="ll3_uh">-</td><td class="num" id="ll3_uj">-</td><td class="num" id="ll3_jam">-</td><td class="num">4x</td><td class="num" id="ll3_total">-</td></tr>
+          <tr class="subtotal"><td colspan="5">SUBTOTAL LEMBUR HARI LIBUR</td><td class="num" id="ll_totjam">-</td><td></td><td class="num" id="ll_grand">-</td></tr>
+        </tbody>
+      </table>
+      <div class="note">Berlaku untuk jadwal 5 hari kerja/minggu (hari libur jatuh pada hari kerja 8 jam). Upah per jam = Gaji ÷ 173.</div>
+    </div>
   </div>
 
   <!-- ============ GAJI HARIAN ============ -->
@@ -767,7 +776,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
   <!-- ============ GAJI BERSIH (TAKE-HOME PAY) ============ -->
   <div class="panel" id="panel-gajibersih">
     <div class="panel-head"><h2>Kalkulator Gaji Bersih (Take-Home Pay)</h2></div>
-    <div class="desc">Estimasi gaji bersih setelah potongan PPh 21 (TER), BPJS Ketenagakerjaan, BPJS Kesehatan, dan potongan lain-lain.</div>
+    <div class="desc">Estimasi gaji bersih setelah potongan PPh 21 (TER), BPJS Ketenagakerjaan, BPJS Kesehatan, dan potongan lain-lain. Dasar pengenaan PPh 21 sudah memperhitungkan iuran JKK, JKM, dan BPJS Kesehatan yang dibayar perusahaan sesuai PMK 168/2023 Pasal 5.</div>
 
     <div class="section-label">Input</div>
     <div class="field-row"><label>Gaji Pokok + Tunjangan Tetap (Bruto)</label><input type="text" class="rp-input" id="gb_bruto" value="10000000"></div>
@@ -784,22 +793,40 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       </select>
     </div>
     <div class="field-row"><label>Sertakan Potongan BPJS Ketenagakerjaan (JHT+JP)?</label><select id="gb_bpjstk"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
+    <div class="field-row"><label>Kelas Risiko JKK (ikut aktif bila BPJS TK di atas "Ya")</label>
+      <select id="gb_jkk">
+        <option value="0.24">Sangat Rendah — 0,24%</option>
+        <option value="0.54" selected>Rendah — 0,54%</option>
+        <option value="0.89">Sedang — 0,89%</option>
+        <option value="1.27">Tinggi — 1,27%</option>
+        <option value="1.74">Sangat Tinggi — 1,74%</option>
+      </select>
+    </div>
     <div class="field-row"><label>Sertakan Potongan BPJS Kesehatan?</label><select id="gb_bpjskes"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
     <div class="field-row"><label>Potongan Lain-lain (pinjaman/kasbon dll)</label><input type="text" class="rp-input" id="gb_lain" value="0"></div>
 
     <button class="btn-primary" onclick="calcGajiBersih()">Hitung</button>
+
+    <div class="section-label">Dasar Pengenaan PPh 21</div>
+    <table class="out-table" id="gb_out_base">
+      <tr><td>Gaji Bruto (Diterima Karyawan)</td><td id="gb_base_bruto">Rp0,00</td></tr>
+      <tr class="sub"><td>+ Premi JKK Perusahaan (objek PPh 21)</td><td id="gb_base_jkk">Rp0,00</td></tr>
+      <tr class="sub"><td>+ Premi JKM Perusahaan (objek PPh 21)</td><td id="gb_base_jkm">Rp0,00</td></tr>
+      <tr class="sub"><td>+ Premi BPJS Kesehatan Perusahaan (objek PPh 21)</td><td id="gb_base_kes">Rp0,00</td></tr>
+      <tr class="total"><td>Dasar Pengenaan PPh 21 (Penghasilan Bruto Pajak)</td><td id="gb_base_total">Rp0,00</td></tr>
+    </table>
 
     <div class="section-label">Output</div>
     <table class="out-table" id="gb_out">
       <tr><td>Gaji Bruto</td><td id="gb_out_bruto">Rp0,00</td></tr>
       <tr class="sub"><td>− Potongan BPJS Ketenagakerjaan (JHT 2% + JP 1%)</td><td id="gb_out_bpjstk">Rp0,00</td></tr>
       <tr class="sub"><td>− Potongan BPJS Kesehatan (1%)</td><td id="gb_out_bpjskes">Rp0,00</td></tr>
-      <tr class="sub"><td>− PPh 21 (TER)</td><td id="gb_out_pph">Rp0,00</td></tr>
+      <tr class="sub"><td>− PPh 21 (TER, dari dasar pengenaan di atas)</td><td id="gb_out_pph">Rp0,00</td></tr>
       <tr class="sub"><td>− Potongan Lain-lain</td><td id="gb_out_lain">Rp0,00</td></tr>
       <tr class="total"><td>Total Potongan</td><td id="gb_out_totpotongan">Rp0,00</td></tr>
       <tr class="grand"><td>GAJI BERSIH (TAKE-HOME PAY)</td><td id="gb_out_bersih">Rp0,00</td></tr>
     </table>
-    <div class="note">PPh 21 dihitung memakai metode TER (Tarif Efektif Rata-rata) bulan berjalan — sama seperti tab "PPh 21 Bulanan". Dasar iuran JP dibatasi maksimal Rp11.086.300 dan BPJS Kesehatan maksimal Rp12.000.000. Perhitungan ini estimasi; tidak memperhitungkan tunjangan tidak tetap, lembur, atau komponen non-rutin lain kecuali dimasukkan manual ke Gaji Bruto.</div>
+    <div class="note">Iuran JKK, JKM, dan BPJS Kesehatan yang dibayar perusahaan menjadi objek PPh 21 (menambah dasar pengenaan pajak) sesuai PMK 168/2023 Pasal 5 ayat (3) huruf d & e — meski begitu, karyawan tidak menerima uangnya secara tunai, hanya menanggung pajaknya. Sebaliknya, iuran JHT dan JP yang dibayar perusahaan dikecualikan dari objek PPh 21 sesuai Pasal 7 huruf c. PPh 21 dihitung memakai metode TER (Tarif Efektif Rata-rata) bulan berjalan berdasarkan dasar pengenaan pajak di atas, bukan sekadar gaji bruto. Dasar iuran JP dibatasi maksimal Rp11.086.300 dan BPJS Kesehatan maksimal Rp12.000.000. Perhitungan ini estimasi; tidak memperhitungkan tunjangan tidak tetap, lembur, atau komponen non-rutin lain kecuali dimasukkan manual ke Gaji Bruto.</div>
   </div>
 
   <!-- ============ SHORTLINK (PEMENDEK URL) ============ -->
@@ -962,6 +989,7 @@ function copyPanelResult(panelId){
   const rows = panel.querySelectorAll('.out-table tr, table.detail tr');
   let lines = [];
   rows.forEach(tr=>{
+    if(tr.offsetParent === null) return; // skip rows hidden inside a collapsed/inactive section
     const cells = Array.from(tr.children).map(td=>td.textContent.trim()).filter(t=>t.length>0);
     if(cells.length>=2) lines.push(cells.join(' : '));
   });
@@ -988,8 +1016,9 @@ function flashPanel(panelId){
 // live-calc: recalculate automatically as the user types/selects, per panel
 (function setupLiveCalc(){
   const calcMap = {
-    pkwt: window.calcPKWT, phk: window.calcPHK, lemburbiasa: window.calcLemburBiasa,
-    lemburlibur: window.calcLemburLibur, gajiharian: window.calcGajiHarian, thr: window.calcTHR,
+    pkwt: window.calcPKWT, phk: window.calcPHK,
+    lembur: function(){ if(typeof calcLemburBiasa==='function') calcLemburBiasa(); if(typeof calcLemburLibur==='function') calcLemburLibur(); },
+    gajiharian: window.calcGajiHarian, thr: window.calcTHR,
     pph21: window.calcPPh21, bpjs: window.calcBPJS, cuti: window.calcCuti, rekap: window.calcRekap,
     gajipersen: function(){ if(typeof calcGajiPersen==='function') calcGajiPersen(); if(typeof calcGajiReverse==='function') calcGajiReverse(); },
     usia: window.calcUsia, gajibersih: window.calcGajiBersih
@@ -1120,8 +1149,15 @@ function calcPHK(){
 }
 
 // ---------- LEMBUR HARI BIASA ----------
+// ---------- LEMBUR (MODE SWITCH) ----------
+function toggleLemburMode(mode){
+  document.querySelectorAll('.lem-switch-btn').forEach(b=> b.classList.toggle('active', b.dataset.mode===mode));
+  document.getElementById('lembur_biasa_section').style.display = (mode==='biasa') ? '' : 'none';
+  document.getElementById('lembur_libur_section').style.display = (mode==='libur') ? '' : 'none';
+}
+
 function calcLemburBiasa(){
-  const gaji = parseRp('lb_gaji');
+  const gaji = parseRp('lem_gaji');
   const hariKerja = parseFloat(document.getElementById('lb_harikerja').value) || 26;
   const jam1 = parseFloat(document.getElementById('lb_jam1').value) || 0;
   const jam2 = parseFloat(document.getElementById('lb_jam2').value) || 0;
@@ -1152,7 +1188,7 @@ function calcLemburBiasa(){
 
 // ---------- LEMBUR HARI LIBUR ----------
 function calcLemburLibur(){
-  const gaji = parseRp('ll_gaji');
+  const gaji = parseRp('lem_gaji');
   const jam18 = parseFloat(document.getElementById('ll_jam18').value) || 0;
   const jam9 = parseFloat(document.getElementById('ll_jam9').value) || 0;
   const jam10 = parseFloat(document.getElementById('ll_jam10').value) || 0;
@@ -1632,12 +1668,14 @@ function calcGajiBersih(){
   const bruto = parseRp('gb_bruto');
   const status = document.getElementById('gb_status').value;
   const includeBpjsTK = document.getElementById('gb_bpjstk').value === '1';
+  const jkkRate = parseFloat(document.getElementById('gb_jkk').value) || 0;
   const includeBpjsKes = document.getElementById('gb_bpjskes').value === '1';
   const lain = parseRp('gb_lain');
 
   const JP_CAP = 11086300;
   const KES_CAP = 12000000;
 
+  // Potongan sisi karyawan (mengurangi take-home)
   const jhtKar = includeBpjsTK ? bruto * 0.02 : 0;
   const jpDasar = includeBpjsTK ? Math.min(bruto, JP_CAP) : 0;
   const jpKar = includeBpjsTK ? jpDasar * 0.01 : 0;
@@ -1646,12 +1684,26 @@ function calcGajiBersih(){
   const kesDasar = includeBpjsKes ? Math.min(bruto, KES_CAP) : 0;
   const bpjsKesTotal = includeBpjsKes ? kesDasar * 0.01 : 0;
 
+  // Premi sisi perusahaan yang menjadi OBJEK PPh 21 (PMK 168/2023 Pasal 5 ayat 3 huruf d & e)
+  // JHT & JP sisi perusahaan DIKECUALIKAN dari objek PPh 21 (Pasal 7 huruf c) — tidak ditambahkan.
+  const jkkPremi = includeBpjsTK ? bruto * (jkkRate/100) : 0;
+  const jkmPremi = includeBpjsTK ? bruto * 0.003 : 0;
+  const kesPremiPerusahaan = includeBpjsKes ? kesDasar * 0.04 : 0;
+
+  const pphBase = bruto + jkkPremi + jkmPremi + kesPremiPerusahaan;
+
   const kategori = PTKP_TO_KATEGORI[status];
-  const rate = getTERRate(bruto, kategori);
-  const pph = bruto * (rate/100);
+  const rate = getTERRate(pphBase, kategori);
+  const pph = pphBase * (rate/100);
 
   const totalPotongan = bpjsTkTotal + bpjsKesTotal + pph + lain;
   const bersih = bruto - totalPotongan;
+
+  document.getElementById('gb_base_bruto').textContent = fmtRp(bruto);
+  document.getElementById('gb_base_jkk').textContent = fmtRp(jkkPremi);
+  document.getElementById('gb_base_jkm').textContent = fmtRp(jkmPremi);
+  document.getElementById('gb_base_kes').textContent = fmtRp(kesPremiPerusahaan);
+  document.getElementById('gb_base_total').textContent = fmtRp(pphBase);
 
   document.getElementById('gb_out_bruto').textContent = fmtRp(bruto);
   document.getElementById('gb_out_bpjstk').textContent = fmtRp(bpjsTkTotal);
