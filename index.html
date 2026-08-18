@@ -358,6 +358,11 @@
       <button class="side-link" data-tab="gajipersen" title="Kenaikan/Penurunan Gaji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 6h6v6"/></svg><span class="link-label">Kenaikan/Penurunan Gaji</span></button>
       <button class="side-link" data-tab="usia" title="Usia Karyawan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg><span class="link-label">Usia Karyawan</span></button>
       <button class="side-link" data-tab="gajibersih" title="Gaji Bersih"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v.01M18 14v.01"/></svg><span class="link-label">Gaji Bersih</span></button>
+      <div class="sidebar-group-label">Analitik &amp; Rekrutmen</div>
+      <button class="side-link" data-tab="turnover" title="Turnover Rate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span class="link-label">Turnover Rate</span></button>
+      <button class="side-link" data-tab="absensi" title="Tingkat Absensi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M9 15l-2 2 2 2M15 15l2 2-2 2"/></svg><span class="link-label">Tingkat Absensi</span></button>
+      <button class="side-link" data-tab="skoring" title="Skoring Berbobot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9 5.8 20.3l1.6-6.8L2.2 8.9l6.9-.6z"/></svg><span class="link-label">Skoring Berbobot</span></button>
+      <button class="side-link" data-tab="bei" title="Generator Pertanyaan BEI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8M8 13h5"/></svg><span class="link-label">Pertanyaan BEI</span></button>
       <div class="sidebar-group-label">Utilitas</div>
       <button class="side-link" data-tab="shortlink" title="Shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span class="link-label">Shortlink</span></button>
     </nav>
@@ -589,7 +594,7 @@
     <div class="panel-head"><h2>Kalkulator PPh 21 Bulanan (TER)</h2></div>
     <div class="desc">Estimasi potongan PPh 21 bulanan karyawan tetap — Tarif Efektif Rata-rata (TER), PP 58/2023 & PMK 168/2023.</div>
 
-    <div class="section-label">Input</div>
+    <div class="section-label">Status PTKP</div>
     <div class="field-row"><label>Status PTKP</label>
       <select id="pph_status">
         <option value="TK0">TK/0 — Lajang, tanpa tanggungan</option>
@@ -602,18 +607,63 @@
         <option value="K3">K/3 — Kawin, 3 tanggungan</option>
       </select>
     </div>
-    <div class="field-row"><label>Penghasilan Bruto Bulanan</label><input type="text" class="rp-input" id="pph_bruto" value="10000000"></div>
 
-    <button class="btn-primary" onclick="calcPPh21()">Hitung</button>
+    <div class="section-label">Jenis Perhitungan</div>
+    <div class="lem-switch" role="tablist">
+      <button type="button" class="lem-switch-btn active" data-pphmode="normal" onclick="togglePphMode('normal')">Gaji Saat Ini</button>
+      <button type="button" class="lem-switch-btn" data-pphmode="grossup" onclick="togglePphMode('grossup')">Gaji Gross Up (+BPJS Perusahaan)</button>
+    </div>
 
-    <div class="section-label">Output</div>
-    <table class="out-table" id="pph_out">
-      <tr><td>Kategori TER</td><td id="pph_kategori">-</td></tr>
-      <tr><td>Tarif Efektif</td><td id="pph_tarif">-</td></tr>
-      <tr class="total"><td>PPh 21 Bulan Ini</td><td id="pph_pajak">Rp0,00</td></tr>
-      <tr class="grand"><td>PENGHASILAN SETELAH PAJAK</td><td id="pph_netto">Rp0,00</td></tr>
-    </table>
-    <div class="note">Berlaku untuk masa pajak Januari–November. Kategori TER: A = TK/0, TK/1, K/0 · B = TK/2, TK/3, K/1, K/2 · C = K/3. Pada masa pajak Desember (atau bulan terakhir kerja), pajak dihitung ulang secara kumulatif setahun memakai tarif progresif Pasal 17 UU PPh — kalkulator ini hanya estimasi bulan berjalan, bukan perhitungan Desember. Verifikasi selalu ke lampiran resmi PMK 168/2023.</div>
+    <div id="pph_mode_normal">
+      <div class="desc" style="margin-top:10px;">Penghasilan bruto dimasukkan langsung apa adanya (sudah termasuk semua komponen objek pajak).</div>
+      <div class="field-row"><label>Penghasilan Bruto Bulanan</label><input type="text" class="rp-input" id="pph_bruto" value="10000000"></div>
+
+      <button class="btn-primary" onclick="calcPPh21()">Hitung</button>
+
+      <div class="section-label">Output</div>
+      <table class="out-table" id="pph_out">
+        <tr><td>Kategori TER</td><td id="pph_kategori">-</td></tr>
+        <tr><td>Tarif Efektif</td><td id="pph_tarif">-</td></tr>
+        <tr class="total"><td>PPh 21 Bulan Ini</td><td id="pph_pajak">Rp0,00</td></tr>
+        <tr class="grand"><td>PENGHASILAN SETELAH PAJAK</td><td id="pph_netto">Rp0,00</td></tr>
+      </table>
+      <div class="note">Berlaku untuk masa pajak Januari–November. Kategori TER: A = TK/0, TK/1, K/0 · B = TK/2, TK/3, K/1, K/2 · C = K/3. Pada masa pajak Desember (atau bulan terakhir kerja), pajak dihitung ulang secara kumulatif setahun memakai tarif progresif Pasal 17 UU PPh — kalkulator ini hanya estimasi bulan berjalan, bukan perhitungan Desember. Verifikasi selalu ke lampiran resmi PMK 168/2023.</div>
+    </div>
+
+    <div id="pph_mode_grossup" style="display:none;">
+      <div class="desc" style="margin-top:10px;">Dasar pengenaan pajak ditambah premi JKK, JKM, dan BPJS Kesehatan yang dibayar perusahaan (objek PPh 21 sesuai PMK 168/2023 Pasal 5 ayat 3 huruf d &amp; e). Iuran JHT &amp; JP perusahaan tetap dikecualikan (Pasal 7 huruf c).</div>
+      <div class="field-row"><label>Gaji Pokok + Tunjangan Tetap</label><input type="text" class="rp-input" id="pphgu_bruto" value="10000000"></div>
+      <div class="field-row"><label>Sertakan Premi JKK + JKM Perusahaan?</label><select id="pphgu_jkk_toggle"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
+      <div class="field-row"><label>Kelas Risiko JKK</label>
+        <select id="pphgu_jkk">
+          <option value="0.24">Sangat Rendah — 0,24%</option>
+          <option value="0.54" selected>Rendah — 0,54%</option>
+          <option value="0.89">Sedang — 0,89%</option>
+          <option value="1.27">Tinggi — 1,27%</option>
+          <option value="1.74">Sangat Tinggi — 1,74%</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Sertakan Premi BPJS Kesehatan Perusahaan?</label><select id="pphgu_kes_toggle"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
+
+      <button class="btn-primary" onclick="calcPPh21GrossUp()">Hitung</button>
+
+      <div class="section-label">Dasar Pengenaan PPh 21</div>
+      <table class="out-table" id="pphgu_out_base">
+        <tr><td>Gaji Pokok + Tunjangan Tetap</td><td id="pphgu_base_bruto">Rp0,00</td></tr>
+        <tr class="sub"><td>+ Premi JKK Perusahaan</td><td id="pphgu_base_jkk">Rp0,00</td></tr>
+        <tr class="sub"><td>+ Premi JKM Perusahaan</td><td id="pphgu_base_jkm">Rp0,00</td></tr>
+        <tr class="sub"><td>+ Premi BPJS Kesehatan Perusahaan</td><td id="pphgu_base_kes">Rp0,00</td></tr>
+        <tr class="total"><td>Dasar Pengenaan PPh 21</td><td id="pphgu_base_total">Rp0,00</td></tr>
+      </table>
+
+      <div class="section-label">Output</div>
+      <table class="out-table" id="pphgu_out">
+        <tr><td>Kategori TER</td><td id="pphgu_kategori">-</td></tr>
+        <tr><td>Tarif Efektif</td><td id="pphgu_tarif">-</td></tr>
+        <tr class="grand"><td>PPh 21 Bulan Ini</td><td id="pphgu_pajak">Rp0,00</td></tr>
+      </table>
+      <div class="note">Karyawan tidak menerima premi JKK/JKM/BPJS Kesehatan perusahaan secara tunai, tapi tetap menanggung pajaknya karena menjadi bagian dasar pengenaan PPh 21. PPh 21 di sini dihitung dari dasar pengenaan (gaji + premi objek pajak), bukan gaji polos. Berlaku untuk masa pajak Januari–November — sama seperti mode "Gaji Saat Ini".</div>
+    </div>
   </div>
 
   <!-- ============ BPJS ============ -->
@@ -793,7 +843,8 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       </select>
     </div>
     <div class="field-row"><label>Sertakan Potongan BPJS Ketenagakerjaan (JHT+JP)?</label><select id="gb_bpjstk"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
-    <div class="field-row"><label>Kelas Risiko JKK (ikut aktif bila BPJS TK di atas "Ya")</label>
+    <div class="field-row"><label>Sertakan Premi JKK + JKM Perusahaan?</label><select id="gb_jkk_toggle"><option value="1" selected>Ya</option><option value="0">Tidak</option></select></div>
+    <div class="field-row"><label>Kelas Risiko JKK</label>
       <select id="gb_jkk">
         <option value="0.24">Sangat Rendah — 0,24%</option>
         <option value="0.54" selected>Rendah — 0,54%</option>
@@ -850,6 +901,110 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <div class="section-label">Riwayat (Maks. 5 Terakhir di Perangkat Ini)</div>
     <div id="sl_history"></div>
     <div class="note">Diproses lewat s.id agar mendukung custom back-half; kalau gagal atau custom back-half sudah dipakai orang lain, otomatis lanjut ke layanan cadangan (CleanURI, is.gd, TinyURL) tanpa custom back-half. Riwayat hanya tersimpan lokal di browser/perangkat ini (localStorage), tidak dikirim atau disimpan oleh aplikasi ini ke server manapun selain langsung ke penyedia yang dipilih. Contoh pemakaian: pendekkan tautan portal ini sendiri di <strong>https://albarnation.github.io/myhrsystem/</strong> supaya lebih mudah dibagikan.</div>
+  </div>
+
+  <!-- ============ TURNOVER RATE ============ -->
+  <div class="panel" id="panel-turnover">
+    <div class="panel-head"><h2>Kalkulator Turnover Rate</h2></div>
+    <div class="desc">Mengukur persentase perputaran karyawan (resign/PHK) dalam satu periode — data yang sering diminta manajemen untuk laporan bulanan/tahunan.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row"><label>Jumlah Karyawan Awal Periode</label><input type="number" id="tv_awal" value="100" min="0"></div>
+    <div class="field-row"><label>Jumlah Karyawan Akhir Periode</label><input type="number" id="tv_akhir" value="98" min="0"></div>
+    <div class="field-row"><label>Jumlah Karyawan Keluar (Resign/PHK)</label><input type="number" id="tv_keluar" value="4" min="0"></div>
+
+    <button class="btn-primary" onclick="calcTurnover()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="tv_out">
+      <tr><td>Rata-rata Jumlah Karyawan</td><td id="tv_ratarata">-</td></tr>
+      <tr><td>Interpretasi</td><td id="tv_interpretasi">-</td></tr>
+      <tr class="grand"><td>TURNOVER RATE</td><td id="tv_rate">0%</td></tr>
+    </table>
+    <div class="note">Rumus: Turnover Rate = Jumlah Karyawan Keluar ÷ Rata-rata Jumlah Karyawan (awal+akhir dibagi 2) × 100%. Sebagai referensi umum industri (bukan patokan baku): turnover tahunan di bawah 10% umumnya dianggap sehat, 10–20% wajar/moderat, di atas 20% tergolong tinggi dan perlu ditelusuri penyebabnya — standar ideal bisa berbeda tergantung sektor industri.</div>
+  </div>
+
+  <!-- ============ TINGKAT ABSENSI ============ -->
+  <div class="panel" id="panel-absensi">
+    <div class="panel-head"><h2>Kalkulator Tingkat Absensi</h2></div>
+    <div class="desc">Menghitung persentase hilangnya waktu kerja akibat ketidakhadiran (sakit, izin, mangkir) dalam satu periode.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row"><label>Jumlah Karyawan</label><input type="number" id="ab_karyawan" value="50" min="0"></div>
+    <div class="field-row"><label>Hari Kerja dalam Periode</label><input type="number" id="ab_harikerja" value="22" min="0"></div>
+    <div class="field-row"><label>Total Hari Sakit (Seluruh Karyawan)</label><input type="number" id="ab_sakit" value="6" min="0"></div>
+    <div class="field-row"><label>Total Hari Izin (Seluruh Karyawan)</label><input type="number" id="ab_izin" value="4" min="0"></div>
+    <div class="field-row"><label>Total Hari Mangkir/Alpa (Seluruh Karyawan)</label><input type="number" id="ab_mangkir" value="1" min="0"></div>
+
+    <button class="btn-primary" onclick="calcAbsensi()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="ab_out">
+      <tr><td>Total Hari Kerja Tersedia</td><td id="ab_tersedia">-</td></tr>
+      <tr class="sub"><td>Total Hari Absen (Sakit+Izin+Mangkir)</td><td id="ab_totalabsen">-</td></tr>
+      <tr class="grand"><td>TINGKAT ABSENSI</td><td id="ab_rate">0%</td></tr>
+    </table>
+    <div class="note">Rumus: Tingkat Absensi = Total Hari Absen ÷ (Jumlah Karyawan × Hari Kerja dalam Periode) × 100%. Sebagai referensi umum, tingkat absensi bulanan di bawah 2–3% biasanya dianggap wajar; di atas itu perlu dievaluasi lebih lanjut, tergantung kebijakan dan sektor masing-masing perusahaan.</div>
+  </div>
+
+  <!-- ============ SKORING BERBOBOT ============ -->
+  <div class="panel" id="panel-skoring">
+    <div class="panel-head"><h2>Kalkulator Skoring Berbobot</h2></div>
+    <div class="desc">Menghitung nilai akhir kandidat pelamar atau penilaian kinerja (KPI) dari beberapa kriteria dengan bobot berbeda.</div>
+
+    <div class="section-label">Kriteria Penilaian</div>
+    <table class="detail" id="ws_table">
+      <thead><tr><th>Kriteria</th><th class="num">Bobot (%)</th><th class="num">Skor (0-100)</th><th class="num">Kontribusi</th></tr></thead>
+      <tbody>
+        <tr><td><input type="text" id="ws_c1_name" value="Tes Teknis" style="border:none;background:transparent;padding:4px 0;"></td><td class="num"><input type="number" id="ws_c1_bobot" value="40" min="0" max="100" style="text-align:right;"></td><td class="num"><input type="number" id="ws_c1_skor" value="80" min="0" max="100" style="text-align:right;"></td><td class="num" id="ws_c1_kontrib">-</td></tr>
+        <tr><td><input type="text" id="ws_c2_name" value="Wawancara" style="border:none;background:transparent;padding:4px 0;"></td><td class="num"><input type="number" id="ws_c2_bobot" value="40" min="0" max="100" style="text-align:right;"></td><td class="num"><input type="number" id="ws_c2_skor" value="75" min="0" max="100" style="text-align:right;"></td><td class="num" id="ws_c2_kontrib">-</td></tr>
+        <tr><td><input type="text" id="ws_c3_name" value="Pengalaman" style="border:none;background:transparent;padding:4px 0;"></td><td class="num"><input type="number" id="ws_c3_bobot" value="20" min="0" max="100" style="text-align:right;"></td><td class="num"><input type="number" id="ws_c3_skor" value="70" min="0" max="100" style="text-align:right;"></td><td class="num" id="ws_c3_kontrib">-</td></tr>
+        <tr><td><input type="text" id="ws_c4_name" value="" placeholder="Kriteria opsional" style="border:none;background:transparent;padding:4px 0;"></td><td class="num"><input type="number" id="ws_c4_bobot" value="0" min="0" max="100" style="text-align:right;"></td><td class="num"><input type="number" id="ws_c4_skor" value="0" min="0" max="100" style="text-align:right;"></td><td class="num" id="ws_c4_kontrib">-</td></tr>
+        <tr><td><input type="text" id="ws_c5_name" value="" placeholder="Kriteria opsional" style="border:none;background:transparent;padding:4px 0;"></td><td class="num"><input type="number" id="ws_c5_bobot" value="0" min="0" max="100" style="text-align:right;"></td><td class="num"><input type="number" id="ws_c5_skor" value="0" min="0" max="100" style="text-align:right;"></td><td class="num" id="ws_c5_kontrib">-</td></tr>
+        <tr class="subtotal"><td>TOTAL</td><td class="num" id="ws_totalbobot">0%</td><td></td><td class="num" id="ws_nilaiakhir">-</td></tr>
+      </tbody>
+    </table>
+
+    <button class="btn-primary" onclick="calcSkoring()">Hitung</button>
+
+    <div class="section-label">Output</div>
+    <table class="out-table" id="ws_out">
+      <tr><td>Total Bobot</td><td id="ws_out_bobot">0%</td></tr>
+      <tr><td>Status Bobot</td><td id="ws_out_status">-</td></tr>
+      <tr class="grand"><td>NILAI AKHIR</td><td id="ws_out_nilai">0,00</td></tr>
+    </table>
+    <div class="note">Kontribusi tiap kriteria = (Bobot ÷ 100) × Skor. Nilai Akhir = jumlah seluruh kontribusi. Idealnya total bobot seluruh kriteria berjumlah 100% — kalau tidak, sistem tetap menghitung apa adanya dan memberi peringatan agar bobot disesuaikan kembali. Kriteria ke-4 dan ke-5 bisa dikosongkan (bobot 0%) kalau tidak dipakai.</div>
+  </div>
+
+  <!-- ============ GENERATOR PERTANYAAN BEI ============ -->
+  <div class="panel" id="panel-bei">
+    <div class="panel-head"><h2>Generator Pertanyaan Wawancara (BEI)</h2></div>
+    <div class="desc">Daftar pertanyaan Behavioral Event Interview (metode STAR) berdasarkan kompetensi yang ingin digali.</div>
+
+    <div class="section-label">Pilih Kompetensi</div>
+    <div class="field-row wide"><label>Kompetensi</label>
+      <select id="bei_kompetensi" onchange="renderBeiQuestions()">
+        <option value="kepemimpinan">Kepemimpinan</option>
+        <option value="pemecahan_masalah">Pemecahan Masalah</option>
+        <option value="kerjasama_tim">Kerja Sama Tim</option>
+        <option value="komunikasi">Komunikasi</option>
+        <option value="adaptabilitas">Adaptabilitas</option>
+        <option value="inisiatif">Inisiatif</option>
+        <option value="manajemen_waktu">Manajemen Waktu</option>
+        <option value="pelayanan_pelanggan">Pelayanan Pelanggan</option>
+        <option value="integritas">Integritas</option>
+        <option value="manajemen_konflik">Manajemen Konflik</option>
+      </select>
+    </div>
+
+    <div class="section-label">Daftar Pertanyaan</div>
+    <div id="bei_questions" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+    <button type="button" class="btn-ghost" style="margin-left:0;" onclick="copyBeiQuestions()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/></svg>
+      Salin Semua Pertanyaan
+    </button>
+    <div class="note">Pertanyaan disusun dengan pendekatan STAR (Situation, Task, Action, Result) — minta kandidat menjelaskan situasi nyata yang pernah dialami, bukan hipotetis, agar jawaban mencerminkan perilaku aktual. Data pertanyaan tersimpan langsung di dalam file ini (tidak perlu internet).</div>
   </div>
 
   <div class="about-box">
@@ -1019,9 +1174,11 @@ function flashPanel(panelId){
     pkwt: window.calcPKWT, phk: window.calcPHK,
     lembur: function(){ if(typeof calcLemburBiasa==='function') calcLemburBiasa(); if(typeof calcLemburLibur==='function') calcLemburLibur(); },
     gajiharian: window.calcGajiHarian, thr: window.calcTHR,
-    pph21: window.calcPPh21, bpjs: window.calcBPJS, cuti: window.calcCuti, rekap: window.calcRekap,
+    pph21: function(){ if(typeof calcPPh21==='function') calcPPh21(); if(typeof calcPPh21GrossUp==='function') calcPPh21GrossUp(); },
+    bpjs: window.calcBPJS, cuti: window.calcCuti, rekap: window.calcRekap,
     gajipersen: function(){ if(typeof calcGajiPersen==='function') calcGajiPersen(); if(typeof calcGajiReverse==='function') calcGajiReverse(); },
-    usia: window.calcUsia, gajibersih: window.calcGajiBersih
+    usia: window.calcUsia, gajibersih: window.calcGajiBersih,
+    turnover: window.calcTurnover, absensi: window.calcAbsensi, skoring: window.calcSkoring
   };
   Object.keys(calcMap).forEach(tabId=>{
     const fn = calcMap[tabId];
@@ -1303,6 +1460,44 @@ function calcPPh21(){
   document.getElementById('pph_tarif').textContent = rate.toString().replace('.', ',') + '%';
   document.getElementById('pph_pajak').textContent = fmtRp(pajak);
   document.getElementById('pph_netto').textContent = fmtRp(netto);
+}
+
+// ---------- PPh 21 MODE SWITCH & GROSS UP ----------
+function togglePphMode(mode){
+  document.querySelectorAll('#panel-pph21 .lem-switch-btn').forEach(b=> b.classList.toggle('active', b.dataset.pphmode===mode));
+  document.getElementById('pph_mode_normal').style.display = (mode==='normal') ? '' : 'none';
+  document.getElementById('pph_mode_grossup').style.display = (mode==='grossup') ? '' : 'none';
+}
+
+function calcPPh21GrossUp(){
+  const status = document.getElementById('pph_status').value;
+  const bruto = parseRp('pphgu_bruto');
+  const includeJkkJkm = document.getElementById('pphgu_jkk_toggle').value === '1';
+  const jkkRate = parseFloat(document.getElementById('pphgu_jkk').value) || 0;
+  const includeKes = document.getElementById('pphgu_kes_toggle').value === '1';
+
+  const KES_CAP = 12000000;
+
+  const jkkPremi = includeJkkJkm ? bruto * (jkkRate/100) : 0;
+  const jkmPremi = includeJkkJkm ? bruto * 0.003 : 0;
+  const kesDasar = includeKes ? Math.min(bruto, KES_CAP) : 0;
+  const kesPremi = includeKes ? kesDasar * 0.04 : 0;
+
+  const pphBase = bruto + jkkPremi + jkmPremi + kesPremi;
+
+  const kategori = PTKP_TO_KATEGORI[status];
+  const rate = getTERRate(pphBase, kategori);
+  const pajak = pphBase * (rate/100);
+
+  document.getElementById('pphgu_base_bruto').textContent = fmtRp(bruto);
+  document.getElementById('pphgu_base_jkk').textContent = fmtRp(jkkPremi);
+  document.getElementById('pphgu_base_jkm').textContent = fmtRp(jkmPremi);
+  document.getElementById('pphgu_base_kes').textContent = fmtRp(kesPremi);
+  document.getElementById('pphgu_base_total').textContent = fmtRp(pphBase);
+
+  document.getElementById('pphgu_kategori').textContent = 'Kategori ' + kategori + ' (status ' + PTKP_LABEL[status] + ')';
+  document.getElementById('pphgu_tarif').textContent = rate.toString().replace('.', ',') + '%';
+  document.getElementById('pphgu_pajak').textContent = fmtRp(pajak);
 }
 
 // ---------- BPJS ----------
@@ -1668,6 +1863,7 @@ function calcGajiBersih(){
   const bruto = parseRp('gb_bruto');
   const status = document.getElementById('gb_status').value;
   const includeBpjsTK = document.getElementById('gb_bpjstk').value === '1';
+  const includeJkkJkm = document.getElementById('gb_jkk_toggle').value === '1';
   const jkkRate = parseFloat(document.getElementById('gb_jkk').value) || 0;
   const includeBpjsKes = document.getElementById('gb_bpjskes').value === '1';
   const lain = parseRp('gb_lain');
@@ -1686,8 +1882,9 @@ function calcGajiBersih(){
 
   // Premi sisi perusahaan yang menjadi OBJEK PPh 21 (PMK 168/2023 Pasal 5 ayat 3 huruf d & e)
   // JHT & JP sisi perusahaan DIKECUALIKAN dari objek PPh 21 (Pasal 7 huruf c) — tidak ditambahkan.
-  const jkkPremi = includeBpjsTK ? bruto * (jkkRate/100) : 0;
-  const jkmPremi = includeBpjsTK ? bruto * 0.003 : 0;
+  // Toggle JKK+JKM independen dari toggle potongan JHT+JP, konsisten dengan tab PPh 21 (mode Gross Up).
+  const jkkPremi = includeJkkJkm ? bruto * (jkkRate/100) : 0;
+  const jkmPremi = includeJkkJkm ? bruto * 0.003 : 0;
   const kesPremiPerusahaan = includeBpjsKes ? kesDasar * 0.04 : 0;
 
   const pphBase = bruto + jkkPremi + jkmPremi + kesPremiPerusahaan;
@@ -1878,6 +2075,174 @@ function copyShortlink(){
 
 window.addEventListener('DOMContentLoaded', slRenderHistory);
 
+// ---------- TURNOVER RATE ----------
+function calcTurnover(){
+  const awal = parseFloat(document.getElementById('tv_awal').value) || 0;
+  const akhir = parseFloat(document.getElementById('tv_akhir').value) || 0;
+  const keluar = parseFloat(document.getElementById('tv_keluar').value) || 0;
+
+  const rataRata = (awal + akhir) / 2;
+  let rate = 0;
+  if(rataRata > 0){ rate = (keluar / rataRata) * 100; }
+
+  let interpretasi;
+  if(rataRata === 0){ interpretasi = '—'; }
+  else if(rate < 10){ interpretasi = 'Tergolong rendah/sehat (referensi umum)'; }
+  else if(rate <= 20){ interpretasi = 'Tergolong wajar/moderat (referensi umum)'; }
+  else { interpretasi = 'Tergolong tinggi, perlu ditelusuri penyebabnya (referensi umum)'; }
+
+  document.getElementById('tv_ratarata').textContent = rataRata.toLocaleString('id-ID', {maximumFractionDigits:1}) + ' karyawan';
+  document.getElementById('tv_interpretasi').textContent = interpretasi;
+  document.getElementById('tv_rate').textContent = rate.toFixed(2).replace('.', ',') + '%';
+}
+
+// ---------- TINGKAT ABSENSI ----------
+function calcAbsensi(){
+  const karyawan = parseFloat(document.getElementById('ab_karyawan').value) || 0;
+  const hariKerja = parseFloat(document.getElementById('ab_harikerja').value) || 0;
+  const sakit = parseFloat(document.getElementById('ab_sakit').value) || 0;
+  const izin = parseFloat(document.getElementById('ab_izin').value) || 0;
+  const mangkir = parseFloat(document.getElementById('ab_mangkir').value) || 0;
+
+  const tersedia = karyawan * hariKerja;
+  const totalAbsen = sakit + izin + mangkir;
+  let rate = 0;
+  if(tersedia > 0){ rate = (totalAbsen / tersedia) * 100; }
+
+  document.getElementById('ab_tersedia').textContent = tersedia.toLocaleString('id-ID') + ' hari-kerja';
+  document.getElementById('ab_totalabsen').textContent = totalAbsen.toLocaleString('id-ID') + ' hari';
+  document.getElementById('ab_rate').textContent = rate.toFixed(2).replace('.', ',') + '%';
+}
+
+// ---------- SKORING BERBOBOT ----------
+function calcSkoring(){
+  const rows = ['ws_c1','ws_c2','ws_c3','ws_c4','ws_c5'];
+  let totalBobot = 0;
+  let nilaiAkhir = 0;
+
+  rows.forEach(r=>{
+    const bobot = parseFloat(document.getElementById(r+'_bobot').value) || 0;
+    const skor = parseFloat(document.getElementById(r+'_skor').value) || 0;
+    const kontrib = (bobot/100) * skor;
+    totalBobot += bobot;
+    nilaiAkhir += kontrib;
+    const kontribEl = document.getElementById(r+'_kontrib');
+    if(kontribEl) kontribEl.textContent = kontrib.toFixed(2).replace('.', ',');
+  });
+
+  document.getElementById('ws_totalbobot').textContent = totalBobot.toFixed(0) + '%';
+  document.getElementById('ws_nilaiakhir').textContent = nilaiAkhir.toFixed(2).replace('.', ',');
+
+  document.getElementById('ws_out_bobot').textContent = totalBobot.toFixed(0) + '%';
+  document.getElementById('ws_out_nilai').textContent = nilaiAkhir.toFixed(2).replace('.', ',');
+  const statusEl = document.getElementById('ws_out_status');
+  if(Math.abs(totalBobot - 100) < 0.01){
+    statusEl.textContent = 'Total bobot 100% ✓';
+    statusEl.style.color = 'var(--success)';
+  } else {
+    statusEl.textContent = 'Total bobot belum 100% — sesuaikan kembali';
+    statusEl.style.color = 'var(--danger)';
+  }
+}
+
+// ---------- GENERATOR PERTANYAAN BEI ----------
+const BEI_QUESTION_BANK = {
+  kepemimpinan: [
+    'Ceritakan pengalaman saat Anda harus memimpin tim melewati situasi yang sulit atau penuh tekanan. Apa yang Anda lakukan dan bagaimana hasilnya?',
+    'Ceritakan saat Anda harus mengambil keputusan sulit sebagai pemimpin tanpa persetujuan penuh dari anggota tim. Bagaimana Anda meyakinkan mereka?',
+    'Ceritakan pengalaman ketika Anda harus memberikan umpan balik (feedback) yang sulit kepada anggota tim. Bagaimana Anda menyampaikannya dan apa hasilnya?',
+    'Ceritakan situasi ketika Anda mendelegasikan tugas penting kepada orang lain. Bagaimana Anda memastikan tugas tersebut selesai dengan baik?',
+    'Ceritakan pengalaman ketika seorang anggota tim tidak setuju dengan arahan Anda. Bagaimana Anda menangani situasi tersebut?'
+  ],
+  pemecahan_masalah: [
+    'Ceritakan masalah kompleks yang pernah Anda hadapi di pekerjaan. Bagaimana Anda menganalisis dan menyelesaikannya?',
+    'Ceritakan situasi ketika solusi pertama yang Anda coba ternyata tidak berhasil. Apa yang Anda lakukan selanjutnya?',
+    'Ceritakan pengalaman ketika Anda harus mengambil keputusan cepat dengan informasi yang terbatas. Bagaimana hasilnya?',
+    'Ceritakan saat Anda mengidentifikasi akar masalah (root cause) dari suatu isu yang berulang. Bagaimana prosesnya?',
+    'Ceritakan pengalaman ketika Anda harus memilih di antara beberapa solusi yang sama-sama punya kekurangan. Bagaimana Anda memutuskan?'
+  ],
+  kerjasama_tim: [
+    'Ceritakan pengalaman bekerja dalam tim dengan latar belakang atau pendapat yang sangat berbeda. Bagaimana Anda menyikapinya?',
+    'Ceritakan situasi ketika Anda harus membantu rekan kerja yang kesulitan menyelesaikan tugasnya, di luar tanggung jawab Anda sendiri.',
+    'Ceritakan pengalaman ketika kontribusi Anda dalam tim tidak diakui atau kurang dihargai. Bagaimana Anda menanggapinya?',
+    'Ceritakan saat Anda harus bekerja sama dengan seseorang yang sulit diajak berkomunikasi. Apa strategi Anda?',
+    'Ceritakan pengalaman ketika tim Anda gagal mencapai target bersama. Apa peran Anda dan apa yang dipelajari?'
+  ],
+  komunikasi: [
+    'Ceritakan pengalaman ketika Anda harus menjelaskan sesuatu yang teknis/rumit kepada orang yang tidak familiar dengan topik tersebut.',
+    'Ceritakan situasi ketika pesan Anda disalahpahami oleh rekan kerja atau atasan. Bagaimana Anda memperbaikinya?',
+    'Ceritakan pengalaman menyampaikan kabar atau keputusan yang tidak menyenangkan kepada orang lain. Bagaimana Anda melakukannya?',
+    'Ceritakan saat Anda harus mempresentasikan ide atau hasil kerja di depan banyak orang. Bagaimana persiapan dan hasilnya?',
+    'Ceritakan pengalaman bernegosiasi dengan pihak lain (klien, vendor, rekan kerja) untuk mencapai kesepakatan.'
+  ],
+  adaptabilitas: [
+    'Ceritakan pengalaman ketika terjadi perubahan mendadak dalam rencana kerja atau prioritas. Bagaimana Anda menyesuaikan diri?',
+    'Ceritakan situasi ketika Anda harus mempelajari keahlian atau sistem baru dalam waktu singkat. Bagaimana prosesnya?',
+    'Ceritakan pengalaman bekerja di lingkungan atau budaya kerja yang sangat berbeda dari biasanya.',
+    'Ceritakan saat rencana yang sudah Anda susun gagal total karena faktor di luar kendali. Apa yang Anda lakukan?',
+    'Ceritakan pengalaman menghadapi perubahan struktur organisasi atau kebijakan perusahaan yang berdampak langsung pada pekerjaan Anda.'
+  ],
+  inisiatif: [
+    'Ceritakan pengalaman ketika Anda mengusulkan atau melakukan sesuatu di luar tanggung jawab formal Anda untuk memperbaiki suatu proses.',
+    'Ceritakan situasi ketika Anda melihat masalah yang belum disadari orang lain, lalu Anda bertindak untuk menyelesaikannya.',
+    'Ceritakan pengalaman ketika Anda mengambil tanggung jawab tambahan tanpa diminta. Apa yang mendorong Anda melakukannya?',
+    'Ceritakan saat Anda mengusulkan ide baru yang awalnya ditolak, namun Anda tetap memperjuangkannya. Bagaimana hasilnya?',
+    'Ceritakan pengalaman belajar suatu keterampilan baru secara mandiri karena Anda melihat itu akan berguna ke depannya.'
+  ],
+  manajemen_waktu: [
+    'Ceritakan pengalaman ketika Anda harus menyelesaikan banyak pekerjaan dengan tenggat waktu yang berdekatan. Bagaimana Anda memprioritaskan?',
+    'Ceritakan situasi ketika Anda hampir melewatkan tenggat waktu penting. Apa yang terjadi dan apa yang Anda pelajari?',
+    'Ceritakan pengalaman mengatur ulang jadwal kerja karena ada permintaan mendadak yang mendesak.',
+    'Ceritakan saat Anda harus menolak atau menunda suatu permintaan karena keterbatasan waktu. Bagaimana Anda menyampaikannya?',
+    'Ceritakan pengalaman menyelesaikan proyek besar tepat waktu. Bagaimana Anda merencanakan dan memantau progresnya?'
+  ],
+  pelayanan_pelanggan: [
+    'Ceritakan pengalaman menangani pelanggan/klien yang marah atau kecewa. Bagaimana Anda menyelesaikannya?',
+    'Ceritakan situasi ketika Anda melampaui ekspektasi pelanggan/klien untuk memberikan pelayanan terbaik.',
+    'Ceritakan pengalaman ketika Anda tidak bisa memenuhi permintaan pelanggan/klien. Bagaimana Anda menyampaikan dan menanganinya?',
+    'Ceritakan saat Anda harus menyeimbangkan kebutuhan pelanggan dengan kebijakan/keterbatasan perusahaan.',
+    'Ceritakan pengalaman menerima keluhan berulang dari pelanggan yang sama. Bagaimana Anda menindaklanjutinya?'
+  ],
+  integritas: [
+    'Ceritakan situasi ketika Anda harus memilih antara mengikuti aturan atau mengambil jalan pintas untuk mengejar target. Apa yang Anda pilih?',
+    'Ceritakan pengalaman ketika Anda melihat rekan kerja melakukan sesuatu yang tidak etis. Bagaimana Anda menyikapinya?',
+    'Ceritakan saat Anda melakukan kesalahan dalam pekerjaan dan harus melaporkannya kepada atasan. Bagaimana prosesnya?',
+    'Ceritakan pengalaman ketika Anda diminta melakukan sesuatu yang bertentangan dengan nilai/prinsip Anda.',
+    'Ceritakan situasi ketika kejujuran Anda menimbulkan konsekuensi yang tidak nyaman bagi diri sendiri.'
+  ],
+  manajemen_konflik: [
+    'Ceritakan pengalaman ketika Anda berselisih pendapat dengan atasan. Bagaimana Anda menyelesaikannya?',
+    'Ceritakan situasi ketika Anda harus menengahi konflik antara dua rekan kerja atau anggota tim.',
+    'Ceritakan pengalaman ketika konflik di tim berdampak pada hasil kerja. Apa peran Anda dalam menyelesaikannya?',
+    'Ceritakan saat Anda harus tetap profesional bekerja dengan seseorang yang tidak Anda sukai secara personal.',
+    'Ceritakan pengalaman ketika Anda salah dalam suatu perselisihan. Bagaimana Anda mengakuinya dan memperbaiki hubungan tersebut?'
+  ]
+};
+
+function renderBeiQuestions(){
+  const kompetensi = document.getElementById('bei_kompetensi').value;
+  const questions = BEI_QUESTION_BANK[kompetensi] || [];
+  const container = document.getElementById('bei_questions');
+  container.innerHTML = questions.map((q, i)=>
+    '<div style="background:var(--panel-2);border-radius:var(--radius-sm);padding:12px 14px;font-size:12.5px;line-height:1.6;color:var(--ink);">' +
+      '<span style="color:var(--accent);font-weight:600;">' + (i+1) + '.</span> ' + slEscapeHtml(q) +
+    '</div>'
+  ).join('');
+}
+
+function copyBeiQuestions(){
+  const kompetensi = document.getElementById('bei_kompetensi').value;
+  const questions = BEI_QUESTION_BANK[kompetensi] || [];
+  const text = questions.map((q, i)=> (i+1) + '. ' + q).join('\n');
+  if(!text) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=> showToast('Pertanyaan disalin ke clipboard')).catch(()=> showToast('Gagal menyalin'));
+  } else {
+    showToast('Gagal menyalin');
+  }
+}
+window.addEventListener('DOMContentLoaded', renderBeiQuestions);
+
 // initial calc with example values
 calcPKWT();
 calcLemburBiasa();
@@ -1885,6 +2250,7 @@ calcLemburLibur();
 calcGajiHarian();
 calcTHR();
 calcPPh21();
+calcPPh21GrossUp();
 calcBPJS();
 calcCuti();
 calcRekap();
@@ -1892,6 +2258,10 @@ calcGajiPersen();
 calcGajiReverse();
 calcUsia();
 calcGajiBersih();
+calcTurnover();
+calcAbsensi();
+calcSkoring();
+renderBeiQuestions();
 slRenderHistory();
 </script>
 </body>
