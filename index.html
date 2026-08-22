@@ -367,6 +367,7 @@
       <button class="side-link" data-tab="bei" title="Generator Pertanyaan BEI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8M8 13h5"/></svg><span class="link-label">Pertanyaan BEI</span></button>
       <div class="sidebar-group-label">Utilitas</div>
       <button class="side-link" data-tab="shortlink" title="Shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span class="link-label">Shortlink</span></button>
+      <button class="side-link" data-tab="img2pdf" title="Foto/Berkas ke PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="9.8" cy="12.3" r="1.2"/><path d="M8 17l2-2.3 1.8 1.8L14.5 14 17 17"/></svg><span class="link-label">Foto/Berkas ke PDF</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -903,6 +904,53 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <div class="section-label">Riwayat (Maks. 5 Terakhir di Perangkat Ini)</div>
     <div id="sl_history"></div>
     <div class="note">Diproses lewat s.id agar mendukung custom back-half; kalau gagal atau custom back-half sudah dipakai orang lain, otomatis lanjut ke layanan cadangan (CleanURI, is.gd, TinyURL) tanpa custom back-half. Riwayat hanya tersimpan lokal di browser/perangkat ini (localStorage), tidak dikirim atau disimpan oleh aplikasi ini ke server manapun selain langsung ke penyedia yang dipilih. Contoh pemakaian: pendekkan tautan portal ini sendiri di <strong>https://albarnation.github.io/myhrsystem/</strong> supaya lebih mudah dibagikan.</div>
+  </div>
+
+  <!-- ============ FOTO/BERKAS KE PDF ============ -->
+  <div class="panel" id="panel-img2pdf">
+    <div class="panel-head"><h2>Ubah Foto/Berkas ke PDF</h2></div>
+    <div class="desc">Gabungkan beberapa foto/gambar (KTP, ijazah, kontrak yang difoto, dsb.) menjadi satu file PDF rapi — praktis untuk melengkapi berkas lamaran atau personalia karyawan. Foto diproses langsung di browser (tidak diunggah ke server manapun); hanya butuh koneksi internet sekali di awal untuk memuat komponen pembuat PDF.</div>
+
+    <div class="section-label">Unggah Foto/Gambar</div>
+    <div id="i2p_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      🖼️ Klik untuk pilih satu/beberapa gambar, seret file ke sini, atau tekan <b>Ctrl+V</b> untuk tempel
+      <input type="file" id="i2p_file_input" accept="image/*" multiple style="display:none;">
+    </div>
+    <div id="i2p_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <span>Urutan Halaman (<span id="i2p_count">0 halaman</span>)</span>
+      <button type="button" class="btn-ghost" style="margin:0;" onclick="clearImg2Pdf()">Kosongkan</button>
+    </div>
+    <div id="i2p_list"></div>
+
+    <div class="section-label">Pengaturan PDF</div>
+    <div class="field-row"><label>Ukuran Halaman</label>
+      <select id="i2p_pagesize">
+        <option value="a4" selected>A4</option>
+        <option value="letter">Letter</option>
+        <option value="auto">Menyesuaikan Ukuran Foto</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Orientasi</label>
+      <select id="i2p_orientation">
+        <option value="auto" selected>Otomatis (ikuti bentuk foto)</option>
+        <option value="portrait">Potret</option>
+        <option value="landscape">Lanskap</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Margin</label>
+      <select id="i2p_margin">
+        <option value="small" selected>Kecil</option>
+        <option value="medium">Sedang</option>
+        <option value="none">Tanpa Margin</option>
+      </select>
+    </div>
+    <div class="field-row wide"><label>Nama File Output</label><input type="text" id="i2p_filename" placeholder="dokumen" value="dokumen"></div>
+
+    <button class="btn-primary" onclick="generateImg2Pdf()">Buat &amp; Unduh PDF</button>
+
+    <div class="note">Mendukung format JPG, PNG, WEBP, GIF, dan BMP — setiap gambar otomatis menjadi satu halaman sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dengan ✕). Latar transparan pada PNG otomatis diberi latar putih. Komponen pembuat PDF (jsPDF) dimuat sekali dari internet lalu tersimpan di cache browser — setelah itu bisa dipakai ulang tanpa internet selama masih di perangkat/browser yang sama; proses penggabungan gambarnya sendiri berjalan sepenuhnya di perangkat ini. Untuk berkas dokumen kantor (Word/Excel) yang perlu dijadikan PDF, gunakan fitur "Save as PDF"/"Print to PDF" bawaan aplikasi tersebut.</div>
   </div>
 
   <!-- ============ TURNOVER RATE ============ -->
@@ -2076,6 +2124,214 @@ function copyShortlink(){
 }
 
 window.addEventListener('DOMContentLoaded', slRenderHistory);
+
+// ---------- FOTO/BERKAS KE PDF ----------
+let jsPdfLoadPromise = null;
+function loadJsPDF(){
+  if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+  if(jsPdfLoadPromise) return jsPdfLoadPromise;
+  jsPdfLoadPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = () => resolve();
+    s.onerror = () => { jsPdfLoadPromise = null; reject(new Error('Gagal memuat komponen pembuat PDF — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ini.')); };
+    document.head.appendChild(s);
+  });
+  return jsPdfLoadPromise;
+}
+
+let img2pdfFiles = [];
+let img2pdfIdCounter = 0;
+
+function setImg2PdfStatus(msg, isError){
+  const el = document.getElementById('i2p_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+function addImg2PdfFiles(fileList){
+  const arr = Array.from(fileList).filter(f=> f.type && f.type.startsWith('image/'));
+  if(arr.length === 0){ setImg2PdfStatus('Tidak ada file gambar yang valid dipilih (format harus JPG/PNG/WEBP/GIF/BMP).', true); return; }
+  arr.forEach(f=>{
+    img2pdfFiles.push({ id: 'f' + (img2pdfIdCounter++), file: f, previewUrl: URL.createObjectURL(f) });
+  });
+  renderImg2PdfList();
+  setImg2PdfStatus(img2pdfFiles.length + ' gambar siap diproses. Atur urutan halaman lalu klik "Buat & Unduh PDF".', false);
+}
+
+function renderImg2PdfList(){
+  const wrap = document.getElementById('i2p_list');
+  const countEl = document.getElementById('i2p_count');
+  if(!wrap) return;
+  if(img2pdfFiles.length === 0){
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--ink-faint);padding:8px 2px;">Belum ada gambar dipilih.</div>';
+    if(countEl) countEl.textContent = '0 halaman';
+    return;
+  }
+  wrap.innerHTML = img2pdfFiles.map((it, idx)=>{
+    const sizeKb = (it.file.size / 1024).toFixed(0);
+    return '<div style="display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px;">'
+      + '<span style="font-family:\'Roboto Mono\',monospace;font-size:11px;color:var(--ink-faint);width:18px;flex-shrink:0;">' + (idx + 1) + '.</span>'
+      + '<img src="' + it.previewUrl + '" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid var(--line);">'
+      + '<div style="flex:1;min-width:0;overflow:hidden;"><div style="font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + slEscapeHtml(it.file.name) + '</div><div style="font-size:10.5px;color:var(--ink-faint);">' + sizeKb + ' KB</div></div>'
+      + '<div style="display:flex;gap:4px;flex-shrink:0;">'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Naik" onclick="moveImg2Pdf(\'' + it.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Turun" onclick="moveImg2Pdf(\'' + it.id + '\',1)"' + (idx === img2pdfFiles.length - 1 ? ' disabled' : '') + '>↓</button>'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;color:var(--danger);" title="Hapus" onclick="removeImg2Pdf(\'' + it.id + '\')">✕</button>'
+      + '</div></div>';
+  }).join('');
+  if(countEl) countEl.textContent = img2pdfFiles.length + ' halaman';
+}
+
+function moveImg2Pdf(id, dir){
+  const idx = img2pdfFiles.findIndex(it=> it.id === id);
+  if(idx < 0) return;
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= img2pdfFiles.length) return;
+  const tmp = img2pdfFiles[idx];
+  img2pdfFiles[idx] = img2pdfFiles[newIdx];
+  img2pdfFiles[newIdx] = tmp;
+  renderImg2PdfList();
+}
+
+function removeImg2Pdf(id){
+  const it = img2pdfFiles.find(x=> x.id === id);
+  if(it) URL.revokeObjectURL(it.previewUrl);
+  img2pdfFiles = img2pdfFiles.filter(x=> x.id !== id);
+  renderImg2PdfList();
+}
+
+function clearImg2Pdf(){
+  img2pdfFiles.forEach(it=> URL.revokeObjectURL(it.previewUrl));
+  img2pdfFiles = [];
+  renderImg2PdfList();
+  setImg2PdfStatus('', false);
+}
+
+function loadImageAsJpegDataUrl(file){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      URL.revokeObjectURL(url);
+      resolve({ dataUrl: dataUrl, width: canvas.width, height: canvas.height });
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('Gagal memuat gambar: ' + file.name)); };
+    img.src = url;
+  });
+}
+
+async function generateImg2Pdf(){
+  if(img2pdfFiles.length === 0){ setImg2PdfStatus('Belum ada foto/gambar yang dipilih.', true); return; }
+
+  setImg2PdfStatus('Memuat komponen pembuat PDF (butuh internet sekali di awal)...', false);
+  try{
+    await loadJsPDF();
+  }catch(err){
+    setImg2PdfStatus(err.message, true);
+    return;
+  }
+
+  const pageSizeOpt = document.getElementById('i2p_pagesize').value;
+  const orientationOpt = document.getElementById('i2p_orientation').value;
+  const marginOpt = document.getElementById('i2p_margin').value;
+  const marginMm = marginOpt === 'none' ? 0 : (marginOpt === 'small' ? 8 : 16);
+  let filename = (document.getElementById('i2p_filename').value || 'dokumen').trim();
+  filename = filename.replace(/\.pdf$/i, '') || 'dokumen';
+
+  try{
+    const { jsPDF } = window.jspdf;
+    let doc = null;
+    for(let i = 0; i < img2pdfFiles.length; i++){
+      setImg2PdfStatus('Memproses gambar ' + (i + 1) + ' dari ' + img2pdfFiles.length + '...', false);
+      const item = img2pdfFiles[i];
+      const { dataUrl, width, height } = await loadImageAsJpegDataUrl(item.file);
+      const isLandscapeImg = width > height;
+      const orientation = orientationOpt === 'auto' ? (isLandscapeImg ? 'landscape' : 'portrait') : orientationOpt;
+
+      let pageWmm, pageHmm, formatArg;
+      if(pageSizeOpt === 'auto'){
+        const wmm = width * 25.4 / 96;
+        const hmm = height * 25.4 / 96;
+        pageWmm = orientation === 'landscape' ? Math.max(wmm, hmm) : Math.min(wmm, hmm);
+        pageHmm = orientation === 'landscape' ? Math.min(wmm, hmm) : Math.max(wmm, hmm);
+        formatArg = [pageWmm, pageHmm];
+      } else {
+        const base = pageSizeOpt === 'letter' ? { w: 215.9, h: 279.4 } : { w: 210, h: 297 };
+        if(orientation === 'landscape'){ pageWmm = Math.max(base.w, base.h); pageHmm = Math.min(base.w, base.h); }
+        else { pageWmm = Math.min(base.w, base.h); pageHmm = Math.max(base.w, base.h); }
+        formatArg = pageSizeOpt;
+      }
+
+      if(!doc){
+        doc = new jsPDF({ orientation: orientation, unit: 'mm', format: formatArg, compress: true });
+      } else {
+        doc.addPage(formatArg, orientation);
+      }
+
+      const availW = Math.max(pageWmm - marginMm * 2, 1);
+      const availH = Math.max(pageHmm - marginMm * 2, 1);
+      const imgRatio = width / height;
+      let drawW = availW, drawH = availW / imgRatio;
+      if(drawH > availH){ drawH = availH; drawW = availH * imgRatio; }
+      const offsetX = (pageWmm - drawW) / 2;
+      const offsetY = (pageHmm - drawH) / 2;
+      doc.addImage(dataUrl, 'JPEG', offsetX, offsetY, drawW, drawH, undefined, 'MEDIUM');
+    }
+    doc.save(filename + '.pdf');
+    setImg2PdfStatus('Selesai — PDF "' + filename + '.pdf" berhasil dibuat dan diunduh (' + img2pdfFiles.length + ' halaman).', false);
+  }catch(err){
+    setImg2PdfStatus('Gagal membuat PDF: ' + err.message, true);
+  }
+}
+
+(function setupImg2PdfDropzone(){
+  const dz = document.getElementById('i2p_dropzone');
+  const fileInput = document.getElementById('i2p_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files.length) addImg2PdfFiles(e.target.files);
+    fileInput.value = '';
+  });
+
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files.length) addImg2PdfFiles(e.dataTransfer.files);
+  });
+
+  function handlePasteEvent(e){
+    const panel = document.getElementById('panel-img2pdf');
+    if(!panel || !panel.classList.contains('active')) return;
+    const items = (e.clipboardData || window.clipboardData) ? (e.clipboardData || window.clipboardData).items : null;
+    if(!items) return;
+    const files = [];
+    for(const item of items){
+      if(item.type && item.type.startsWith('image/')){
+        const f = item.getAsFile();
+        if(f) files.push(f);
+      }
+    }
+    if(files.length){ e.preventDefault(); addImg2PdfFiles(files); }
+  }
+  dz.addEventListener('paste', handlePasteEvent);
+  document.addEventListener('paste', handlePasteEvent);
+})();
+renderImg2PdfList();
 
 // ---------- TURNOVER RATE ----------
 function calcTurnover(){
