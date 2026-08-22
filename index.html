@@ -372,6 +372,7 @@
       <button class="side-link" data-tab="splitpdf" title="Potong PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="18" r="2.3"/><path d="M20 4 7.5 13M8 11l12 9M14 14.5 20 20"/></svg><span class="link-label">Potong PDF</span></button>
       <button class="side-link" data-tab="mergepdf" title="Gabungkan PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h4l3 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M12 3v3h3"/><path d="M4 9h3v11a1 1 0 0 0 1 1h9"/></svg><span class="link-label">Gabungkan PDF</span></button>
       <button class="side-link" data-tab="qrcode" title="Buat QR Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3M19 14v3h2M14 19h3v2M19 19v2h2"/></svg><span class="link-label">Buat QR Code</span></button>
+      <button class="side-link" data-tab="pdf2word" title="PDF ke Ms Word"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h6l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13 3v5h5"/><path d="M9 17V12l1.5 3L12 12v5M14 12v5h1.6a1.4 1.4 0 0 0 0-5H14z"/></svg><span class="link-label">PDF ke Ms Word</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -1082,6 +1083,33 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <button type="button" class="btn-ghost" id="qr_download_btn" style="display:none;margin-top:10px;" onclick="downloadQrCode()">Unduh PNG</button>
 
     <div class="note">QR Code dibuat sepenuhnya di perangkat ini (tidak lewat server/API manapun), jadi hasilnya bisa dipakai selamanya. Beda dengan fitur Shortlink di menu ini yang bergantung pada layanan pemendek URL pihak ketiga, QR Code ini murni membungkus teks/tautan yang Anda masukkan apa adanya — jangan persingkat dulu tautannya lewat Shortlink kalau ingin QR paling tahan lama (biar tidak bergantung dua layanan sekaligus). Semakin panjang teks/tautan dan semakin tinggi level koreksi kesalahan, semakin rapat pola QR-nya dan makin butuh ukuran cetak lebih besar agar tetap mudah dipindai. Komponen pembuat QR (qrcodejs) dimuat sekali dari internet lalu tersimpan di cache browser.</div>
+  </div>
+
+  <!-- ============ PDF KE MS WORD ============ -->
+  <div class="panel" id="panel-pdf2word">
+    <div class="panel-head"><h2>PDF ke Ms Word</h2></div>
+    <div class="desc">Ubah isi PDF menjadi dokumen Word (.docx) yang bisa diedit. Fitur ini mengekstrak <strong>teksnya saja</strong> per baris & per halaman — tata letak asli seperti kolom, tabel, header/footer, dan gambar <strong>tidak</strong> dipertahankan (hasilnya paragraf teks polos yang rapi per halaman). Paling cocok untuk PDF berbasis teks (bukan hasil scan); untuk PDF hasil scan/foto, aktifkan opsi OCR di bawah.</div>
+
+    <div class="section-label">Unggah File PDF</div>
+    <div id="pw_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      📄➜📝 Klik untuk pilih file PDF, atau seret file ke sini (satu file per proses)
+      <input type="file" id="pw_file_input" accept="application/pdf,.pdf" style="display:none;">
+    </div>
+    <div id="pw_fileinfo" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+    <div id="pw_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div class="section-label">Pengaturan</div>
+    <div class="field-row wide" style="align-items:center;">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;">
+        <input type="checkbox" id="pw_use_ocr" style="width:auto;">
+        Gunakan OCR otomatis untuk halaman hasil scan/foto (tanpa teks) — proses lebih lambat
+      </label>
+    </div>
+    <div class="field-row wide"><label>Nama File Output</label><input type="text" id="pw_filename" placeholder="dokumen-Word" value=""></div>
+
+    <button class="btn-primary" id="pw_btn" onclick="convertPdfToWord()">Konversi &amp; Unduh Word</button>
+
+    <div class="note">Berjalan sepenuhnya di perangkat ini — komponen pembaca PDF (PDF.js), penyusun berkas Word (JSZip), dan OCR (Tesseract.js, hanya dimuat kalau opsi OCR dicentang) diambil sekali dari internet lalu tersimpan di cache browser; file tidak diunggah ke server manapun. Hasil berupa .docx asli yang bisa langsung dibuka & diedit di Microsoft Word/WPS/Google Docs. Karena hanya teks yang diekstrak, periksa kembali hasilnya sebelum dipakai resmi — terutama untuk PDF dengan tabel atau tata letak kompleks. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ TURNOVER RATE ============ -->
@@ -3073,6 +3101,242 @@ function downloadQrCode(){
     downloadBlob(blob, 'qrcode.png');
   }, 'image/png');
 }
+
+// ---------- PDF KE MS WORD ----------
+let jsZipLoadPromise = null;
+function loadJsZip(){
+  if(window.JSZip) return Promise.resolve();
+  if(jsZipLoadPromise) return jsZipLoadPromise;
+  jsZipLoadPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = () => resolve();
+    s.onerror = () => { jsZipLoadPromise = null; reject(new Error('Gagal memuat komponen penyusun berkas Word — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ini.')); };
+    document.head.appendChild(s);
+  });
+  return jsZipLoadPromise;
+}
+
+let pw2SelectedFile = null;
+
+function setPwStatus(msg, isError){
+  const el = document.getElementById('pw_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+function pwEscapeXml(str){
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function pwSetFile(file){
+  if(!file) return;
+  const isPdf = (file.type && file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+  if(!isPdf){
+    setPwStatus('File yang dipilih bukan PDF. Pilih satu file berformat .pdf.', true);
+    return;
+  }
+  pw2SelectedFile = file;
+  const info = document.getElementById('pw_fileinfo');
+  info.style.display = '';
+  info.textContent = '📄 ' + file.name + ' — ' + formatBytes(file.size);
+  const baseName = (file.name || 'dokumen').replace(/\.pdf$/i, '').trim() || 'dokumen';
+  document.getElementById('pw_filename').value = baseName + '-Word';
+  setPwStatus('File siap. Klik "Konversi & Unduh Word" untuk memproses.', false);
+}
+
+// Kelompokkan item teks pdf.js per baris berdasarkan koordinat Y, lalu urutkan kiri ke kanan.
+function pwExtractLinesFromTextContent(textContent){
+  const items = (textContent.items || []).filter(it=> it.str != null);
+  if(items.length === 0) return [];
+  const rows = items.map(it=>({ x: it.transform[4], y: it.transform[5], str: it.str }));
+  rows.sort((a, b)=> (b.y - a.y) || (a.x - b.x));
+
+  const lines = [];
+  let currentLine = [];
+  let currentY = null;
+  const yTolerance = 2.5;
+
+  rows.forEach(r=>{
+    if(currentY === null || Math.abs(r.y - currentY) <= yTolerance){
+      currentLine.push(r);
+      currentY = currentY === null ? r.y : currentY;
+    } else {
+      lines.push(currentLine);
+      currentLine = [r];
+      currentY = r.y;
+    }
+  });
+  if(currentLine.length) lines.push(currentLine);
+
+  return lines.map(line=>{
+    line.sort((a, b)=> a.x - b.x);
+    return line.map(it=> it.str).join(' ').replace(/\s+/g, ' ').trim();
+  });
+}
+
+async function pwOcrPageToLines(page){
+  const viewport = page.getViewport({ scale: 2 });
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(viewport.width));
+  canvas.height = Math.max(1, Math.round(viewport.height));
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+  const { data: { text } } = await Tesseract.recognize(canvas, 'ind', {
+    logger: (info)=>{
+      if(info.status === 'recognizing text' && info.progress != null){
+        setPwStatus('OCR halaman berjalan... ' + Math.round(info.progress * 100) + '%', false);
+      }
+    }
+  });
+  return text.split(/\r?\n/).map(l=> l.trim()).filter(l=> l.length > 0);
+}
+
+async function pwBuildDocxBlob(pagesLines){
+  await loadJsZip();
+  const zip = new window.JSZip();
+
+  zip.file('[Content_Types].xml',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+    '</Types>');
+
+  zip.folder('_rels').file('.rels',
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+    '</Relationships>');
+
+  const bodyParts = [];
+  pagesLines.forEach((lines, pageIdx)=>{
+    if(pageIdx > 0){
+      bodyParts.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
+    }
+    if(lines.length === 0){
+      bodyParts.push('<w:p/>');
+    } else {
+      lines.forEach(line=>{
+        if(!line){
+          bodyParts.push('<w:p/>');
+        } else {
+          bodyParts.push('<w:p><w:r><w:t xml:space="preserve">' + pwEscapeXml(line) + '</w:t></w:r></w:p>');
+        }
+      });
+    }
+  });
+
+  const documentXml =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    '<w:body>' + bodyParts.join('') +
+    '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>' +
+    '</w:body></w:document>';
+
+  zip.folder('word').file('document.xml', documentXml);
+
+  const blob = await zip.generateAsync({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+  return blob;
+}
+
+async function convertPdfToWord(){
+  if(!pw2SelectedFile){ setPwStatus('Belum ada file PDF yang dipilih.', true); return; }
+  const useOcr = document.getElementById('pw_use_ocr').checked;
+  let filename = (document.getElementById('pw_filename').value || 'dokumen-Word').trim();
+  filename = filename.replace(/\.docx$/i, '') || 'dokumen-Word';
+
+  const btn = document.getElementById('pw_btn');
+  if(btn) btn.disabled = true;
+
+  setPwStatus('Memuat komponen pembaca PDF (butuh internet sekali di awal)...', false);
+  try{
+    await loadPdfJs();
+    if(useOcr) await loadTesseract();
+  }catch(err){
+    setPwStatus(err.message, true);
+    if(btn) btn.disabled = false;
+    return;
+  }
+
+  try{
+    const arrayBuffer = await pw2SelectedFile.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const numPages = pdf.numPages;
+    const pagesLines = [];
+    let ocrPageCount = 0;
+
+    for(let pageNum = 1; pageNum <= numPages; pageNum++){
+      setPwStatus('Membaca teks halaman ' + pageNum + ' dari ' + numPages + '...', false);
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      let lines = pwExtractLinesFromTextContent(textContent);
+      const totalChars = lines.join('').length;
+
+      if(totalChars < 5 && useOcr){
+        setPwStatus('Halaman ' + pageNum + ' tidak berisi teks — menjalankan OCR...', false);
+        ocrPageCount++;
+        lines = await pwOcrPageToLines(page);
+      }
+
+      pagesLines.push(lines);
+      page.cleanup && page.cleanup();
+    }
+
+    const totalExtractedChars = pagesLines.reduce((sum, lines)=> sum + lines.join('').length, 0);
+    if(totalExtractedChars === 0){
+      setPwStatus('Tidak ada teks yang berhasil diekstrak dari PDF ini. Kalau ini PDF hasil scan/foto, centang dulu opsi OCR lalu coba lagi.', true);
+      if(btn) btn.disabled = false;
+      return;
+    }
+
+    setPwStatus('Menyusun berkas Word...', false);
+    const blob = await pwBuildDocxBlob(pagesLines);
+    downloadBlob(blob, filename + '.docx');
+
+    let doneMsg = 'Selesai — "' + filename + '.docx" berhasil dibuat dan diunduh (' + numPages + ' halaman).';
+    if(ocrPageCount > 0) doneMsg += ' ' + ocrPageCount + ' halaman diproses lewat OCR.';
+    setPwStatus(doneMsg, false);
+  }catch(err){
+    setPwStatus('Gagal mengonversi PDF: ' + err.message, true);
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+(function setupPwDropzone(){
+  const dz = document.getElementById('pw_dropzone');
+  const fileInput = document.getElementById('pw_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files[0]) pwSetFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) pwSetFile(e.dataTransfer.files[0]);
+  });
+})();
 
 // ---------- TURNOVER RATE ----------
 function calcTurnover(){
