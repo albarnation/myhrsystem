@@ -370,6 +370,8 @@
       <button class="side-link" data-tab="img2pdf" title="Foto/Berkas ke PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="9.8" cy="12.3" r="1.2"/><path d="M8 17l2-2.3 1.8 1.8L14.5 14 17 17"/></svg><span class="link-label">Foto/Berkas ke PDF</span></button>
       <button class="side-link" data-tab="compresspdf" title="Kompres PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 17l1.6-4M12 17l0-4M15 17l-1.6-4M8.5 13h7"/></svg><span class="link-label">Kompres PDF</span></button>
       <button class="side-link" data-tab="splitpdf" title="Potong PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="18" r="2.3"/><path d="M20 4 7.5 13M8 11l12 9M14 14.5 20 20"/></svg><span class="link-label">Potong PDF</span></button>
+      <button class="side-link" data-tab="mergepdf" title="Gabungkan PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h4l3 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M12 3v3h3"/><path d="M4 9h3v11a1 1 0 0 0 1 1h9"/></svg><span class="link-label">Gabungkan PDF</span></button>
+      <button class="side-link" data-tab="qrcode" title="Buat QR Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3M19 14v3h2M14 19h3v2M19 19v2h2"/></svg><span class="link-label">Buat QR Code</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -1017,6 +1019,69 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <button class="btn-primary" id="ps_btn" onclick="generateSplitPdf()">Buat &amp; Unduh PDF</button>
 
     <div class="note">Klik badge nomor pada tiap halaman untuk membuang/mengembalikannya (halaman yang dibuang ditandai pudar dan bergaris merah, tetap dihitung nomor aslinya untuk referensi). Gunakan tombol ↑/↓ pada tiap kartu untuk mengubah urutan halaman, termasuk menyelipkan halaman dari PDF tambahan di antara halaman PDF utama. Komponen pembaca PDF (PDF.js) dan penyusun PDF (pdf-lib) dimuat sekali dari internet lalu tersimpan di cache browser; proses penggabungan halamannya sendiri berjalan sepenuhnya di perangkat ini, tidak ada file yang diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
+  </div>
+
+  <!-- ============ GABUNGKAN FILE PDF ============ -->
+  <div class="panel" id="panel-mergepdf">
+    <div class="panel-head"><h2>Gabungkan File PDF</h2></div>
+    <div class="desc">Satukan beberapa file PDF terpisah (mis. surat lamaran, ijazah, KTP yang masing-masing sudah berupa PDF) menjadi satu file PDF utuh sesuai urutan yang diinginkan — praktis untuk melengkapi berkas personalia/lamaran. Semua halaman disalin langsung tanpa digambar ulang, jadi kualitas dan teks yang bisa diseleksi tetap terjaga.</div>
+
+    <div class="section-label">Unggah File PDF (Bisa Beberapa Sekaligus)</div>
+    <div id="mg_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      📚 Klik untuk pilih beberapa file PDF, atau seret file ke sini
+      <input type="file" id="mg_file_input" accept="application/pdf,.pdf" multiple style="display:none;">
+    </div>
+    <div id="mg_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <span>Urutan Berkas (<span id="mg_count">0 berkas</span>)</span>
+      <button type="button" class="btn-ghost" style="margin:0;" onclick="mgClearAll()">Kosongkan</button>
+    </div>
+    <div id="mg_list"></div>
+
+    <div class="section-label" style="margin-top:16px;">Pengaturan Output</div>
+    <div class="field-row wide"><label>Nama File Output</label><input type="text" id="mg_filename" placeholder="dokumen-gabungan" value="dokumen-gabungan"></div>
+
+    <button class="btn-primary" id="mg_btn" onclick="generateMergedPdf()">Gabungkan &amp; Unduh PDF</button>
+
+    <div class="note">Seluruh halaman tiap file digabung apa adanya sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dari daftar dengan ✕) — kalau perlu membuang halaman tertentu dari salah satu file sebelum digabung, gunakan dulu fitur "Potong PDF". Komponen penyusun PDF (pdf-lib) dimuat sekali dari internet lalu tersimpan di cache browser; proses penggabungannya sendiri berjalan sepenuhnya di perangkat ini, tidak ada file yang diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
+  </div>
+
+  <!-- ============ BUAT QR CODE ============ -->
+  <div class="panel" id="panel-qrcode">
+    <div class="panel-head"><h2>Buat QR Code</h2></div>
+    <div class="desc">Buat QR Code dari teks, tautan (URL), nomor WhatsApp, atau info lain — dibuat langsung di browser tanpa API pihak ketiga, jadi hasil gambarnya bisa dipakai selamanya, tidak akan kedaluwarsa atau berhenti berfungsi tiba-tiba. Catatan: kalau isinya berupa tautan, tautan tujuannya sendiri yang harus tetap aktif — QR Code hanya membungkus teks/tautan itu apa adanya, bukan menyimpan salinan halaman webnya.</div>
+
+    <div class="section-label">Input</div>
+    <div class="field-row wide"><label>Teks / Tautan (URL)</label><textarea id="qr_text" rows="3" style="width:100%;box-sizing:border-box;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px;font-family:inherit;font-size:13px;line-height:1.5;" placeholder="https://albarnation.github.io/myhrsystem/">https://albarnation.github.io/myhrsystem/</textarea></div>
+
+    <div class="field-row"><label>Ukuran</label>
+      <select id="qr_size">
+        <option value="200">200 × 200 px</option>
+        <option value="300" selected>300 × 300 px</option>
+        <option value="500">500 × 500 px</option>
+        <option value="800">800 × 800 px</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Level Koreksi Kesalahan</label>
+      <select id="qr_level">
+        <option value="L">Rendah (L) — muat teks lebih panjang</option>
+        <option value="M" selected>Sedang (M) — disarankan</option>
+        <option value="Q">Tinggi (Q)</option>
+        <option value="H">Tertinggi (H) — tahan noda/lipatan saat dicetak</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Warna Kode</label><input type="color" id="qr_colordark" value="#000000" style="width:60px;height:34px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);cursor:pointer;"></div>
+    <div class="field-row"><label>Warna Latar</label><input type="color" id="qr_colorlight" value="#ffffff" style="width:60px;height:34px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);cursor:pointer;"></div>
+
+    <button class="btn-primary" onclick="generateQrCode()">Buat QR Code</button>
+
+    <div class="section-label">Hasil</div>
+    <div id="qr_status" style="font-size:12px;color:var(--ink-dim);margin-bottom:8px;display:none;"></div>
+    <div id="qr_preview" style="display:flex;justify-content:center;padding:16px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);min-height:80px;align-items:center;"></div>
+    <button type="button" class="btn-ghost" id="qr_download_btn" style="display:none;margin-top:10px;" onclick="downloadQrCode()">Unduh PNG</button>
+
+    <div class="note">QR Code dibuat sepenuhnya di perangkat ini (tidak lewat server/API manapun), jadi hasilnya bisa dipakai selamanya. Beda dengan fitur Shortlink di menu ini yang bergantung pada layanan pemendek URL pihak ketiga, QR Code ini murni membungkus teks/tautan yang Anda masukkan apa adanya — jangan persingkat dulu tautannya lewat Shortlink kalau ingin QR paling tahan lama (biar tidak bergantung dua layanan sekaligus). Semakin panjang teks/tautan dan semakin tinggi level koreksi kesalahan, semakin rapat pola QR-nya dan makin butuh ukuran cetak lebih besar agar tetap mudah dipindai. Komponen pembuat QR (qrcodejs) dimuat sekali dari internet lalu tersimpan di cache browser.</div>
   </div>
 
   <!-- ============ TURNOVER RATE ============ -->
@@ -2784,6 +2849,230 @@ async function generateSplitPdf(){
   }
 })();
 psRenderGrid();
+
+// ---------- GABUNGKAN FILE PDF ----------
+let mgFiles = [];    // { id, file, arrayBuffer, pageCount }
+let mgIdCounter = 0;
+
+function setMgStatus(msg, isError){
+  const el = document.getElementById('mg_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+function mgRenderList(){
+  const wrap = document.getElementById('mg_list');
+  const countEl = document.getElementById('mg_count');
+  if(!wrap) return;
+  if(countEl) countEl.textContent = mgFiles.length + ' berkas';
+  if(mgFiles.length === 0){
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--ink-faint);padding:8px 2px;">Belum ada file PDF dipilih.</div>';
+    return;
+  }
+  wrap.innerHTML = mgFiles.map((it, idx)=>{
+    const sizeKb = (it.file.size / 1024).toFixed(0);
+    const pageInfo = it.pageCount != null ? (it.pageCount + ' halaman · ' + sizeKb + ' KB') : ('Membaca...');
+    return '<div style="display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px;">'
+      + '<span style="font-family:\'Roboto Mono\',monospace;font-size:11px;color:var(--ink-faint);width:18px;flex-shrink:0;">' + (idx + 1) + '.</span>'
+      + '<div style="width:32px;height:38px;flex-shrink:0;border-radius:4px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;">📄</div>'
+      + '<div style="flex:1;min-width:0;overflow:hidden;"><div style="font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + slEscapeHtml(it.file.name) + '</div><div style="font-size:10.5px;color:var(--ink-faint);">' + pageInfo + '</div></div>'
+      + '<div style="display:flex;gap:4px;flex-shrink:0;">'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Naik" onclick="mgMove(\'' + it.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Turun" onclick="mgMove(\'' + it.id + '\',1)"' + (idx === mgFiles.length - 1 ? ' disabled' : '') + '>↓</button>'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;color:var(--danger);" title="Hapus" onclick="mgRemove(\'' + it.id + '\')">✕</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function mgMove(id, dir){
+  const idx = mgFiles.findIndex(it=> it.id === id);
+  if(idx < 0) return;
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= mgFiles.length) return;
+  const tmp = mgFiles[idx];
+  mgFiles[idx] = mgFiles[newIdx];
+  mgFiles[newIdx] = tmp;
+  mgRenderList();
+}
+
+function mgRemove(id){
+  mgFiles = mgFiles.filter(x=> x.id !== id);
+  mgRenderList();
+}
+
+function mgClearAll(){
+  mgFiles = [];
+  mgRenderList();
+  setMgStatus('', false);
+}
+
+async function mgAddFiles(fileList){
+  const arr = Array.from(fileList).filter(f=> (f.type && f.type === 'application/pdf') || /\.pdf$/i.test(f.name || ''));
+  if(arr.length === 0){ setMgStatus('Tidak ada file PDF yang valid dipilih.', true); return; }
+
+  setMgStatus('Memuat komponen penyusun PDF (butuh internet sekali di awal)...', false);
+  try{
+    await loadPdfLib();
+  }catch(err){
+    setMgStatus(err.message, true);
+    return;
+  }
+
+  const { PDFDocument } = window.PDFLib;
+  for(const f of arr){
+    const entry = { id: 'm' + (mgIdCounter++), file: f, arrayBuffer: null, pageCount: null };
+    mgFiles.push(entry);
+    mgRenderList();
+    try{
+      const arrayBuffer = await f.arrayBuffer();
+      const doc = await PDFDocument.load(arrayBuffer.slice(0));
+      entry.arrayBuffer = arrayBuffer;
+      entry.pageCount = doc.getPageCount();
+    }catch(err){
+      entry.pageCount = 0;
+      setMgStatus('"' + f.name + '" gagal dibaca (mungkin terkunci password/rusak) — sebaiknya dihapus dari daftar.', true);
+    }
+    mgRenderList();
+  }
+  if(!document.getElementById('mg_filename').value){
+    document.getElementById('mg_filename').value = 'dokumen-gabungan';
+  }
+  setMgStatus(mgFiles.length + ' berkas siap. Atur urutan lalu klik "Gabungkan & Unduh PDF".', false);
+}
+
+async function generateMergedPdf(){
+  const validFiles = mgFiles.filter(f=> f.arrayBuffer && f.pageCount);
+  if(validFiles.length === 0){ setMgStatus('Belum ada file PDF yang valid untuk digabungkan.', true); return; }
+
+  let filename = (document.getElementById('mg_filename').value || 'dokumen-gabungan').trim();
+  filename = filename.replace(/\.pdf$/i, '') || 'dokumen-gabungan';
+
+  const btn = document.getElementById('mg_btn');
+  if(btn) btn.disabled = true;
+
+  setMgStatus('Memuat komponen penyusun PDF (butuh internet sekali di awal)...', false);
+  try{
+    await loadPdfLib();
+  }catch(err){
+    setMgStatus(err.message, true);
+    if(btn) btn.disabled = false;
+    return;
+  }
+
+  try{
+    const { PDFDocument } = window.PDFLib;
+    const outDoc = await PDFDocument.create();
+    for(let i = 0; i < mgFiles.length; i++){
+      const entry = mgFiles[i];
+      if(!entry.arrayBuffer || !entry.pageCount) continue;
+      setMgStatus('Menggabungkan berkas ' + (i + 1) + ' dari ' + mgFiles.length + ' ("' + entry.file.name + '")...', false);
+      const srcDoc = await PDFDocument.load(entry.arrayBuffer.slice(0));
+      const copiedPages = await outDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+      copiedPages.forEach(p=> outDoc.addPage(p));
+    }
+    const bytes = await outDoc.save();
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    downloadBlob(blob, filename + '.pdf');
+    setMgStatus('Selesai — PDF "' + filename + '.pdf" berhasil digabungkan dan diunduh (' + outDoc.getPageCount() + ' halaman dari ' + validFiles.length + ' berkas).', false);
+  }catch(err){
+    setMgStatus('Gagal menggabungkan PDF: ' + err.message, true);
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+(function setupMgDropzone(){
+  const dz = document.getElementById('mg_dropzone');
+  const fileInput = document.getElementById('mg_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files.length) mgAddFiles(e.target.files);
+    fileInput.value = '';
+  });
+
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files.length) mgAddFiles(e.dataTransfer.files);
+  });
+})();
+mgRenderList();
+
+// ---------- BUAT QR CODE ----------
+let qrLoadPromise = null;
+function loadQrCodeLib(){
+  if(window.QRCode) return Promise.resolve();
+  if(qrLoadPromise) return qrLoadPromise;
+  qrLoadPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload = () => resolve();
+    s.onerror = () => { qrLoadPromise = null; reject(new Error('Gagal memuat komponen pembuat QR Code — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ini.')); };
+    document.head.appendChild(s);
+  });
+  return qrLoadPromise;
+}
+
+function setQrStatus(msg, isError){
+  const el = document.getElementById('qr_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+async function generateQrCode(){
+  const text = (document.getElementById('qr_text').value || '').trim();
+  if(!text){ setQrStatus('Isi teks/tautan terlebih dahulu.', true); return; }
+
+  setQrStatus('Memuat komponen pembuat QR Code (butuh internet sekali di awal)...', false);
+  try{
+    await loadQrCodeLib();
+  }catch(err){
+    setQrStatus(err.message, true);
+    return;
+  }
+
+  const size = parseInt(document.getElementById('qr_size').value, 10) || 300;
+  const levelKey = document.getElementById('qr_level').value;
+  const colorDark = document.getElementById('qr_colordark').value || '#000000';
+  const colorLight = document.getElementById('qr_colorlight').value || '#ffffff';
+  const correctLevel = (window.QRCode.CorrectLevel && window.QRCode.CorrectLevel[levelKey] != null) ? window.QRCode.CorrectLevel[levelKey] : window.QRCode.CorrectLevel.M;
+
+  const preview = document.getElementById('qr_preview');
+  preview.innerHTML = '';
+  document.getElementById('qr_download_btn').style.display = 'none';
+  try{
+    new window.QRCode(preview, {
+      text: text,
+      width: size,
+      height: size,
+      colorDark: colorDark,
+      colorLight: colorLight,
+      correctLevel: correctLevel
+    });
+    document.getElementById('qr_download_btn').style.display = '';
+    setQrStatus('QR Code berhasil dibuat — pindai dulu untuk menguji, lalu unduh kalau sudah sesuai.', false);
+  }catch(err){
+    setQrStatus('Gagal membuat QR Code: ' + err.message + ' — coba perpendek teks/tautan atau turunkan level koreksi kesalahan.', true);
+  }
+}
+
+function downloadQrCode(){
+  const preview = document.getElementById('qr_preview');
+  const canvas = preview ? preview.querySelector('canvas') : null;
+  if(!canvas){ setQrStatus('Belum ada QR Code yang bisa diunduh — klik "Buat QR Code" dahulu.', true); return; }
+  canvas.toBlob(function(blob){
+    if(!blob){ setQrStatus('Gagal mengunduh QR Code.', true); return; }
+    downloadBlob(blob, 'qrcode.png');
+  }, 'image/png');
+}
 
 // ---------- TURNOVER RATE ----------
 function calcTurnover(){
