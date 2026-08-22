@@ -368,6 +368,7 @@
       <div class="sidebar-group-label">Utilitas</div>
       <button class="side-link" data-tab="shortlink" title="Shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span class="link-label">Shortlink</span></button>
       <button class="side-link" data-tab="img2pdf" title="Foto/Berkas ke PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="9.8" cy="12.3" r="1.2"/><path d="M8 17l2-2.3 1.8 1.8L14.5 14 17 17"/></svg><span class="link-label">Foto/Berkas ke PDF</span></button>
+      <button class="side-link" data-tab="compresspdf" title="Kompres PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 17l1.6-4M12 17l0-4M15 17l-1.6-4M8.5 13h7"/></svg><span class="link-label">Kompres PDF</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -951,6 +952,40 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <button class="btn-primary" onclick="generateImg2Pdf()">Buat &amp; Unduh PDF</button>
 
     <div class="note">Mendukung format JPG, PNG, WEBP, GIF, dan BMP — setiap gambar otomatis menjadi satu halaman sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dengan ✕). Latar transparan pada PNG otomatis diberi latar putih. Komponen pembuat PDF (jsPDF) dimuat sekali dari internet lalu tersimpan di cache browser — setelah itu bisa dipakai ulang tanpa internet selama masih di perangkat/browser yang sama; proses penggabungan gambarnya sendiri berjalan sepenuhnya di perangkat ini. Untuk berkas dokumen kantor (Word/Excel) yang perlu dijadikan PDF, gunakan fitur "Save as PDF"/"Print to PDF" bawaan aplikasi tersebut.</div>
+  </div>
+
+  <!-- ============ KOMPRES PDF ============ -->
+  <div class="panel" id="panel-compresspdf">
+    <div class="panel-head"><h2>Kompres PDF (Perkecil Ukuran)</h2></div>
+    <div class="desc">Perkecil ukuran file PDF (mis. hasil scan/foto yang beratnya puluhan MB) supaya muat batas unggah portal HRIS, email, atau WhatsApp. Setiap halaman digambar ulang sebagai gambar terkompresi lalu disusun jadi PDF baru — cocok untuk PDF hasil scan/foto; PDF berisi teks yang bisa diseleksi (mis. hasil ekspor Word) akan berubah menjadi gambar dan teksnya tidak bisa lagi diseleksi/dicari setelah dikompres.</div>
+
+    <div class="section-label">Unggah File PDF</div>
+    <div id="cp_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      📄 Klik untuk pilih file PDF, atau seret file ke sini (satu file per proses)
+      <input type="file" id="cp_file_input" accept="application/pdf,.pdf" style="display:none;">
+    </div>
+    <div id="cp_fileinfo" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+    <div id="cp_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div class="section-label">Tingkat Kompresi</div>
+    <div class="field-row"><label>Level</label>
+      <select id="cp_level">
+        <option value="ringan">Ringan — kualitas terbaik, ukuran berkurang sedang</option>
+        <option value="sedang" selected>Sedang — seimbang (disarankan)</option>
+        <option value="kuat">Kuat — ukuran terkecil, kualitas gambar turun</option>
+      </select>
+    </div>
+    <div class="field-row wide"><label>Nama File Output</label><input type="text" id="cp_filename" placeholder="dokumen-kompres" value="dokumen-kompres"></div>
+
+    <button class="btn-primary" id="cp_btn" onclick="compressPdf()">Kompres &amp; Unduh PDF</button>
+
+    <div class="section-label">Hasil</div>
+    <table class="out-table" id="cp_out">
+      <tr><td>Ukuran Asli</td><td id="cp_size_before">-</td></tr>
+      <tr><td>Ukuran Setelah Kompresi</td><td id="cp_size_after">-</td></tr>
+      <tr class="grand"><td>PENGURANGAN UKURAN</td><td id="cp_reduction">-</td></tr>
+    </table>
+    <div class="note">Proses menggambar ulang tiap halaman PDF ke gambar (Ringan ≈150 DPI/kualitas 85%, Sedang ≈120 DPI/kualitas 70%, Kuat ≈96 DPI/kualitas 50%) lalu menyusunnya jadi PDF baru — semua berjalan di perangkat ini, file tidak diunggah ke server manapun. Komponen pembaca PDF (PDF.js) dan pembuat PDF (jsPDF) dimuat sekali dari internet lalu tersimpan di cache browser. Untuk PDF berisi teks yang masih perlu bisa diseleksi/dicari, jangan gunakan fitur ini — pakai fitur kompres bawaan aplikasi office atau layanan lain yang mempertahankan teks. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ TURNOVER RATE ============ -->
@@ -2332,6 +2367,166 @@ async function generateImg2Pdf(){
   document.addEventListener('paste', handlePasteEvent);
 })();
 renderImg2PdfList();
+
+// ---------- KOMPRES PDF ----------
+let pdfJsLoadPromise = null;
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve();
+  if(pdfJsLoadPromise) return pdfJsLoadPromise;
+  pdfJsLoadPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js';
+    s.onload = () => {
+      try{
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js';
+        resolve();
+      }catch(err){ reject(err); }
+    };
+    s.onerror = () => { pdfJsLoadPromise = null; reject(new Error('Gagal memuat komponen pembaca PDF — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ini.')); };
+    document.head.appendChild(s);
+  });
+  return pdfJsLoadPromise;
+}
+
+const CP_LEVELS = {
+  ringan: { dpi: 150, quality: 0.85, label: 'Ringan' },
+  sedang: { dpi: 120, quality: 0.70, label: 'Sedang' },
+  kuat:   { dpi: 96,  quality: 0.50, label: 'Kuat' }
+};
+
+let cpSelectedFile = null;
+
+function setCpStatus(msg, isError){
+  const el = document.getElementById('cp_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+function formatBytes(bytes){
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(2) + ' MB';
+}
+
+function cpSetFile(file){
+  if(!file) return;
+  const isPdf = (file.type && file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+  if(!isPdf){
+    setCpStatus('File yang dipilih bukan PDF. Pilih satu file berformat .pdf.', true);
+    return;
+  }
+  cpSelectedFile = file;
+  const info = document.getElementById('cp_fileinfo');
+  info.style.display = '';
+  info.textContent = '📄 ' + file.name + ' — ' + formatBytes(file.size);
+  document.getElementById('cp_size_before').textContent = formatBytes(file.size);
+  document.getElementById('cp_size_after').textContent = '-';
+  document.getElementById('cp_reduction').textContent = '-';
+  setCpStatus('File siap. Pilih tingkat kompresi lalu klik "Kompres & Unduh PDF".', false);
+}
+
+async function compressPdf(){
+  if(!cpSelectedFile){ setCpStatus('Belum ada file PDF yang dipilih.', true); return; }
+  const level = CP_LEVELS[document.getElementById('cp_level').value] || CP_LEVELS.sedang;
+  let filename = (document.getElementById('cp_filename').value || 'dokumen-kompres').trim();
+  filename = filename.replace(/\.pdf$/i, '') || 'dokumen-kompres';
+
+  const btn = document.getElementById('cp_btn');
+  if(btn) btn.disabled = true;
+
+  setCpStatus('Memuat komponen pembaca & pembuat PDF (butuh internet sekali di awal)...', false);
+  try{
+    await Promise.all([loadPdfJs(), loadJsPDF()]);
+  }catch(err){
+    setCpStatus(err.message, true);
+    if(btn) btn.disabled = false;
+    return;
+  }
+
+  try{
+    const arrayBuffer = await cpSelectedFile.arrayBuffer();
+    const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
+    const numPages = pdf.numPages;
+
+    const { jsPDF } = window.jspdf;
+    let doc = null;
+    const ptToMm = 25.4 / 72;
+
+    for(let pageNum = 1; pageNum <= numPages; pageNum++){
+      setCpStatus('Memproses halaman ' + pageNum + ' dari ' + numPages + ' (level ' + level.label + ')...', false);
+      const page = await pdf.getPage(pageNum);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const scale = level.dpi / 72;
+      const viewport = page.getViewport({ scale: scale });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(viewport.width));
+      canvas.height = Math.max(1, Math.round(viewport.height));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+      const dataUrl = canvas.toDataURL('image/jpeg', level.quality);
+      const pageWmm = baseViewport.width * ptToMm;
+      const pageHmm = baseViewport.height * ptToMm;
+      const orientation = pageWmm > pageHmm ? 'landscape' : 'portrait';
+      const formatArg = [pageWmm, pageHmm];
+
+      if(!doc){
+        doc = new jsPDF({ orientation: orientation, unit: 'mm', format: formatArg, compress: true });
+      } else {
+        doc.addPage(formatArg, orientation);
+      }
+      doc.addImage(dataUrl, 'JPEG', 0, 0, pageWmm, pageHmm, undefined, 'MEDIUM');
+
+      page.cleanup && page.cleanup();
+    }
+
+    const blob = doc.output('blob');
+    doc.save(filename + '.pdf');
+
+    const beforeSize = cpSelectedFile.size;
+    const afterSize = blob.size;
+    document.getElementById('cp_size_before').textContent = formatBytes(beforeSize);
+    document.getElementById('cp_size_after').textContent = formatBytes(afterSize);
+    const reductionPct = beforeSize > 0 ? Math.max(0, (1 - afterSize / beforeSize) * 100) : 0;
+    const reductionEl = document.getElementById('cp_reduction');
+    if(afterSize < beforeSize){
+      reductionEl.textContent = '-' + reductionPct.toFixed(0) + '% (' + formatBytes(beforeSize - afterSize) + ' lebih kecil)';
+    } else {
+      reductionEl.textContent = 'Tidak berkurang (file sumber sudah ringan/berbasis gambar resolusi rendah)';
+    }
+    setCpStatus('Selesai — PDF "' + filename + '.pdf" berhasil dikompres dan diunduh (' + numPages + ' halaman).', false);
+  }catch(err){
+    setCpStatus('Gagal mengompres PDF: ' + err.message, true);
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+(function setupCpDropzone(){
+  const dz = document.getElementById('cp_dropzone');
+  const fileInput = document.getElementById('cp_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files[0]) cpSetFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) cpSetFile(e.dataTransfer.files[0]);
+  });
+})();
 
 // ---------- TURNOVER RATE ----------
 function calcTurnover(){
