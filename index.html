@@ -369,6 +369,7 @@
       <button class="side-link" data-tab="shortlink" title="Shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span class="link-label">Shortlink</span></button>
       <button class="side-link" data-tab="img2pdf" title="Foto/Berkas ke PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="9.8" cy="12.3" r="1.2"/><path d="M8 17l2-2.3 1.8 1.8L14.5 14 17 17"/></svg><span class="link-label">Foto/Berkas ke PDF</span></button>
       <button class="side-link" data-tab="compresspdf" title="Kompres PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 17l1.6-4M12 17l0-4M15 17l-1.6-4M8.5 13h7"/></svg><span class="link-label">Kompres PDF</span></button>
+      <button class="side-link" data-tab="splitpdf" title="Potong PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="18" r="2.3"/><path d="M20 4 7.5 13M8 11l12 9M14 14.5 20 20"/></svg><span class="link-label">Potong PDF</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -975,7 +976,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
         <option value="kuat">Kuat — ukuran terkecil, kualitas gambar turun</option>
       </select>
     </div>
-    <div class="field-row wide"><label>Nama File Output</label><input type="text" id="cp_filename" placeholder="dokumen-kompres" value="dokumen-kompres"></div>
+    <div class="field-row wide"><label>Nama File Output</label><input type="text" id="cp_filename" placeholder="dokumen-kompres" value=""></div>
 
     <button class="btn-primary" id="cp_btn" onclick="compressPdf()">Kompres &amp; Unduh PDF</button>
 
@@ -986,6 +987,36 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <tr class="grand"><td>PENGURANGAN UKURAN</td><td id="cp_reduction">-</td></tr>
     </table>
     <div class="note">Proses menggambar ulang tiap halaman PDF ke gambar (Ringan ≈150 DPI/kualitas 85%, Sedang ≈120 DPI/kualitas 70%, Kuat ≈96 DPI/kualitas 50%) lalu menyusunnya jadi PDF baru — semua berjalan di perangkat ini, file tidak diunggah ke server manapun. Komponen pembaca PDF (PDF.js) dan pembuat PDF (jsPDF) dimuat sekali dari internet lalu tersimpan di cache browser. Untuk PDF berisi teks yang masih perlu bisa diseleksi/dicari, jangan gunakan fitur ini — pakai fitur kompres bawaan aplikasi office atau layanan lain yang mempertahankan teks. File terkunci password atau rusak mungkin gagal diproses.</div>
+  </div>
+
+  <!-- ============ POTONG PDF ============ -->
+  <div class="panel" id="panel-splitpdf">
+    <div class="panel-head"><h2>Potong &amp; Susun Halaman PDF</h2></div>
+    <div class="desc">Buka PDF banyak halaman (mis. 10 lembar), lihat pratinjau tiap halaman, lalu buang halaman yang tidak perlu, ubah urutan, atau sisipkan halaman dari PDF lain — hasilnya diunduh sebagai satu file PDF baru. Kualitas asli halaman (termasuk teks yang bisa diseleksi) tetap terjaga karena halaman disalin langsung, bukan digambar ulang.</div>
+
+    <div class="section-label">Unggah PDF</div>
+    <div id="ps_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      📄 Klik untuk pilih file PDF, atau seret file ke sini
+      <input type="file" id="ps_file_input" accept="application/pdf,.pdf" style="display:none;">
+    </div>
+    <div id="ps_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <span>Halaman (<span id="ps_count">0 halaman</span>)</span>
+      <span style="display:flex;gap:8px;">
+        <button type="button" class="btn-ghost" style="margin:0;" onclick="document.getElementById('ps_add_file_input').click()">+ Tambah Halaman dari PDF Lain</button>
+        <button type="button" class="btn-ghost" style="margin:0;" onclick="psClearAll()">Kosongkan</button>
+      </span>
+      <input type="file" id="ps_add_file_input" accept="application/pdf,.pdf" style="display:none;">
+    </div>
+    <div id="ps_grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:6px;"></div>
+
+    <div class="section-label" style="margin-top:16px;">Pengaturan Output</div>
+    <div class="field-row wide"><label>Nama File Output</label><input type="text" id="ps_filename" placeholder="dokumen-potong" value=""></div>
+
+    <button class="btn-primary" id="ps_btn" onclick="generateSplitPdf()">Buat &amp; Unduh PDF</button>
+
+    <div class="note">Klik badge nomor pada tiap halaman untuk membuang/mengembalikannya (halaman yang dibuang ditandai pudar dan bergaris merah, tetap dihitung nomor aslinya untuk referensi). Gunakan tombol ↑/↓ pada tiap kartu untuk mengubah urutan halaman, termasuk menyelipkan halaman dari PDF tambahan di antara halaman PDF utama. Komponen pembaca PDF (PDF.js) dan penyusun PDF (pdf-lib) dimuat sekali dari internet lalu tersimpan di cache browser; proses penggabungan halamannya sendiri berjalan sepenuhnya di perangkat ini, tidak ada file yang diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ TURNOVER RATE ============ -->
@@ -2424,6 +2455,8 @@ function cpSetFile(file){
   document.getElementById('cp_size_before').textContent = formatBytes(file.size);
   document.getElementById('cp_size_after').textContent = '-';
   document.getElementById('cp_reduction').textContent = '-';
+  const baseName = (file.name || 'dokumen').replace(/\.pdf$/i, '').trim() || 'dokumen';
+  document.getElementById('cp_filename').value = baseName + '-Kompres';
   setCpStatus('File siap. Pilih tingkat kompresi lalu klik "Kompres & Unduh PDF".', false);
 }
 
@@ -2527,6 +2560,230 @@ async function compressPdf(){
     if(e.dataTransfer.files && e.dataTransfer.files[0]) cpSetFile(e.dataTransfer.files[0]);
   });
 })();
+
+// ---------- POTONG & SUSUN HALAMAN PDF ----------
+let pdfLibLoadPromise = null;
+function loadPdfLib(){
+  if(window.PDFLib) return Promise.resolve();
+  if(pdfLibLoadPromise) return pdfLibLoadPromise;
+  pdfLibLoadPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+    s.onload = () => resolve();
+    s.onerror = () => { pdfLibLoadPromise = null; reject(new Error('Gagal memuat komponen penyusun PDF — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ini.')); };
+    document.head.appendChild(s);
+  });
+  return pdfLibLoadPromise;
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=> URL.revokeObjectURL(url), 4000);
+}
+
+let psSources = [];   // { key, fileName, arrayBuffer, numPages }
+let psPages = [];     // { id, sourceKey, pageIndex (0-based), thumbUrl, excluded }
+let psIdCounter = 0;
+let psSourceCounter = 0;
+
+function setPsStatus(msg, isError){
+  const el = document.getElementById('ps_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+function psRenderGrid(){
+  const wrap = document.getElementById('ps_grid');
+  const countEl = document.getElementById('ps_count');
+  if(!wrap) return;
+  const included = psPages.filter(p=> !p.excluded).length;
+  if(countEl) countEl.textContent = psPages.length + ' halaman (' + included + ' akan disimpan)';
+  if(psPages.length === 0){
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--ink-faint);padding:8px 2px;grid-column:1/-1;">Belum ada PDF diunggah.</div>';
+    return;
+  }
+  wrap.innerHTML = psPages.map((pg, idx)=>{
+    const src = psSources.find(s=> s.key === pg.sourceKey);
+    const srcLabel = src ? src.fileName : '';
+    const excludedStyle = pg.excluded ? 'opacity:.4;border-color:var(--danger) !important;' : '';
+    return '<div style="background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px;display:flex;flex-direction:column;gap:6px;' + excludedStyle + '">'
+      + '<div style="position:relative;">'
+      + '<img src="' + pg.thumbUrl + '" style="width:100%;display:block;border-radius:6px;border:1px solid var(--line);background:#fff;">'
+      + '<button type="button" title="' + (pg.excluded ? 'Kembalikan halaman ini' : 'Buang halaman ini') + '" onclick="psToggleExclude(\'' + pg.id + '\')" style="position:absolute;top:4px;left:4px;border:none;border-radius:999px;width:22px;height:22px;font-size:10.5px;font-weight:700;cursor:pointer;' + (pg.excluded ? 'background:var(--danger);color:#fff;' : 'background:var(--accent);color:#fff;') + '">' + (idx + 1) + '</button>'
+      + '</div>'
+      + '<div style="font-size:9.5px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + slEscapeHtml(srcLabel) + '">' + slEscapeHtml(srcLabel) + '</div>'
+      + '<div style="display:flex;gap:4px;">'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:4px 6px;font-size:11px;flex:1;" title="Naik" onclick="psMovePage(\'' + pg.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:4px 6px;font-size:11px;flex:1;" title="Turun" onclick="psMovePage(\'' + pg.id + '\',1)"' + (idx === psPages.length - 1 ? ' disabled' : '') + '>↓</button>'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:4px 6px;font-size:11px;color:var(--danger);" title="Hapus dari daftar" onclick="psRemovePage(\'' + pg.id + '\')">✕</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function psToggleExclude(id){
+  const pg = psPages.find(p=> p.id === id);
+  if(!pg) return;
+  pg.excluded = !pg.excluded;
+  psRenderGrid();
+}
+
+function psMovePage(id, dir){
+  const idx = psPages.findIndex(p=> p.id === id);
+  if(idx < 0) return;
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= psPages.length) return;
+  const tmp = psPages[idx];
+  psPages[idx] = psPages[newIdx];
+  psPages[newIdx] = tmp;
+  psRenderGrid();
+}
+
+function psRemovePage(id){
+  psPages = psPages.filter(p=> p.id !== id);
+  psRenderGrid();
+}
+
+function psClearAll(){
+  psSources = [];
+  psPages = [];
+  document.getElementById('ps_filename').value = '';
+  psRenderGrid();
+  setPsStatus('', false);
+}
+
+async function psAddPdfFile(file){
+  const isPdf = (file.type && file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+  if(!isPdf){ setPsStatus('File yang dipilih bukan PDF.', true); return; }
+
+  setPsStatus('Memuat komponen pembaca PDF (butuh internet sekali di awal)...', false);
+  try{
+    await loadPdfJs();
+  }catch(err){
+    setPsStatus(err.message, true);
+    return;
+  }
+
+  setPsStatus('Membaca "' + file.name + '"...', false);
+  try{
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer.slice(0) }).promise;
+    const numPages = pdf.numPages;
+    const sourceKey = 'src' + (psSourceCounter++);
+    psSources.push({ key: sourceKey, fileName: file.name, arrayBuffer: arrayBuffer, numPages: numPages });
+
+    for(let pageNum = 1; pageNum <= numPages; pageNum++){
+      setPsStatus('Membuat pratinjau halaman ' + pageNum + ' dari ' + numPages + ' ("' + file.name + '")...', false);
+      const page = await pdf.getPage(pageNum);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const scale = 220 / Math.max(baseViewport.width, baseViewport.height);
+      const viewport = page.getViewport({ scale: scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(viewport.width));
+      canvas.height = Math.max(1, Math.round(viewport.height));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      const thumbUrl = canvas.toDataURL('image/jpeg', 0.7);
+      page.cleanup && page.cleanup();
+
+      psPages.push({ id: 'p' + (psIdCounter++), sourceKey: sourceKey, pageIndex: pageNum - 1, thumbUrl: thumbUrl, excluded: false });
+      psRenderGrid();
+    }
+
+    if(!document.getElementById('ps_filename').value){
+      const baseName = (file.name || 'dokumen').replace(/\.pdf$/i, '').trim() || 'dokumen';
+      document.getElementById('ps_filename').value = baseName + '-Potong';
+    }
+    setPsStatus(numPages + ' halaman dari "' + file.name + '" siap diatur. Buang/susun halaman lalu klik "Buat & Unduh PDF".', false);
+  }catch(err){
+    setPsStatus('Gagal membaca PDF: ' + err.message, true);
+  }
+}
+
+async function generateSplitPdf(){
+  const activePages = psPages.filter(p=> !p.excluded);
+  if(activePages.length === 0){ setPsStatus('Tidak ada halaman yang akan disimpan — semua halaman dibuang atau belum ada PDF diunggah.', true); return; }
+
+  let filename = (document.getElementById('ps_filename').value || 'dokumen-potong').trim();
+  filename = filename.replace(/\.pdf$/i, '') || 'dokumen-potong';
+
+  const btn = document.getElementById('ps_btn');
+  if(btn) btn.disabled = true;
+
+  setPsStatus('Memuat komponen penyusun PDF (butuh internet sekali di awal)...', false);
+  try{
+    await loadPdfLib();
+  }catch(err){
+    setPsStatus(err.message, true);
+    if(btn) btn.disabled = false;
+    return;
+  }
+
+  try{
+    const { PDFDocument } = window.PDFLib;
+    const loadedDocs = {};
+    for(const src of psSources){
+      setPsStatus('Memuat berkas sumber "' + src.fileName + '"...', false);
+      loadedDocs[src.key] = await PDFDocument.load(src.arrayBuffer.slice(0));
+    }
+
+    const outDoc = await PDFDocument.create();
+    for(let i = 0; i < activePages.length; i++){
+      setPsStatus('Menyalin halaman ' + (i + 1) + ' dari ' + activePages.length + '...', false);
+      const pg = activePages[i];
+      const srcDoc = loadedDocs[pg.sourceKey];
+      const [copiedPage] = await outDoc.copyPages(srcDoc, [pg.pageIndex]);
+      outDoc.addPage(copiedPage);
+    }
+
+    const bytes = await outDoc.save();
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    downloadBlob(blob, filename + '.pdf');
+    setPsStatus('Selesai — PDF "' + filename + '.pdf" berhasil dibuat dan diunduh (' + activePages.length + ' halaman).', false);
+  }catch(err){
+    setPsStatus('Gagal menyusun PDF: ' + err.message, true);
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+(function setupPsDropzone(){
+  const dz = document.getElementById('ps_dropzone');
+  const fileInput = document.getElementById('ps_file_input');
+  const addFileInput = document.getElementById('ps_add_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files[0]) psAddPdfFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) psAddPdfFile(e.dataTransfer.files[0]);
+  });
+
+  if(addFileInput){
+    addFileInput.addEventListener('change', (e)=>{
+      if(e.target.files && e.target.files[0]) psAddPdfFile(e.target.files[0]);
+      addFileInput.value = '';
+    });
+  }
+})();
+psRenderGrid();
 
 // ---------- TURNOVER RATE ----------
 function calcTurnover(){
