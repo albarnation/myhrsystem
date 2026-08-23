@@ -3694,15 +3694,22 @@ function loadBodyPix(){
   if(bodyPixLoadPromise) return bodyPixLoadPromise;
   bodyPixLoadPromise = new Promise((resolve, reject)=>{
     const tfScript = document.createElement('script');
-    tfScript.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4/dist/tf.min.js';
+    tfScript.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js';
     tfScript.onload = ()=>{
       const bpScript = document.createElement('script');
-      bpScript.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.1';
-      bpScript.onload = ()=> resolve();
-      bpScript.onerror = ()=> { bodyPixLoadPromise = null; reject(new Error('Gagal memuat model AI segmentasi latar — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ganti background.')); };
+      bpScript.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.1/dist/body-pix.min.js';
+      bpScript.onload = ()=>{
+        if(window.bodyPix){
+          resolve();
+        } else {
+          bodyPixLoadPromise = null;
+          reject(new Error('Komponen model AI (body-pix) termuat tapi tidak terbaca dengan benar oleh browser. Coba nonaktifkan sementara ad-blocker/ekstensi privasi lalu muat ulang halaman.'));
+        }
+      };
+      bpScript.onerror = ()=> { bodyPixLoadPromise = null; reject(new Error('Gagal memuat model AI segmentasi latar dari internet. Periksa koneksi internet, coba muat ulang halaman, atau nonaktifkan sementara ad-blocker/ekstensi privasi yang mungkin memblokir domain cdn.jsdelivr.net.')); };
       document.head.appendChild(bpScript);
     };
-    tfScript.onerror = ()=> { bodyPixLoadPromise = null; reject(new Error('Gagal memuat komponen TensorFlow.js — pastikan komputer terhubung ke internet saat pertama kali memakai fitur ganti background.')); };
+    tfScript.onerror = ()=> { bodyPixLoadPromise = null; reject(new Error('Gagal memuat komponen TensorFlow.js dari internet. Periksa koneksi internet, coba muat ulang halaman, atau nonaktifkan sementara ad-blocker/ekstensi privasi yang mungkin memblokir domain cdn.jsdelivr.net.')); };
     document.head.appendChild(tfScript);
   });
   return bodyPixLoadPromise;
