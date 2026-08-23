@@ -375,6 +375,7 @@
       <button class="side-link" data-tab="qrcode" title="Buat QR Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3M19 14v3h2M14 19h3v2M19 19v2h2"/></svg><span class="link-label">Buat QR Code</span></button>
       <button class="side-link" data-tab="pdf2word" title="PDF ke Ms Word"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h6l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13 3v5h5"/><path d="M9 17V12l1.5 3L12 12v5M14 12v5h1.6a1.4 1.4 0 0 0 0-5H14z"/></svg><span class="link-label">PDF ke Ms Word</span></button>
       <button class="side-link" data-tab="pasfoto" title="Pas Foto Generator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="3.2"/><path d="M7 18c.7-2.6 2.6-4 5-4s4.3 1.4 5 4"/></svg><span class="link-label">Pas Foto Generator</span></button>
+      <button class="side-link" data-tab="removebg" title="Hapus Background (Transparan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" stroke-dasharray="2 2"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-dasharray="2 2"/></svg><span class="link-label">Hapus Background</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -1167,6 +1168,30 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     </div>
 
     <div class="note">Ganti latar belakang memakai model AI segmentasi orang (TensorFlow.js BodyPix) yang dimuat sekali dari internet (ukurannya cukup besar, mohon sabar saat pertama kali dipakai) lalu tersimpan di cache browser — prosesnya sendiri berjalan di perangkat ini, foto tidak dikirim ke server manapun. Hasil pemisahan latar bisa kurang sempurna pada rambut/tepi yang rumit atau foto dengan latar mirip warna kulit/baju — untuk hasil terbaik pakai foto dengan latar polos &amp; pencahayaan rata. Lembar A4 disusun otomatis di 300 DPI dengan garis potong tipis sebagai panduan gunting; kalau jumlah salinan melebihi kapasitas satu lembar, unduhan PDF otomatis menambah halaman.</div>
+  </div>
+
+  <!-- ============ HAPUS BACKGROUND (TRANSPARAN) ============ -->
+  <div class="panel" id="panel-removebg">
+    <div class="panel-head"><h2>Hapus Background (Transparan)</h2></div>
+    <div class="desc">Ubah foto/logo berlatar polos menjadi PNG transparan — cocok untuk foto produk, logo perusahaan, atau foto profil yang mau ditempel ke desain lain. Pakai model AI segmentasi orang (sama seperti di Pas Foto Generator) untuk memisahkan subjek dari latar belakangnya.</div>
+
+    <div class="section-label">Unggah Foto</div>
+    <div id="rb_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      🖼️➜🔳 Klik untuk pilih foto, atau seret file ke sini
+      <input type="file" id="rb_file_input" accept="image/*" style="display:none;">
+    </div>
+    <div id="rb_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <button class="btn-primary" style="margin-top:10px;" onclick="rbRemoveBackground()">✂️ Hapus Background</button>
+
+    <div class="section-label">Pratinjau</div>
+    <div id="rb_preview_wrap" style="display:none;justify-content:center;padding:14px;border:1px solid var(--line);border-radius:var(--radius-sm);background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0px;">
+      <canvas id="rb_preview_canvas" style="max-width:100%;max-height:360px;"></canvas>
+    </div>
+
+    <button type="button" class="btn-ghost" id="rb_download_btn" style="display:none;margin-top:10px;" onclick="rbDownloadPng()">💾 Unduh PNG Transparan</button>
+
+    <div class="note">Latar belakang kotak-kotak abu-abu pada pratinjau menandakan bagian yang sudah transparan (bukan bagian dari gambar). Hasil terbaik didapat dari foto dengan subjek yang jelas terpisah dari latarnya dan pencahayaan rata; tepi rambut/detail rumit kadang kurang sempurna. Model AI (TensorFlow.js BodyPix) dimuat sekali dari internet lalu tersimpan di cache browser — kalau sebelumnya sudah dipakai lewat fitur Pas Foto Generator, tidak perlu dimuat ulang. Semua proses berjalan di perangkat ini, foto tidak dikirim ke server manapun. Unduhan hanya format PNG karena JPG tidak mendukung transparansi.</div>
   </div>
 
   <!-- ============ HEADCOUNT CALCULATOR ============ -->
@@ -3885,6 +3910,110 @@ async function pfDownloadA4(format){
     }, mime, 0.95);
   });
   pfSetStatus('Selesai — lembar A4 (' + pfA4Canvases.length + ' halaman) berhasil diunduh.', false);
+}
+
+// ---------- HAPUS BACKGROUND (TRANSPARAN) ----------
+let rbOriginalImage = null;
+let rbResultCanvas = null;
+
+function rbSetStatus(msg, isError){
+  const el = document.getElementById('rb_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+function rbLoadImageFile(file){
+  const isImg = file.type && file.type.startsWith('image/');
+  if(!isImg){ rbSetStatus('File yang dipilih bukan gambar.', true); return; }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = ()=>{
+    rbOriginalImage = img;
+    rbResultCanvas = null;
+    document.getElementById('rb_preview_wrap').style.display = 'none';
+    document.getElementById('rb_download_btn').style.display = 'none';
+    rbSetStatus('Foto siap — klik "Hapus Background" untuk memproses.', false);
+  };
+  img.onerror = ()=>{ rbSetStatus('Gagal memuat gambar.', true); };
+  img.src = url;
+}
+
+(function setupRbDropzone(){
+  const dz = document.getElementById('rb_dropzone');
+  const fileInput = document.getElementById('rb_file_input');
+  if(!dz || !fileInput) return;
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files[0]) rbLoadImageFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) rbLoadImageFile(e.dataTransfer.files[0]);
+  });
+})();
+
+async function rbRemoveBackground(){
+  if(!rbOriginalImage){ rbSetStatus('Unggah foto terlebih dahulu.', true); return; }
+
+  rbSetStatus('Memuat model AI segmentasi latar (butuh internet & bisa agak lama saat pertama kali, ukuran unduhan cukup besar)...', false);
+  try{
+    await loadBodyPix();
+  }catch(err){
+    rbSetStatus(err.message, true);
+    return;
+  }
+
+  try{
+    if(!pfBodyPixNet){
+      rbSetStatus('Memuat model ke memori...', false);
+      pfBodyPixNet = await window.bodyPix.load();
+    }
+    rbSetStatus('Memproses penghapusan latar belakang...', false);
+    const segmentation = await pfBodyPixNet.segmentPerson(rbOriginalImage, { internalResolution: 'medium', segmentationThreshold: 0.7 });
+    const w = rbOriginalImage.naturalWidth, h = rbOriginalImage.naturalHeight;
+    const maskCanvas = pfBuildMaskCanvas(segmentation.data, w, h);
+
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = w; outCanvas.height = h;
+    const octx = outCanvas.getContext('2d');
+    octx.drawImage(rbOriginalImage, 0, 0, w, h);
+    octx.globalCompositeOperation = 'destination-in';
+    octx.filter = 'blur(1.5px)';
+    octx.drawImage(maskCanvas, 0, 0, w, h);
+    octx.filter = 'none';
+    octx.globalCompositeOperation = 'source-over';
+
+    rbResultCanvas = outCanvas;
+
+    const previewCanvas = document.getElementById('rb_preview_canvas');
+    const maxDim = 360;
+    const scale = Math.min(1, maxDim / Math.max(w, h));
+    previewCanvas.width = Math.round(w * scale);
+    previewCanvas.height = Math.round(h * scale);
+    const pctx = previewCanvas.getContext('2d');
+    pctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    pctx.drawImage(outCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+    document.getElementById('rb_preview_wrap').style.display = 'flex';
+    document.getElementById('rb_download_btn').style.display = '';
+
+    rbSetStatus('Background berhasil dihapus — area kotak-kotak pada pratinjau sudah transparan. Kalau tepinya kurang rapi, coba foto dengan latar lebih polos & pencahayaan lebih rata.', false);
+  }catch(err){
+    rbSetStatus('Gagal menghapus background: ' + err.message, true);
+  }
+}
+
+function rbDownloadPng(){
+  if(!rbResultCanvas){ rbSetStatus('Belum ada hasil untuk diunduh — klik "Hapus Background" dahulu.', true); return; }
+  rbResultCanvas.toBlob(function(blob){
+    if(!blob){ rbSetStatus('Gagal membuat file PNG.', true); return; }
+    downloadBlob(blob, 'foto-transparan.png');
+  }, 'image/png');
 }
 
 // ---------- HEADCOUNT CALCULATOR ----------
