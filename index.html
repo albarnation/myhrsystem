@@ -374,8 +374,6 @@
       <button class="side-link" data-tab="mergepdf" title="Gabungkan PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h4l3 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M12 3v3h3"/><path d="M4 9h3v11a1 1 0 0 0 1 1h9"/></svg><span class="link-label">Gabungkan PDF</span></button>
       <button class="side-link" data-tab="qrcode" title="Buat QR Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3M19 14v3h2M14 19h3v2M19 19v2h2"/></svg><span class="link-label">Buat QR Code</span></button>
       <button class="side-link" data-tab="pdf2word" title="PDF ke Ms Word"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h6l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13 3v5h5"/><path d="M9 17V12l1.5 3L12 12v5M14 12v5h1.6a1.4 1.4 0 0 0 0-5H14z"/></svg><span class="link-label">PDF ke Ms Word</span></button>
-      <button class="side-link" data-tab="pasfoto" title="Pas Foto Generator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="3.2"/><path d="M7 18c.7-2.6 2.6-4 5-4s4.3 1.4 5 4"/></svg><span class="link-label">Pas Foto Generator</span></button>
-      <button class="side-link" data-tab="removebg" title="Hapus Background (Transparan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" stroke-dasharray="2 2"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-dasharray="2 2"/></svg><span class="link-label">Hapus Background</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -1040,11 +1038,19 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <div id="mg_list"></div>
 
     <div class="section-label" style="margin-top:16px;">Pengaturan Output</div>
+    <div class="field-row"><label>Ukuran Halaman</label>
+      <select id="mg_pagesize">
+        <option value="original" selected>Biarkan Ukuran Asli (bisa beda-beda tiap file)</option>
+        <option value="a4">Samakan Semua ke A4</option>
+        <option value="letter">Samakan Semua ke Letter</option>
+        <option value="first">Samakan Semua ke Ukuran Halaman File Pertama</option>
+      </select>
+    </div>
     <div class="field-row wide"><label>Nama File Output</label><input type="text" id="mg_filename" placeholder="dokumen-gabungan" value="dokumen-gabungan"></div>
 
     <button class="btn-primary" id="mg_btn" onclick="generateMergedPdf()">Gabungkan &amp; Unduh PDF</button>
 
-    <div class="note">Seluruh halaman tiap file digabung apa adanya sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dari daftar dengan ✕) — kalau perlu membuang halaman tertentu dari salah satu file sebelum digabung, gunakan dulu fitur "Potong PDF". Komponen penyusun PDF (pdf-lib) dimuat sekali dari internet lalu tersimpan di cache browser; proses penggabungannya sendiri berjalan sepenuhnya di perangkat ini, tidak ada file yang diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
+    <div class="note">Seluruh halaman tiap file digabung apa adanya sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dari daftar dengan ✕) — kalau perlu membuang halaman tertentu dari salah satu file sebelum digabung, gunakan dulu fitur "Potong PDF". Kalau file-file sumber punya ukuran halaman berbeda-beda (mis. campuran A4 dan F4/Legal), pilih "Samakan Semua ke..." supaya semua halaman rata ukurannya di hasil akhir — tiap halaman diskalakan proporsional (tidak gepeng/melar) dan diletakkan di tengah, area sisa diberi latar putih. Komponen penyusun PDF (pdf-lib) dimuat sekali dari internet lalu tersimpan di cache browser; proses penggabungannya sendiri berjalan sepenuhnya di perangkat ini, tidak ada file yang diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ BUAT QR CODE ============ -->
@@ -1109,89 +1115,6 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <button class="btn-primary" id="pw_btn" onclick="convertPdfToWord()">Konversi &amp; Unduh Word</button>
 
     <div class="note">Berjalan sepenuhnya di perangkat ini — komponen pembaca PDF (PDF.js), penyusun berkas Word (JSZip), dan OCR (Tesseract.js, hanya dimuat kalau opsi OCR dicentang) diambil sekali dari internet lalu tersimpan di cache browser; file tidak diunggah ke server manapun. Hasil berupa .docx asli yang bisa langsung dibuka & diedit di Microsoft Word/WPS/Google Docs. Karena hanya teks yang diekstrak, periksa kembali hasilnya sebelum dipakai resmi — terutama untuk PDF dengan tabel atau tata letak kompleks. File terkunci password atau rusak mungkin gagal diproses.</div>
-  </div>
-
-  <!-- ============ PAS FOTO GENERATOR ============ -->
-  <div class="panel" id="panel-pasfoto">
-    <div class="panel-head"><h2>Pas Foto Generator</h2></div>
-    <div class="desc">Unggah foto, atur posisi &amp; crop ke rasio pas foto standar, ganti warna latar, lalu cetak beberapa salinan sekaligus dalam satu lembar A4 — semua diproses langsung di browser (foto tidak diunggah ke server manapun).</div>
-
-    <div class="section-label">1. Unggah Foto</div>
-    <div id="pf_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
-      🙂 Klik untuk pilih foto (idealnya foto menghadap kamera, pencahayaan rata), atau seret file ke sini
-      <input type="file" id="pf_file_input" accept="image/*" style="display:none;">
-    </div>
-    <div id="pf_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
-
-    <div class="section-label">2. Atur Posisi &amp; Ukuran</div>
-    <div class="field-row"><label>Ukuran Pas Foto</label>
-      <select id="pf_size" onchange="pfOnSizeChange()">
-        <option value="2x3">2 × 3 cm</option>
-        <option value="3x4" selected>3 × 4 cm</option>
-        <option value="4x6">4 × 6 cm</option>
-      </select>
-    </div>
-    <div style="display:flex;justify-content:center;margin:10px 0;">
-      <canvas id="pf_editor_canvas" style="border:1px solid var(--line);border-radius:6px;touch-action:none;cursor:grab;background:var(--panel-2);"></canvas>
-    </div>
-    <div style="font-size:11.5px;color:var(--ink-faint);text-align:center;margin-bottom:8px;">Geser foto untuk atur posisi wajah, pakai slider di bawah untuk zoom.</div>
-    <div class="field-row"><label>Zoom</label><input type="range" id="pf_zoom" min="100" max="300" value="100" style="width:100%;" oninput="pfOnZoomChange()"></div>
-
-    <div class="section-label">3. Ganti Latar Belakang <span class="pill">opsional, pakai AI</span></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
-      <button type="button" class="btn-ghost" style="margin:0;background:#DC2626;color:#fff;border-color:#DC2626;" onclick="pfApplyBackground('#DC2626')">Merah</button>
-      <button type="button" class="btn-ghost" style="margin:0;background:#2563EB;color:#fff;border-color:#2563EB;" onclick="pfApplyBackground('#2563EB')">Biru</button>
-      <button type="button" class="btn-ghost" style="margin:0;background:#FFFFFF;color:#111;border-color:var(--line);" onclick="pfApplyBackground('#FFFFFF')">Putih</button>
-      <input type="color" id="pf_custom_color" value="#22C55E" style="width:40px;height:34px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);cursor:pointer;" title="Warna kustom">
-      <button type="button" class="btn-ghost" style="margin:0;" onclick="pfApplyBackground(document.getElementById('pf_custom_color').value)">Pakai Warna Ini</button>
-      <button type="button" class="btn-ghost" style="margin:0;" onclick="pfResetBackground()">↩ Kembalikan Foto Asli</button>
-    </div>
-    <div id="pf_bg_status" style="font-size:12px;color:var(--ink-dim);margin-bottom:6px;display:none;"></div>
-
-    <div class="section-label">4. Cetak Banyak Salinan (Lembar A4)</div>
-    <div class="field-row"><label>Jumlah Salinan</label><input type="number" id="pf_copies" value="8" min="1" max="60"></div>
-    <button class="btn-primary" onclick="pfBuildA4Preview()">Susun Lembar A4</button>
-    <div id="pf_a4_info" style="font-size:12px;color:var(--ink-dim);margin-top:8px;display:none;"></div>
-    <div style="display:flex;justify-content:center;margin-top:10px;">
-      <canvas id="pf_a4_preview_canvas" style="border:1px solid var(--line);border-radius:4px;max-width:100%;display:none;"></canvas>
-    </div>
-
-    <div class="section-label">5. Unduh</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button type="button" class="btn-ghost" style="margin:0;" onclick="pfDownloadSingle('jpg')">📷 1 Foto (JPG)</button>
-      <button type="button" class="btn-ghost" style="margin:0;" onclick="pfDownloadSingle('png')">🖼️ 1 Foto (PNG)</button>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-      <button type="button" class="btn-primary" style="margin:0;" onclick="pfDownloadA4('jpg')">📄 Lembar A4 (JPG)</button>
-      <button type="button" class="btn-primary" style="margin:0;" onclick="pfDownloadA4('png')">📄 Lembar A4 (PNG)</button>
-      <button type="button" class="btn-primary" style="margin:0;" onclick="pfDownloadA4('pdf')">📄 Lembar A4 (PDF)</button>
-    </div>
-
-    <div class="note">Ganti latar belakang memakai model AI segmentasi orang (TensorFlow.js BodyPix) yang dimuat sekali dari internet (ukurannya cukup besar, mohon sabar saat pertama kali dipakai) lalu tersimpan di cache browser — prosesnya sendiri berjalan di perangkat ini, foto tidak dikirim ke server manapun. Hasil pemisahan latar bisa kurang sempurna pada rambut/tepi yang rumit atau foto dengan latar mirip warna kulit/baju — untuk hasil terbaik pakai foto dengan latar polos &amp; pencahayaan rata. Lembar A4 disusun otomatis di 300 DPI dengan garis potong tipis sebagai panduan gunting; kalau jumlah salinan melebihi kapasitas satu lembar, unduhan PDF otomatis menambah halaman.</div>
-  </div>
-
-  <!-- ============ HAPUS BACKGROUND (TRANSPARAN) ============ -->
-  <div class="panel" id="panel-removebg">
-    <div class="panel-head"><h2>Hapus Background (Transparan)</h2></div>
-    <div class="desc">Ubah foto/logo berlatar polos menjadi PNG transparan — cocok untuk foto produk, logo perusahaan, atau foto profil yang mau ditempel ke desain lain. Pakai model AI segmentasi orang (sama seperti di Pas Foto Generator) untuk memisahkan subjek dari latar belakangnya.</div>
-
-    <div class="section-label">Unggah Foto</div>
-    <div id="rb_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
-      🖼️➜🔳 Klik untuk pilih foto, atau seret file ke sini
-      <input type="file" id="rb_file_input" accept="image/*" style="display:none;">
-    </div>
-    <div id="rb_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
-
-    <button class="btn-primary" style="margin-top:10px;" onclick="rbRemoveBackground()">✂️ Hapus Background</button>
-
-    <div class="section-label">Pratinjau</div>
-    <div id="rb_preview_wrap" style="display:none;justify-content:center;padding:14px;border:1px solid var(--line);border-radius:var(--radius-sm);background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0px;">
-      <canvas id="rb_preview_canvas" style="max-width:100%;max-height:360px;"></canvas>
-    </div>
-
-    <button type="button" class="btn-ghost" id="rb_download_btn" style="display:none;margin-top:10px;" onclick="rbDownloadPng()">💾 Unduh PNG Transparan</button>
-
-    <div class="note">Latar belakang kotak-kotak abu-abu pada pratinjau menandakan bagian yang sudah transparan (bukan bagian dari gambar). Hasil terbaik didapat dari foto dengan subjek yang jelas terpisah dari latarnya dan pencahayaan rata; tepi rambut/detail rumit kadang kurang sempurna. Model AI (TensorFlow.js BodyPix) dimuat sekali dari internet lalu tersimpan di cache browser — kalau sebelumnya sudah dipakai lewat fitur Pas Foto Generator, tidak perlu dimuat ulang. Semua proses berjalan di perangkat ini, foto tidak dikirim ke server manapun. Unduhan hanya format PNG karena JPG tidak mendukung transparansi.</div>
   </div>
 
   <!-- ============ HEADCOUNT CALCULATOR ============ -->
@@ -3164,6 +3087,7 @@ async function generateMergedPdf(){
 
   let filename = (document.getElementById('mg_filename').value || 'dokumen-gabungan').trim();
   filename = filename.replace(/\.pdf$/i, '') || 'dokumen-gabungan';
+  const pageSizeMode = document.getElementById('mg_pagesize').value;
 
   const btn = document.getElementById('mg_btn');
   if(btn) btn.disabled = true;
@@ -3178,20 +3102,46 @@ async function generateMergedPdf(){
   }
 
   try{
-    const { PDFDocument } = window.PDFLib;
+    const { PDFDocument, rgb } = window.PDFLib;
     const outDoc = await PDFDocument.create();
+
+    let targetW = null, targetH = null;
+    if(pageSizeMode === 'a4'){ targetW = 595.28; targetH = 841.89; }
+    else if(pageSizeMode === 'letter'){ targetW = 612; targetH = 792; }
+
     for(let i = 0; i < mgFiles.length; i++){
       const entry = mgFiles[i];
       if(!entry.arrayBuffer || !entry.pageCount) continue;
       setMgStatus('Menggabungkan berkas ' + (i + 1) + ' dari ' + mgFiles.length + ' ("' + entry.file.name + '")...', false);
       const srcDoc = await PDFDocument.load(entry.arrayBuffer.slice(0));
-      const copiedPages = await outDoc.copyPages(srcDoc, srcDoc.getPageIndices());
-      copiedPages.forEach(p=> outDoc.addPage(p));
+
+      if(pageSizeMode === 'original'){
+        const copiedPages = await outDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+        copiedPages.forEach(p=> outDoc.addPage(p));
+      } else {
+        const srcPages = srcDoc.getPages();
+        if(pageSizeMode === 'first' && targetW === null){
+          const firstSize = srcPages[0].getSize();
+          targetW = firstSize.width;
+          targetH = firstSize.height;
+        }
+        for(const srcPage of srcPages){
+          const embedded = await outDoc.embedPage(srcPage);
+          const srcW = embedded.width, srcH = embedded.height;
+          const scale = Math.min(targetW / srcW, targetH / srcH);
+          const drawW = srcW * scale, drawH = srcH * scale;
+          const x = (targetW - drawW) / 2, y = (targetH - drawH) / 2;
+          const newPage = outDoc.addPage([targetW, targetH]);
+          newPage.drawRectangle({ x: 0, y: 0, width: targetW, height: targetH, color: rgb(1, 1, 1) });
+          newPage.drawPage(embedded, { x: x, y: y, width: drawW, height: drawH });
+        }
+      }
     }
     const bytes = await outDoc.save();
     const blob = new Blob([bytes], { type: 'application/pdf' });
     downloadBlob(blob, filename + '.pdf');
-    setMgStatus('Selesai — PDF "' + filename + '.pdf" berhasil digabungkan dan diunduh (' + outDoc.getPageCount() + ' halaman dari ' + validFiles.length + ' berkas).', false);
+    const sizeNote = pageSizeMode === 'original' ? '' : ' — ukuran halaman disamakan';
+    setMgStatus('Selesai — PDF "' + filename + '.pdf" berhasil digabungkan dan diunduh (' + outDoc.getPageCount() + ' halaman dari ' + validFiles.length + ' berkas' + sizeNote + ').', false);
   }catch(err){
     setMgStatus('Gagal menggabungkan PDF: ' + err.message, true);
   } finally {
@@ -3525,503 +3475,6 @@ async function convertPdfToWord(){
     if(e.dataTransfer.files && e.dataTransfer.files[0]) pwSetFile(e.dataTransfer.files[0]);
   });
 })();
-
-// ---------- PAS FOTO GENERATOR ----------
-const PF_SIZES = { '2x3': { w: 2, h: 3 }, '3x4': { w: 3, h: 4 }, '4x6': { w: 4, h: 6 } };
-const PF_DPI = 300;
-const PF_PREVIEW_W = 260;
-
-let pfOriginalImage = null;   // Image asli hasil upload
-let pfImage = null;           // Image yang sedang dipakai di editor (asli atau hasil ganti background)
-let pfZoom = 1;                // 1..3
-let pfPanX = 0, pfPanY = 0;    // posisi (px, koordinat kanvas preview)
-let pfDispW = 0, pfDispH = 0;  // ukuran gambar yang ditampilkan di kanvas preview
-let pfMinX = 0, pfMinY = 0;    // batas geser (maxX/maxY selalu 0)
-let pfDragging = false;
-let pfDragStartX = 0, pfDragStartY = 0;
-let pfPanStartX = 0, pfPanStartY = 0;
-let pfBodyPixNet = null;
-let pfA4Canvases = [];         // hasil susun lembar A4 (bisa lebih dari 1 halaman)
-
-function pfSetStatus(msg, isError){
-  const el = document.getElementById('pf_status');
-  if(!el) return;
-  el.style.display = msg ? '' : 'none';
-  el.textContent = msg || '';
-  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
-}
-function pfSetBgStatus(msg, isError){
-  const el = document.getElementById('pf_bg_status');
-  if(!el) return;
-  el.style.display = msg ? '' : 'none';
-  el.textContent = msg || '';
-  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
-}
-
-function pfGetSize(){
-  return PF_SIZES[document.getElementById('pf_size').value] || PF_SIZES['3x4'];
-}
-function pfGetEditorCanvasDims(){
-  const size = pfGetSize();
-  const ratio = size.w / size.h;
-  const w = PF_PREVIEW_W;
-  const h = Math.round(w / ratio);
-  return { w: w, h: h, ratio: ratio };
-}
-
-function pfClampPan(){
-  pfPanX = Math.min(0, Math.max(pfMinX, pfPanX));
-  pfPanY = Math.min(0, Math.max(pfMinY, pfPanY));
-}
-
-function pfRedrawEditor(){
-  const canvas = document.getElementById('pf_editor_canvas');
-  if(!canvas || !pfImage) return;
-  const dims = pfGetEditorCanvasDims();
-  canvas.width = dims.w;
-  canvas.height = dims.h;
-
-  const baseScale = Math.max(dims.w / pfImage.naturalWidth, dims.h / pfImage.naturalHeight);
-  pfDispW = pfImage.naturalWidth * baseScale * pfZoom;
-  pfDispH = pfImage.naturalHeight * baseScale * pfZoom;
-  pfMinX = dims.w - pfDispW;
-  pfMinY = dims.h - pfDispH;
-  pfClampPan();
-
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, dims.w, dims.h);
-  ctx.drawImage(pfImage, pfPanX, pfPanY, pfDispW, pfDispH);
-}
-
-function pfOnSizeChange(){
-  // Rasio berubah -> kanvas & posisi disesuaikan ulang, pan/zoom direset ke tengah agar tidak aneh
-  pfZoom = 1;
-  document.getElementById('pf_zoom').value = 100;
-  pfPanX = 0; pfPanY = 0;
-  pfRedrawEditor();
-  // re-center setelah redraw pertama menghitung batas
-  pfPanX = pfMinX / 2;
-  pfPanY = pfMinY / 2;
-  pfRedrawEditor();
-}
-function pfOnZoomChange(){
-  const val = parseFloat(document.getElementById('pf_zoom').value) || 100;
-  const oldZoom = pfZoom;
-  pfZoom = val / 100;
-  // jaga titik tengah tetap sama saat zoom berubah
-  const dims = pfGetEditorCanvasDims();
-  const cx = dims.w / 2, cy = dims.h / 2;
-  const relX = (cx - pfPanX) / (pfDispW || 1);
-  const relY = (cy - pfPanY) / (pfDispH || 1);
-  pfRedrawEditor();
-  pfPanX = cx - relX * pfDispW;
-  pfPanY = cy - relY * pfDispH;
-  pfClampPan();
-  pfRedrawEditor();
-}
-
-function pfSetupCanvasDrag(){
-  const canvas = document.getElementById('pf_editor_canvas');
-  if(!canvas) return;
-  canvas.addEventListener('pointerdown', (e)=>{
-    if(!pfImage) return;
-    pfDragging = true;
-    canvas.setPointerCapture(e.pointerId);
-    canvas.style.cursor = 'grabbing';
-    pfDragStartX = e.clientX; pfDragStartY = e.clientY;
-    pfPanStartX = pfPanX; pfPanStartY = pfPanY;
-  });
-  canvas.addEventListener('pointermove', (e)=>{
-    if(!pfDragging) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleFactor = canvas.width / rect.width;
-    pfPanX = pfPanStartX + (e.clientX - pfDragStartX) * scaleFactor;
-    pfPanY = pfPanStartY + (e.clientY - pfDragStartY) * scaleFactor;
-    pfClampPan();
-    pfRedrawEditor();
-  });
-  function endDrag(){ pfDragging = false; canvas.style.cursor = 'grab'; }
-  canvas.addEventListener('pointerup', endDrag);
-  canvas.addEventListener('pointerleave', endDrag);
-  canvas.addEventListener('pointercancel', endDrag);
-}
-
-function pfLoadImageFile(file){
-  const isImg = file.type && file.type.startsWith('image/');
-  if(!isImg){ pfSetStatus('File yang dipilih bukan gambar.', true); return; }
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = ()=>{
-    pfOriginalImage = img;
-    pfImage = img;
-    pfZoom = 1;
-    document.getElementById('pf_zoom').value = 100;
-    pfPanX = 0; pfPanY = 0;
-    pfRedrawEditor();
-    pfPanX = pfMinX / 2; pfPanY = pfMinY / 2;
-    pfRedrawEditor();
-    pfSetStatus('Foto siap — geser/zoom untuk atur posisi, lalu lanjut ke langkah berikutnya.', false);
-    document.getElementById('pf_a4_preview_canvas').style.display = 'none';
-    document.getElementById('pf_a4_info').style.display = 'none';
-    pfA4Canvases = [];
-  };
-  img.onerror = ()=>{ pfSetStatus('Gagal memuat gambar.', true); };
-  img.src = url;
-}
-
-(function setupPfDropzone(){
-  const dz = document.getElementById('pf_dropzone');
-  const fileInput = document.getElementById('pf_file_input');
-  if(!dz || !fileInput) return;
-  dz.addEventListener('click', ()=> fileInput.click());
-  fileInput.addEventListener('change', (e)=>{
-    if(e.target.files && e.target.files[0]) pfLoadImageFile(e.target.files[0]);
-    fileInput.value = '';
-  });
-  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
-  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
-  dz.addEventListener('drop', (e)=>{
-    e.preventDefault();
-    dz.style.borderColor = 'var(--line)';
-    if(e.dataTransfer.files && e.dataTransfer.files[0]) pfLoadImageFile(e.dataTransfer.files[0]);
-  });
-  pfSetupCanvasDrag();
-})();
-
-let bodyPixLoadPromise = null;
-function loadBodyPix(){
-  if(window.bodyPix) return Promise.resolve();
-  if(bodyPixLoadPromise) return bodyPixLoadPromise;
-  bodyPixLoadPromise = new Promise((resolve, reject)=>{
-    const tfScript = document.createElement('script');
-    tfScript.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js';
-    tfScript.onload = ()=>{
-      const bpScript = document.createElement('script');
-      bpScript.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.1/dist/body-pix.min.js';
-      bpScript.onload = ()=>{
-        if(window.bodyPix){
-          resolve();
-        } else {
-          bodyPixLoadPromise = null;
-          reject(new Error('Komponen model AI (body-pix) termuat tapi tidak terbaca dengan benar oleh browser. Coba nonaktifkan sementara ad-blocker/ekstensi privasi lalu muat ulang halaman.'));
-        }
-      };
-      bpScript.onerror = ()=> { bodyPixLoadPromise = null; reject(new Error('Gagal memuat model AI segmentasi latar dari internet. Periksa koneksi internet, coba muat ulang halaman, atau nonaktifkan sementara ad-blocker/ekstensi privasi yang mungkin memblokir domain cdn.jsdelivr.net.')); };
-      document.head.appendChild(bpScript);
-    };
-    tfScript.onerror = ()=> { bodyPixLoadPromise = null; reject(new Error('Gagal memuat komponen TensorFlow.js dari internet. Periksa koneksi internet, coba muat ulang halaman, atau nonaktifkan sementara ad-blocker/ekstensi privasi yang mungkin memblokir domain cdn.jsdelivr.net.')); };
-    document.head.appendChild(tfScript);
-  });
-  return bodyPixLoadPromise;
-}
-
-function pfBuildMaskCanvas(maskData, width, height){
-  const maskCanvas = document.createElement('canvas');
-  maskCanvas.width = width; maskCanvas.height = height;
-  const mctx = maskCanvas.getContext('2d');
-  const imgData = mctx.createImageData(width, height);
-  for(let i = 0; i < maskData.length; i++){
-    const v = maskData[i] ? 255 : 0;
-    const o = i * 4;
-    imgData.data[o] = 255; imgData.data[o+1] = 255; imgData.data[o+2] = 255; imgData.data[o+3] = v;
-  }
-  mctx.putImageData(imgData, 0, 0);
-  return maskCanvas;
-}
-
-async function pfApplyBackground(colorHex){
-  if(!pfOriginalImage){ pfSetBgStatus('Unggah foto terlebih dahulu.', true); return; }
-  pfSetBgStatus('Memuat model AI segmentasi latar (butuh internet & bisa agak lama saat pertama kali, ukuran unduhan cukup besar)...', false);
-  try{
-    await loadBodyPix();
-  }catch(err){
-    pfSetBgStatus(err.message, true);
-    return;
-  }
-  try{
-    if(!pfBodyPixNet){
-      pfSetBgStatus('Memuat model ke memori...', false);
-      pfBodyPixNet = await window.bodyPix.load();
-    }
-    pfSetBgStatus('Memproses pemisahan latar belakang...', false);
-    const segmentation = await pfBodyPixNet.segmentPerson(pfOriginalImage, { internalResolution: 'medium', segmentationThreshold: 0.7 });
-    const w = pfOriginalImage.naturalWidth, h = pfOriginalImage.naturalHeight;
-    const maskCanvas = pfBuildMaskCanvas(segmentation.data, w, h);
-
-    const personCanvas = document.createElement('canvas');
-    personCanvas.width = w; personCanvas.height = h;
-    const pctx = personCanvas.getContext('2d');
-    pctx.drawImage(pfOriginalImage, 0, 0, w, h);
-    pctx.globalCompositeOperation = 'destination-in';
-    pctx.filter = 'blur(1.5px)';
-    pctx.drawImage(maskCanvas, 0, 0, w, h);
-    pctx.filter = 'none';
-    pctx.globalCompositeOperation = 'source-over';
-
-    const outCanvas = document.createElement('canvas');
-    outCanvas.width = w; outCanvas.height = h;
-    const octx = outCanvas.getContext('2d');
-    octx.fillStyle = colorHex;
-    octx.fillRect(0, 0, w, h);
-    octx.drawImage(personCanvas, 0, 0);
-
-    const dataUrl = outCanvas.toDataURL('image/png');
-    const newImg = new Image();
-    await new Promise((resolve, reject)=>{
-      newImg.onload = resolve;
-      newImg.onerror = ()=> reject(new Error('Gagal memuat hasil olahan gambar.'));
-      newImg.src = dataUrl;
-    });
-    pfImage = newImg;
-    pfRedrawEditor();
-    pfSetBgStatus('Latar belakang berhasil diganti. Kalau hasil tepi kurang rapi (mis. rambut), coba foto dengan latar lebih polos & pencahayaan lebih rata.', false);
-  }catch(err){
-    pfSetBgStatus('Gagal mengganti latar: ' + err.message, true);
-  }
-}
-
-function pfResetBackground(){
-  if(!pfOriginalImage) return;
-  pfImage = pfOriginalImage;
-  pfRedrawEditor();
-  pfSetBgStatus('Kembali ke foto asli.', false);
-}
-
-// Render pas foto tunggal ke kanvas beresolusi cetak (300 DPI) sesuai posisi/zoom editor saat ini
-function pfRenderSinglePhotoCanvas(){
-  if(!pfImage) return null;
-  const size = pfGetSize();
-  const targetW = Math.round(size.w / 2.54 * PF_DPI);
-  const targetH = Math.round(size.h / 2.54 * PF_DPI);
-  const dims = pfGetEditorCanvasDims();
-  const k = targetW / dims.w;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = targetW; canvas.height = targetH;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(pfImage, pfPanX * k, pfPanY * k, pfDispW * k, pfDispH * k);
-  return canvas;
-}
-
-function pfBuildA4Preview(){
-  if(!pfImage){ pfSetStatus('Unggah foto terlebih dahulu.', true); return; }
-  const photoCanvas = pfRenderSinglePhotoCanvas();
-  if(!photoCanvas) return;
-
-  const size = pfGetSize();
-  const photoWpx = photoCanvas.width, photoHpx = photoCanvas.height;
-  const marginCm = 0.5, gapCm = 0.2;
-  const a4Wcm = 21, a4Hcm = 29.7;
-  const a4Wpx = Math.round(a4Wcm / 2.54 * PF_DPI);
-  const a4Hpx = Math.round(a4Hcm / 2.54 * PF_DPI);
-  const marginPx = Math.round(marginCm / 2.54 * PF_DPI);
-  const gapPx = Math.round(gapCm / 2.54 * PF_DPI);
-
-  const cols = Math.max(1, Math.floor((a4Wpx - 2 * marginPx + gapPx) / (photoWpx + gapPx)));
-  const rows = Math.max(1, Math.floor((a4Hpx - 2 * marginPx + gapPx) / (photoHpx + gapPx)));
-  const perPage = cols * rows;
-
-  let copies = parseInt(document.getElementById('pf_copies').value, 10) || 1;
-  copies = Math.max(1, Math.min(copies, 200));
-  const totalPages = Math.ceil(copies / perPage);
-
-  pfA4Canvases = [];
-  let remaining = copies;
-  for(let p = 0; p < totalPages; p++){
-    const pageCanvas = document.createElement('canvas');
-    pageCanvas.width = a4Wpx; pageCanvas.height = a4Hpx;
-    const ctx = pageCanvas.getContext('2d');
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, a4Wpx, a4Hpx);
-
-    const gridW = cols * photoWpx + (cols - 1) * gapPx;
-    const gridH = rows * photoHpx + (rows - 1) * gapPx;
-    const startX = (a4Wpx - gridW) / 2;
-    const startY = (a4Hpx - gridH) / 2;
-
-    let placed = 0;
-    for(let r = 0; r < rows && remaining > 0; r++){
-      for(let c = 0; c < cols && remaining > 0; c++){
-        const x = startX + c * (photoWpx + gapPx);
-        const y = startY + r * (photoHpx + gapPx);
-        ctx.drawImage(photoCanvas, x, y, photoWpx, photoHpx);
-        ctx.save();
-        ctx.strokeStyle = '#BBBBBB';
-        ctx.setLineDash([4, 4]);
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, photoWpx, photoHpx);
-        ctx.restore();
-        remaining--; placed++;
-      }
-    }
-    pfA4Canvases.push(pageCanvas);
-  }
-
-  const previewCanvas = document.getElementById('pf_a4_preview_canvas');
-  const previewScale = 380 / a4Wpx;
-  previewCanvas.width = Math.round(a4Wpx * previewScale);
-  previewCanvas.height = Math.round(a4Hpx * previewScale);
-  const pctx = previewCanvas.getContext('2d');
-  pctx.drawImage(pfA4Canvases[0], 0, 0, previewCanvas.width, previewCanvas.height);
-  previewCanvas.style.display = '';
-
-  const infoEl = document.getElementById('pf_a4_info');
-  infoEl.style.display = '';
-  infoEl.textContent = 'Muat ' + perPage + ' foto per lembar A4 (' + cols + ' kolom × ' + rows + ' baris) — ' + copies + ' salinan disusun ke ' + totalPages + ' halaman.';
-}
-
-function pfDownloadSingle(format){
-  const canvas = pfRenderSinglePhotoCanvas();
-  if(!canvas){ pfSetStatus('Unggah foto terlebih dahulu.', true); return; }
-  const mime = format === 'png' ? 'image/png' : 'image/jpeg';
-  canvas.toBlob(function(blob){
-    if(!blob){ pfSetStatus('Gagal membuat file foto.', true); return; }
-    downloadBlob(blob, 'pas-foto-' + document.getElementById('pf_size').value + '.' + format);
-  }, mime, 0.95);
-}
-
-async function pfDownloadA4(format){
-  if(pfA4Canvases.length === 0){ pfBuildA4Preview(); }
-  if(pfA4Canvases.length === 0){ pfSetStatus('Unggah foto terlebih dahulu.', true); return; }
-
-  if(format === 'pdf'){
-    pfSetStatus('Memuat komponen pembuat PDF (butuh internet sekali di awal)...', false);
-    try{
-      await loadJsPDF();
-    }catch(err){
-      pfSetStatus(err.message, true);
-      return;
-    }
-    const { jsPDF } = window.jspdf;
-    let doc = null;
-    pfA4Canvases.forEach((pageCanvas, idx)=>{
-      const dataUrl = pageCanvas.toDataURL('image/jpeg', 0.95);
-      if(!doc){
-        doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-      } else {
-        doc.addPage('a4', 'portrait');
-      }
-      doc.addImage(dataUrl, 'JPEG', 0, 0, 210, 297);
-    });
-    doc.save('lembar-pas-foto.pdf');
-    pfSetStatus('Selesai — "lembar-pas-foto.pdf" (' + pfA4Canvases.length + ' halaman) berhasil diunduh.', false);
-    return;
-  }
-
-  const mime = format === 'png' ? 'image/png' : 'image/jpeg';
-  pfA4Canvases.forEach((pageCanvas, idx)=>{
-    pageCanvas.toBlob(function(blob){
-      if(!blob) return;
-      const suffix = pfA4Canvases.length > 1 ? ('-hal' + (idx + 1)) : '';
-      downloadBlob(blob, 'lembar-pas-foto' + suffix + '.' + format);
-    }, mime, 0.95);
-  });
-  pfSetStatus('Selesai — lembar A4 (' + pfA4Canvases.length + ' halaman) berhasil diunduh.', false);
-}
-
-// ---------- HAPUS BACKGROUND (TRANSPARAN) ----------
-let rbOriginalImage = null;
-let rbResultCanvas = null;
-
-function rbSetStatus(msg, isError){
-  const el = document.getElementById('rb_status');
-  if(!el) return;
-  el.style.display = msg ? '' : 'none';
-  el.textContent = msg || '';
-  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
-}
-
-function rbLoadImageFile(file){
-  const isImg = file.type && file.type.startsWith('image/');
-  if(!isImg){ rbSetStatus('File yang dipilih bukan gambar.', true); return; }
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = ()=>{
-    rbOriginalImage = img;
-    rbResultCanvas = null;
-    document.getElementById('rb_preview_wrap').style.display = 'none';
-    document.getElementById('rb_download_btn').style.display = 'none';
-    rbSetStatus('Foto siap — klik "Hapus Background" untuk memproses.', false);
-  };
-  img.onerror = ()=>{ rbSetStatus('Gagal memuat gambar.', true); };
-  img.src = url;
-}
-
-(function setupRbDropzone(){
-  const dz = document.getElementById('rb_dropzone');
-  const fileInput = document.getElementById('rb_file_input');
-  if(!dz || !fileInput) return;
-  dz.addEventListener('click', ()=> fileInput.click());
-  fileInput.addEventListener('change', (e)=>{
-    if(e.target.files && e.target.files[0]) rbLoadImageFile(e.target.files[0]);
-    fileInput.value = '';
-  });
-  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
-  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
-  dz.addEventListener('drop', (e)=>{
-    e.preventDefault();
-    dz.style.borderColor = 'var(--line)';
-    if(e.dataTransfer.files && e.dataTransfer.files[0]) rbLoadImageFile(e.dataTransfer.files[0]);
-  });
-})();
-
-async function rbRemoveBackground(){
-  if(!rbOriginalImage){ rbSetStatus('Unggah foto terlebih dahulu.', true); return; }
-
-  rbSetStatus('Memuat model AI segmentasi latar (butuh internet & bisa agak lama saat pertama kali, ukuran unduhan cukup besar)...', false);
-  try{
-    await loadBodyPix();
-  }catch(err){
-    rbSetStatus(err.message, true);
-    return;
-  }
-
-  try{
-    if(!pfBodyPixNet){
-      rbSetStatus('Memuat model ke memori...', false);
-      pfBodyPixNet = await window.bodyPix.load();
-    }
-    rbSetStatus('Memproses penghapusan latar belakang...', false);
-    const segmentation = await pfBodyPixNet.segmentPerson(rbOriginalImage, { internalResolution: 'medium', segmentationThreshold: 0.7 });
-    const w = rbOriginalImage.naturalWidth, h = rbOriginalImage.naturalHeight;
-    const maskCanvas = pfBuildMaskCanvas(segmentation.data, w, h);
-
-    const outCanvas = document.createElement('canvas');
-    outCanvas.width = w; outCanvas.height = h;
-    const octx = outCanvas.getContext('2d');
-    octx.drawImage(rbOriginalImage, 0, 0, w, h);
-    octx.globalCompositeOperation = 'destination-in';
-    octx.filter = 'blur(1.5px)';
-    octx.drawImage(maskCanvas, 0, 0, w, h);
-    octx.filter = 'none';
-    octx.globalCompositeOperation = 'source-over';
-
-    rbResultCanvas = outCanvas;
-
-    const previewCanvas = document.getElementById('rb_preview_canvas');
-    const maxDim = 360;
-    const scale = Math.min(1, maxDim / Math.max(w, h));
-    previewCanvas.width = Math.round(w * scale);
-    previewCanvas.height = Math.round(h * scale);
-    const pctx = previewCanvas.getContext('2d');
-    pctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-    pctx.drawImage(outCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
-    document.getElementById('rb_preview_wrap').style.display = 'flex';
-    document.getElementById('rb_download_btn').style.display = '';
-
-    rbSetStatus('Background berhasil dihapus — area kotak-kotak pada pratinjau sudah transparan. Kalau tepinya kurang rapi, coba foto dengan latar lebih polos & pencahayaan lebih rata.', false);
-  }catch(err){
-    rbSetStatus('Gagal menghapus background: ' + err.message, true);
-  }
-}
-
-function rbDownloadPng(){
-  if(!rbResultCanvas){ rbSetStatus('Belum ada hasil untuk diunduh — klik "Hapus Background" dahulu.', true); return; }
-  rbResultCanvas.toBlob(function(blob){
-    if(!blob){ rbSetStatus('Gagal membuat file PNG.', true); return; }
-    downloadBlob(blob, 'foto-transparan.png');
-  }, 'image/png');
-}
 
 // ---------- HEADCOUNT CALCULATOR ----------
 function calcHeadcount(){
