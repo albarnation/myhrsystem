@@ -977,6 +977,14 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
         <option value="kuat">Kuat — ukuran terkecil, kualitas gambar turun</option>
       </select>
     </div>
+    <div class="field-row"><label>Putar Halaman</label>
+      <select id="cp_rotate">
+        <option value="0" selected>Tidak diputar</option>
+        <option value="90">90° Searah Jarum Jam</option>
+        <option value="180">180°</option>
+        <option value="270">270° (90° Berlawanan Arah Jarum Jam)</option>
+      </select>
+    </div>
     <div class="field-row wide"><label>Nama File Output</label><input type="text" id="cp_filename" placeholder="dokumen-kompres" value=""></div>
 
     <button class="btn-primary" id="cp_btn" onclick="compressPdf()">Kompres &amp; Unduh PDF</button>
@@ -2549,7 +2557,7 @@ function addImg2PdfFiles(fileList){
   const arr = Array.from(fileList).filter(f=> f.type && f.type.startsWith('image/'));
   if(arr.length === 0){ setImg2PdfStatus('Tidak ada file gambar yang valid dipilih (format harus JPG/PNG/WEBP/GIF/BMP).', true); return; }
   arr.forEach(f=>{
-    img2pdfFiles.push({ id: 'f' + (img2pdfIdCounter++), file: f, previewUrl: URL.createObjectURL(f) });
+    img2pdfFiles.push({ id: 'f' + (img2pdfIdCounter++), file: f, previewUrl: URL.createObjectURL(f), rotation: 0 });
   });
   renderImg2PdfList();
   setImg2PdfStatus(img2pdfFiles.length + ' gambar siap diproses. Atur urutan halaman lalu klik "Buat & Unduh PDF".', false);
@@ -2566,11 +2574,15 @@ function renderImg2PdfList(){
   }
   wrap.innerHTML = img2pdfFiles.map((it, idx)=>{
     const sizeKb = (it.file.size / 1024).toFixed(0);
+    const rot = it.rotation || 0;
     return '<div style="display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px;">'
       + '<span style="font-family:\'Roboto Mono\',monospace;font-size:11px;color:var(--ink-faint);width:18px;flex-shrink:0;">' + (idx + 1) + '.</span>'
-      + '<img src="' + it.previewUrl + '" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid var(--line);">'
-      + '<div style="flex:1;min-width:0;overflow:hidden;"><div style="font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + slEscapeHtml(it.file.name) + '</div><div style="font-size:10.5px;color:var(--ink-faint);">' + sizeKb + ' KB</div></div>'
+      + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:6px;border:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;">'
+      + '<img src="' + it.previewUrl + '" style="max-width:100%;max-height:100%;object-fit:contain;transform:rotate(' + rot + 'deg);transition:transform .15s;">'
+      + '</div>'
+      + '<div style="flex:1;min-width:0;overflow:hidden;"><div style="font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + slEscapeHtml(it.file.name) + '</div><div style="font-size:10.5px;color:var(--ink-faint);">' + sizeKb + ' KB' + (rot ? ' · Diputar ' + rot + '°' : '') + '</div></div>'
       + '<div style="display:flex;gap:4px;flex-shrink:0;">'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Putar 90°" onclick="rotateImg2Pdf(\'' + it.id + '\')">⟳</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Naik" onclick="moveImg2Pdf(\'' + it.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Turun" onclick="moveImg2Pdf(\'' + it.id + '\',1)"' + (idx === img2pdfFiles.length - 1 ? ' disabled' : '') + '>↓</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;color:var(--danger);" title="Hapus" onclick="removeImg2Pdf(\'' + it.id + '\')">✕</button>'
@@ -2597,6 +2609,13 @@ function removeImg2Pdf(id){
   renderImg2PdfList();
 }
 
+function rotateImg2Pdf(id){
+  const it = img2pdfFiles.find(x=> x.id === id);
+  if(!it) return;
+  it.rotation = ((it.rotation || 0) + 90) % 360;
+  renderImg2PdfList();
+}
+
 function clearImg2Pdf(){
   img2pdfFiles.forEach(it=> URL.revokeObjectURL(it.previewUrl));
   img2pdfFiles = [];
@@ -2604,18 +2623,24 @@ function clearImg2Pdf(){
   setImg2PdfStatus('', false);
 }
 
-function loadImageAsJpegDataUrl(file){
+function loadImageAsJpegDataUrl(file, rotation){
+  rotation = ((rotation || 0) % 360 + 360) % 360;
   return new Promise((resolve, reject)=>{
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = ()=>{
+      const swap = rotation === 90 || rotation === 270;
       const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+      canvas.width = swap ? img.naturalHeight : img.naturalWidth;
+      canvas.height = swap ? img.naturalWidth : img.naturalHeight;
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(rotation * Math.PI / 180);
+      ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+      ctx.restore();
       const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
       URL.revokeObjectURL(url);
       resolve({ dataUrl: dataUrl, width: canvas.width, height: canvas.height });
@@ -2649,7 +2674,7 @@ async function generateImg2Pdf(){
     for(let i = 0; i < img2pdfFiles.length; i++){
       setImg2PdfStatus('Memproses gambar ' + (i + 1) + ' dari ' + img2pdfFiles.length + '...', false);
       const item = img2pdfFiles[i];
-      const { dataUrl, width, height } = await loadImageAsJpegDataUrl(item.file);
+      const { dataUrl, width, height } = await loadImageAsJpegDataUrl(item.file, item.rotation);
       const isLandscapeImg = width > height;
       const orientation = orientationOpt === 'auto' ? (isLandscapeImg ? 'landscape' : 'portrait') : orientationOpt;
 
@@ -2815,13 +2840,15 @@ async function compressPdf(){
     const { jsPDF } = window.jspdf;
     let doc = null;
     const ptToMm = 25.4 / 72;
+    const rotateAdd = parseInt(document.getElementById('cp_rotate').value, 10) || 0;
 
     for(let pageNum = 1; pageNum <= numPages; pageNum++){
       setCpStatus('Memproses halaman ' + pageNum + ' dari ' + numPages + ' (level ' + level.label + ')...', false);
       const page = await pdf.getPage(pageNum);
-      const baseViewport = page.getViewport({ scale: 1 });
+      const totalRotation = (page.rotate + rotateAdd) % 360;
+      const baseViewport = page.getViewport({ scale: 1, rotation: totalRotation });
       const scale = level.dpi / 72;
-      const viewport = page.getViewport({ scale: scale });
+      const viewport = page.getViewport({ scale: scale, rotation: totalRotation });
 
       const canvas = document.createElement('canvas');
       canvas.width = Math.max(1, Math.round(viewport.width));
@@ -2942,13 +2969,16 @@ function psRenderGrid(){
     const src = psSources.find(s=> s.key === pg.sourceKey);
     const srcLabel = src ? src.fileName : '';
     const excludedStyle = pg.excluded ? 'opacity:.4;border-color:var(--danger) !important;' : '';
+    const rot = pg.rotation || 0;
     return '<div style="background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px;display:flex;flex-direction:column;gap:6px;' + excludedStyle + '">'
-      + '<div style="position:relative;">'
-      + '<img src="' + pg.thumbUrl + '" style="width:100%;display:block;border-radius:6px;border:1px solid var(--line);background:#fff;">'
+      + '<div style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;">'
+      + '<img src="' + pg.thumbUrl + '" style="max-width:100%;max-height:100%;object-fit:contain;transform:rotate(' + rot + 'deg);transition:transform .15s;">'
       + '<button type="button" title="' + (pg.excluded ? 'Kembalikan halaman ini' : 'Buang halaman ini') + '" onclick="psToggleExclude(\'' + pg.id + '\')" style="position:absolute;top:4px;left:4px;border:none;border-radius:999px;width:22px;height:22px;font-size:10.5px;font-weight:700;cursor:pointer;' + (pg.excluded ? 'background:var(--danger);color:#fff;' : 'background:var(--accent);color:#fff;') + '">' + (idx + 1) + '</button>'
+      + (rot ? '<span style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;font-size:9px;font-weight:700;border-radius:999px;padding:2px 6px;">' + rot + '°</span>' : '')
       + '</div>'
       + '<div style="font-size:9.5px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + slEscapeHtml(srcLabel) + '">' + slEscapeHtml(srcLabel) + '</div>'
       + '<div style="display:flex;gap:4px;">'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:4px 6px;font-size:11px;flex:1;" title="Putar 90°" onclick="psRotatePage(\'' + pg.id + '\')">⟳</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:4px 6px;font-size:11px;flex:1;" title="Naik" onclick="psMovePage(\'' + pg.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:4px 6px;font-size:11px;flex:1;" title="Turun" onclick="psMovePage(\'' + pg.id + '\',1)"' + (idx === psPages.length - 1 ? ' disabled' : '') + '>↓</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:4px 6px;font-size:11px;color:var(--danger);" title="Hapus dari daftar" onclick="psRemovePage(\'' + pg.id + '\')">✕</button>'
@@ -2960,6 +2990,13 @@ function psToggleExclude(id){
   const pg = psPages.find(p=> p.id === id);
   if(!pg) return;
   pg.excluded = !pg.excluded;
+  psRenderGrid();
+}
+
+function psRotatePage(id){
+  const pg = psPages.find(p=> p.id === id);
+  if(!pg) return;
+  pg.rotation = ((pg.rotation || 0) + 90) % 360;
   psRenderGrid();
 }
 
@@ -3023,7 +3060,7 @@ async function psAddPdfFile(file){
       const thumbUrl = canvas.toDataURL('image/jpeg', 0.7);
       page.cleanup && page.cleanup();
 
-      psPages.push({ id: 'p' + (psIdCounter++), sourceKey: sourceKey, pageIndex: pageNum - 1, thumbUrl: thumbUrl, excluded: false });
+      psPages.push({ id: 'p' + (psIdCounter++), sourceKey: sourceKey, pageIndex: pageNum - 1, thumbUrl: thumbUrl, excluded: false, rotation: 0 });
       psRenderGrid();
     }
 
@@ -3057,7 +3094,7 @@ async function generateSplitPdf(){
   }
 
   try{
-    const { PDFDocument } = window.PDFLib;
+    const { PDFDocument, degrees } = window.PDFLib;
     const loadedDocs = {};
     for(const src of psSources){
       setPsStatus('Memuat berkas sumber "' + src.fileName + '"...', false);
@@ -3069,6 +3106,11 @@ async function generateSplitPdf(){
       setPsStatus('Menyalin halaman ' + (i + 1) + ' dari ' + activePages.length + '...', false);
       const pg = activePages[i];
       const srcDoc = loadedDocs[pg.sourceKey];
+      if(pg.rotation){
+        const srcPage = srcDoc.getPage(pg.pageIndex);
+        const curAngle = srcPage.getRotation().angle;
+        srcPage.setRotation(degrees((curAngle + pg.rotation) % 360));
+      }
       const [copiedPage] = await outDoc.copyPages(srcDoc, [pg.pageIndex]);
       outDoc.addPage(copiedPage);
     }
@@ -3136,12 +3178,14 @@ function mgRenderList(){
   }
   wrap.innerHTML = mgFiles.map((it, idx)=>{
     const sizeKb = (it.file.size / 1024).toFixed(0);
-    const pageInfo = it.pageCount != null ? (it.pageCount + ' halaman · ' + sizeKb + ' KB') : ('Membaca...');
+    const rot = it.rotation || 0;
+    const pageInfo = (it.pageCount != null ? (it.pageCount + ' halaman · ' + sizeKb + ' KB') : ('Membaca...')) + (rot ? ' · Diputar ' + rot + '°' : '');
     return '<div style="display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px;">'
       + '<span style="font-family:\'Roboto Mono\',monospace;font-size:11px;color:var(--ink-faint);width:18px;flex-shrink:0;">' + (idx + 1) + '.</span>'
-      + '<div style="width:32px;height:38px;flex-shrink:0;border-radius:4px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;">📄</div>'
+      + '<div style="width:32px;height:38px;flex-shrink:0;border-radius:4px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;"><span style="display:inline-block;transform:rotate(' + rot + 'deg);transition:transform .15s;">📄</span></div>'
       + '<div style="flex:1;min-width:0;overflow:hidden;"><div style="font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + slEscapeHtml(it.file.name) + '</div><div style="font-size:10.5px;color:var(--ink-faint);">' + pageInfo + '</div></div>'
       + '<div style="display:flex;gap:4px;flex-shrink:0;">'
+      + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Putar semua halaman file ini 90°" onclick="mgRotate(\'' + it.id + '\')">⟳</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Naik" onclick="mgMove(\'' + it.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;" title="Turun" onclick="mgMove(\'' + it.id + '\',1)"' + (idx === mgFiles.length - 1 ? ' disabled' : '') + '>↓</button>'
       + '<button type="button" class="btn-ghost" style="margin:0;padding:5px 8px;color:var(--danger);" title="Hapus" onclick="mgRemove(\'' + it.id + '\')">✕</button>'
@@ -3165,6 +3209,13 @@ function mgRemove(id){
   mgRenderList();
 }
 
+function mgRotate(id){
+  const it = mgFiles.find(x=> x.id === id);
+  if(!it) return;
+  it.rotation = ((it.rotation || 0) + 90) % 360;
+  mgRenderList();
+}
+
 function mgClearAll(){
   mgFiles = [];
   mgRenderList();
@@ -3185,7 +3236,7 @@ async function mgAddFiles(fileList){
 
   const { PDFDocument } = window.PDFLib;
   for(const f of arr){
-    const entry = { id: 'm' + (mgIdCounter++), file: f, arrayBuffer: null, pageCount: null };
+    const entry = { id: 'm' + (mgIdCounter++), file: f, arrayBuffer: null, pageCount: null, rotation: 0 };
     mgFiles.push(entry);
     mgRenderList();
     try{
@@ -3226,7 +3277,7 @@ async function generateMergedPdf(){
   }
 
   try{
-    const { PDFDocument, rgb } = window.PDFLib;
+    const { PDFDocument, rgb, degrees } = window.PDFLib;
     const outDoc = await PDFDocument.create();
 
     let targetW = null, targetH = null;
@@ -3238,6 +3289,12 @@ async function generateMergedPdf(){
       if(!entry.arrayBuffer || !entry.pageCount) continue;
       setMgStatus('Menggabungkan berkas ' + (i + 1) + ' dari ' + mgFiles.length + ' ("' + entry.file.name + '")...', false);
       const srcDoc = await PDFDocument.load(entry.arrayBuffer.slice(0));
+      if(entry.rotation){
+        srcDoc.getPages().forEach(p=>{
+          const curAngle = p.getRotation().angle;
+          p.setRotation(degrees((curAngle + entry.rotation) % 360));
+        });
+      }
 
       if(pageSizeMode === 'original'){
         const copiedPages = await outDoc.copyPages(srcDoc, srcDoc.getPageIndices());
