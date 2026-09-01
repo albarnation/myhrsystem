@@ -949,11 +949,17 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
         <option value="none">Tanpa Margin</option>
       </select>
     </div>
+    <div class="field-row wide" style="align-items:center;">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;">
+        <input type="checkbox" id="i2p_uniform" style="width:auto;" checked>
+        Samakan ukuran &amp; orientasi semua halaman (supaya semua foto tampil sama besar dan rata, tidak ada yang lebih kecil/besar sendiri)
+      </label>
+    </div>
     <div class="field-row wide"><label>Nama File Output</label><input type="text" id="i2p_filename" placeholder="dokumen" value="dokumen"></div>
 
     <button class="btn-primary" onclick="generateImg2Pdf()">Buat &amp; Unduh PDF</button>
 
-    <div class="note">Mendukung format JPG, PNG, WEBP, GIF, dan BMP — setiap gambar otomatis menjadi satu halaman sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dengan ✕). Latar transparan pada PNG otomatis diberi latar putih. Komponen pembuat PDF (jsPDF) dimuat sekali dari internet lalu tersimpan di cache browser — setelah itu bisa dipakai ulang tanpa internet selama masih di perangkat/browser yang sama; proses penggabungan gambarnya sendiri berjalan sepenuhnya di perangkat ini. Untuk berkas dokumen kantor (Word/Excel) yang perlu dijadikan PDF, gunakan fitur "Save as PDF"/"Print to PDF" bawaan aplikasi tersebut.</div>
+    <div class="note">Mendukung format JPG, PNG, WEBP, GIF, dan BMP — setiap gambar otomatis menjadi satu halaman sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dengan ✕). Centang "Samakan ukuran &amp; orientasi semua halaman" supaya seluruh halaman berukuran persis sama dan foto tampil rata (tidak ada halaman yang lebih kecil/besar sendiri) — kalau ukuran halaman diset "Menyesuaikan Ukuran Foto", ukuran seragam ini otomatis mengikuti foto terbesar dalam daftar. Latar transparan pada PNG otomatis diberi latar putih. Komponen pembuat PDF (jsPDF) dimuat sekali dari internet lalu tersimpan di cache browser — setelah itu bisa dipakai ulang tanpa internet selama masih di perangkat/browser yang sama; proses penggabungan gambarnya sendiri berjalan sepenuhnya di perangkat ini. Untuk berkas dokumen kantor (Word/Excel) yang perlu dijadikan PDF, gunakan fitur "Save as PDF"/"Print to PDF" bawaan aplikasi tersebut.</div>
   </div>
 
   <!-- ============ KOMPRES PDF ============ -->
@@ -2665,27 +2671,71 @@ async function generateImg2Pdf(){
   const orientationOpt = document.getElementById('i2p_orientation').value;
   const marginOpt = document.getElementById('i2p_margin').value;
   const marginMm = marginOpt === 'none' ? 0 : (marginOpt === 'small' ? 8 : 16);
+  const uniformEl = document.getElementById('i2p_uniform');
+  const uniformOpt = uniformEl ? uniformEl.checked : false;
   let filename = (document.getElementById('i2p_filename').value || 'dokumen').trim();
   filename = filename.replace(/\.pdf$/i, '') || 'dokumen';
 
   try{
-    const { jsPDF } = window.jspdf;
-    let doc = null;
+    // Tahap 1: muat semua gambar dulu (supaya bisa hitung ukuran halaman seragam sebelum menyusun PDF)
+    const items = [];
     for(let i = 0; i < img2pdfFiles.length; i++){
-      setImg2PdfStatus('Memproses gambar ' + (i + 1) + ' dari ' + img2pdfFiles.length + '...', false);
+      setImg2PdfStatus('Memuat gambar ' + (i + 1) + ' dari ' + img2pdfFiles.length + '...', false);
       const item = img2pdfFiles[i];
       const { dataUrl, width, height } = await loadImageAsJpegDataUrl(item.file, item.rotation);
       const isLandscapeImg = width > height;
       const orientation = orientationOpt === 'auto' ? (isLandscapeImg ? 'landscape' : 'portrait') : orientationOpt;
+      items.push({ dataUrl: dataUrl, width: width, height: height, orientation: orientation, wmm: width * 25.4 / 96, hmm: height * 25.4 / 96 });
+    }
 
-      let pageWmm, pageHmm, formatArg;
+    // Tahap 2: kalau "Samakan ukuran" aktif, tentukan satu orientasi & ukuran halaman untuk SEMUA foto
+    let uniformBox = null;
+    if(uniformOpt){
+      let orientation;
+      if(orientationOpt === 'auto'){
+        const landscapeCount = items.filter(it=> it.orientation === 'landscape').length;
+        orientation = landscapeCount > items.length / 2 ? 'landscape' : 'portrait';
+      } else {
+        orientation = orientationOpt;
+      }
+      let pageWmm, pageHmm;
       if(pageSizeOpt === 'auto'){
-        const wmm = width * 25.4 / 96;
-        const hmm = height * 25.4 / 96;
-        pageWmm = orientation === 'landscape' ? Math.max(wmm, hmm) : Math.min(wmm, hmm);
-        pageHmm = orientation === 'landscape' ? Math.min(wmm, hmm) : Math.max(wmm, hmm);
+        // pakai ukuran foto terbesar di antara semua foto, supaya tidak ada foto yang harus dipotong
+        let maxW = 0, maxH = 0;
+        items.forEach(it=>{
+          const ow = orientation === 'landscape' ? Math.max(it.wmm, it.hmm) : Math.min(it.wmm, it.hmm);
+          const oh = orientation === 'landscape' ? Math.min(it.wmm, it.hmm) : Math.max(it.wmm, it.hmm);
+          if(ow > maxW) maxW = ow;
+          if(oh > maxH) maxH = oh;
+        });
+        pageWmm = maxW; pageHmm = maxH;
+      } else {
+        const base = pageSizeOpt === 'letter' ? { w: 215.9, h: 279.4 } : { w: 210, h: 297 };
+        if(orientation === 'landscape'){ pageWmm = Math.max(base.w, base.h); pageHmm = Math.min(base.w, base.h); }
+        else { pageWmm = Math.min(base.w, base.h); pageHmm = Math.max(base.w, base.h); }
+      }
+      uniformBox = { orientation: orientation, pageWmm: pageWmm, pageHmm: pageHmm };
+    }
+
+    const { jsPDF } = window.jspdf;
+    let doc = null;
+    for(let i = 0; i < items.length; i++){
+      setImg2PdfStatus('Menyusun halaman ' + (i + 1) + ' dari ' + items.length + '...', false);
+      const it = items[i];
+
+      let orientation, pageWmm, pageHmm, formatArg;
+      if(uniformBox){
+        orientation = uniformBox.orientation;
+        pageWmm = uniformBox.pageWmm;
+        pageHmm = uniformBox.pageHmm;
+        formatArg = pageSizeOpt === 'auto' ? [pageWmm, pageHmm] : pageSizeOpt;
+      } else if(pageSizeOpt === 'auto'){
+        orientation = it.orientation;
+        pageWmm = orientation === 'landscape' ? Math.max(it.wmm, it.hmm) : Math.min(it.wmm, it.hmm);
+        pageHmm = orientation === 'landscape' ? Math.min(it.wmm, it.hmm) : Math.max(it.wmm, it.hmm);
         formatArg = [pageWmm, pageHmm];
       } else {
+        orientation = it.orientation;
         const base = pageSizeOpt === 'letter' ? { w: 215.9, h: 279.4 } : { w: 210, h: 297 };
         if(orientation === 'landscape'){ pageWmm = Math.max(base.w, base.h); pageHmm = Math.min(base.w, base.h); }
         else { pageWmm = Math.min(base.w, base.h); pageHmm = Math.max(base.w, base.h); }
@@ -2700,15 +2750,15 @@ async function generateImg2Pdf(){
 
       const availW = Math.max(pageWmm - marginMm * 2, 1);
       const availH = Math.max(pageHmm - marginMm * 2, 1);
-      const imgRatio = width / height;
+      const imgRatio = it.width / it.height;
       let drawW = availW, drawH = availW / imgRatio;
       if(drawH > availH){ drawH = availH; drawW = availH * imgRatio; }
       const offsetX = (pageWmm - drawW) / 2;
       const offsetY = (pageHmm - drawH) / 2;
-      doc.addImage(dataUrl, 'JPEG', offsetX, offsetY, drawW, drawH, undefined, 'MEDIUM');
+      doc.addImage(it.dataUrl, 'JPEG', offsetX, offsetY, drawW, drawH, undefined, 'MEDIUM');
     }
     doc.save(filename + '.pdf');
-    setImg2PdfStatus('Selesai — PDF "' + filename + '.pdf" berhasil dibuat dan diunduh (' + img2pdfFiles.length + ' halaman).', false);
+    setImg2PdfStatus('Selesai — PDF "' + filename + '.pdf" berhasil dibuat dan diunduh (' + items.length + ' halaman).', false);
   }catch(err){
     setImg2PdfStatus('Gagal membuat PDF: ' + err.message, true);
   }
