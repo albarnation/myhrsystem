@@ -370,6 +370,7 @@
       <div class="sidebar-group-label">Utilitas</div>
       <button class="side-link" data-tab="shortlink" title="Shortlink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg><span class="link-label">Shortlink</span></button>
       <button class="side-link" data-tab="img2pdf" title="Foto/Berkas ke PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="9.8" cy="12.3" r="1.2"/><path d="M8 17l2-2.3 1.8 1.8L14.5 14 17 17"/></svg><span class="link-label">Foto/Berkas ke PDF</span></button>
+      <button class="side-link" data-tab="removebg" title="Hapus Latar Belakang Foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="11" cy="14" r="3" stroke-dasharray="2.2 2.2"/></svg><span class="link-label">Hapus Latar Belakang Foto</span></button>
       <button class="side-link" data-tab="compresspdf" title="Kompres PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 17l1.6-4M12 17l0-4M15 17l-1.6-4M8.5 13h7"/></svg><span class="link-label">Kompres PDF</span></button>
       <button class="side-link" data-tab="splitpdf" title="Potong PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="18" r="2.3"/><path d="M20 4 7.5 13M8 11l12 9M14 14.5 20 20"/></svg><span class="link-label">Potong PDF</span></button>
       <button class="side-link" data-tab="mergepdf" title="Gabungkan PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h4l3 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M12 3v3h3"/><path d="M4 9h3v11a1 1 0 0 0 1 1h9"/></svg><span class="link-label">Gabungkan PDF</span></button>
@@ -960,6 +961,55 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <button class="btn-primary" onclick="generateImg2Pdf()">Buat &amp; Unduh PDF</button>
 
     <div class="note">Mendukung format JPG, PNG, WEBP, GIF, dan BMP — setiap gambar otomatis menjadi satu halaman sesuai urutan pada daftar di atas (ubah urutan dengan tombol ↑/↓, atau hapus dengan ✕). Centang "Samakan ukuran &amp; orientasi semua halaman" supaya seluruh halaman berukuran persis sama dan foto tampil rata (tidak ada halaman yang lebih kecil/besar sendiri) — kalau ukuran halaman diset "Menyesuaikan Ukuran Foto", ukuran seragam ini otomatis mengikuti foto terbesar dalam daftar. Latar transparan pada PNG otomatis diberi latar putih. Komponen pembuat PDF (jsPDF) dimuat sekali dari internet lalu tersimpan di cache browser — setelah itu bisa dipakai ulang tanpa internet selama masih di perangkat/browser yang sama; proses penggabungan gambarnya sendiri berjalan sepenuhnya di perangkat ini. Untuk berkas dokumen kantor (Word/Excel) yang perlu dijadikan PDF, gunakan fitur "Save as PDF"/"Print to PDF" bawaan aplikasi tersebut.</div>
+  </div>
+
+  <!-- ============ HAPUS LATAR BELAKANG FOTO ============ -->
+  <div class="panel" id="panel-removebg">
+    <div class="panel-head"><h2>Hapus Latar Belakang Foto</h2></div>
+    <div class="desc">Hilangkan latar belakang polos (putih, biru, merah, hijau, dll.) dari sebuah foto — cocok untuk pas foto/foto KTP karyawan yang perlu latar transparan atau diganti warna lain sesuai ketentuan instansi/portal. Berbasis kemiripan warna (bukan AI pengenal objek), jadi hasil paling rapi untuk foto berlatar polos satu warna. Diproses sepenuhnya di browser tanpa koneksi internet dan tanpa foto diunggah ke server manapun.</div>
+
+    <div class="section-label">Unggah Foto</div>
+    <div id="rb_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      🖼️ Klik untuk pilih satu foto, seret file ke sini, atau tekan <b>Ctrl+V</b> untuk tempel
+      <input type="file" id="rb_file_input" accept="image/*" style="display:none;">
+    </div>
+    <div id="rb_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div id="rb_workarea" style="display:none;">
+      <div class="section-label">Pratinjau (klik area latar belakang pada foto untuk memilih warnanya)</div>
+      <div style="background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0px;border-radius:8px;border:1px solid var(--line);padding:8px;text-align:center;">
+        <canvas id="rb_canvas" style="max-width:100%;max-height:420px;border-radius:4px;cursor:crosshair;display:inline-block;"></canvas>
+      </div>
+
+      <div class="field-row"><label>Warna Latar Terpilih</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="rb_color_swatch" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--line);flex-shrink:0;background:#ffffff;"></span>
+          <button type="button" class="btn-ghost" style="margin:0;" onclick="rbAutoPickColor()">Ambil Otomatis dari Tepi</button>
+        </div>
+      </div>
+      <div class="field-row"><label>Toleransi Warna</label><input type="range" id="rb_tolerance" min="5" max="100" value="35" oninput="rbUpdateSliderLabels();rbProcess();" style="width:100%;"></div>
+      <div id="rb_tolerance_label" style="font-size:11px;color:var(--ink-faint);margin-top:-8px;margin-bottom:10px;">Toleransi: 35</div>
+      <div class="field-row"><label>Haluskan Tepi</label><input type="range" id="rb_feather" min="0" max="60" value="15" oninput="rbUpdateSliderLabels();rbProcess();" style="width:100%;"></div>
+      <div id="rb_feather_label" style="font-size:11px;color:var(--ink-faint);margin-top:-8px;margin-bottom:10px;">Haluskan Tepi: 15</div>
+
+      <div class="field-row"><label>Latar Belakang Hasil</label>
+        <select id="rb_bgmode" onchange="rbToggleBgColorRow();rbProcess();">
+          <option value="transparent" selected>Transparan (PNG)</option>
+          <option value="solid">Warna Solid</option>
+        </select>
+      </div>
+      <div class="field-row" id="rb_bgcolor_row" style="display:none;"><label>Pilih Warna Latar Baru</label><input type="color" id="rb_bgcolor" value="#ffffff" oninput="rbProcess();" style="width:60px;height:36px;padding:2px;"></div>
+
+      <div class="field-row wide"><label>Nama File Output</label><input type="text" id="rb_filename" placeholder="foto-tanpa-latar" value="foto-tanpa-latar"></div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-primary" style="flex:1;min-width:170px;margin:0;" onclick="rbDownload('png')">Unduh PNG</button>
+        <button class="btn-ghost" style="flex:1;min-width:170px;margin:0;" onclick="rbDownload('jpg')">Unduh JPG (Latar Dipadatkan)</button>
+      </div>
+      <div style="margin-top:8px;"><button type="button" class="btn-ghost" style="margin:0;" onclick="rbResetTool()">Ganti Foto Lain</button></div>
+    </div>
+
+    <div class="note">Cara pakai: unggah foto berlatar polos (pas foto/KTP dengan latar putih/biru/merah/hijau), lalu klik bagian latar belakang pada pratinjau untuk memilih warnanya (atau pakai tombol "Ambil Otomatis dari Tepi" yang menebak warna dari sudut-sudut foto). Naikkan "Toleransi Warna" kalau latar belum terhapus semua, turunkan kalau bagian objek/wajah ikut terhapus; atur "Haluskan Tepi" supaya batas potongan tidak bergerigi/kasar. Unduhan PNG memakai latar transparan (atau warna solid kalau dipilih); unduhan JPG otomatis dipadatkan ke latar warna solid karena format JPG tidak mendukung transparansi. Foto besar otomatis diperkecil ke maksimal 1800px pada sisi terpanjang supaya proses tetap ringan di browser. Fitur ini berbasis kemiripan warna sehingga paling akurat untuk latar belakang polos satu warna — bukan latar bertekstur atau pemandangan.</div>
   </div>
 
   <!-- ============ KOMPRES PDF ============ -->
@@ -2801,6 +2851,234 @@ async function generateImg2Pdf(){
   document.addEventListener('paste', handlePasteEvent);
 })();
 renderImg2PdfList();
+
+// ---------- HAPUS LATAR BELAKANG FOTO ----------
+let rbSrcCanvas = null, rbSrcCtx = null;
+let rbProcCanvas = null, rbProcCtx = null;
+let rbPickedColor = null;
+
+function setRbStatus(msg, isError){
+  const el = document.getElementById('rb_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+function rbHandleFile(file){
+  if(!file || !file.type || !file.type.startsWith('image/')){
+    setRbStatus('Berkas yang dipilih bukan gambar.', true);
+    return;
+  }
+  setRbStatus('Memuat foto...', false);
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = ()=>{
+    const maxDim = 1800;
+    let w = img.naturalWidth, h = img.naturalHeight;
+    if(w > maxDim || h > maxDim){
+      const scale = maxDim / Math.max(w, h);
+      w = Math.max(1, Math.round(w * scale));
+      h = Math.max(1, Math.round(h * scale));
+    }
+    if(!rbSrcCanvas){ rbSrcCanvas = document.createElement('canvas'); rbSrcCtx = rbSrcCanvas.getContext('2d', { willReadFrequently: true }); }
+    rbSrcCanvas.width = w; rbSrcCanvas.height = h;
+    rbSrcCtx.clearRect(0, 0, w, h);
+    rbSrcCtx.drawImage(img, 0, 0, w, h);
+
+    if(!rbProcCanvas){ rbProcCanvas = document.createElement('canvas'); rbProcCtx = rbProcCanvas.getContext('2d'); }
+    rbProcCanvas.width = w; rbProcCanvas.height = h;
+
+    const canvas = document.getElementById('rb_canvas');
+    canvas.width = w; canvas.height = h;
+
+    URL.revokeObjectURL(url);
+    document.getElementById('rb_workarea').style.display = '';
+    rbAutoPickColor();
+    setRbStatus('Foto dimuat (' + w + '×' + h + ' px). Warna latar ditebak otomatis dari sudut foto — klik pada foto untuk mengoreksi kalau kurang tepat.', false);
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); setRbStatus('Gagal memuat foto.', true); };
+  img.src = url;
+}
+
+function rbUpdateSwatch(){
+  const sw = document.getElementById('rb_color_swatch');
+  if(sw && rbPickedColor) sw.style.background = 'rgb(' + rbPickedColor.r + ',' + rbPickedColor.g + ',' + rbPickedColor.b + ')';
+}
+
+function rbUpdateSliderLabels(){
+  const t = document.getElementById('rb_tolerance');
+  const f = document.getElementById('rb_feather');
+  const tl = document.getElementById('rb_tolerance_label');
+  const fl = document.getElementById('rb_feather_label');
+  if(t && tl) tl.textContent = 'Toleransi: ' + t.value;
+  if(f && fl) fl.textContent = 'Haluskan Tepi: ' + f.value;
+}
+
+function rbToggleBgColorRow(){
+  const mode = document.getElementById('rb_bgmode').value;
+  const row = document.getElementById('rb_bgcolor_row');
+  if(row) row.style.display = mode === 'solid' ? '' : 'none';
+}
+
+function rbAutoPickColor(){
+  if(!rbSrcCtx) return;
+  const w = rbSrcCanvas.width, h = rbSrcCanvas.height;
+  const inset = Math.max(2, Math.round(Math.min(w, h) * 0.02));
+  const sampleSize = Math.max(3, Math.round(Math.min(w, h) * 0.05));
+  const corners = [
+    [inset, inset],
+    [Math.max(inset, w - inset - sampleSize), inset],
+    [inset, Math.max(inset, h - inset - sampleSize)],
+    [Math.max(inset, w - inset - sampleSize), Math.max(inset, h - inset - sampleSize)]
+  ];
+  let rSum = 0, gSum = 0, bSum = 0, count = 0;
+  corners.forEach(c=>{
+    const cx = c[0], cy = c[1];
+    const cw = Math.min(sampleSize, w - cx), ch = Math.min(sampleSize, h - cy);
+    if(cw <= 0 || ch <= 0) return;
+    const d = rbSrcCtx.getImageData(cx, cy, cw, ch).data;
+    for(let i = 0; i < d.length; i += 4){ rSum += d[i]; gSum += d[i+1]; bSum += d[i+2]; count++; }
+  });
+  if(count === 0) return;
+  rbPickedColor = { r: Math.round(rSum / count), g: Math.round(gSum / count), b: Math.round(bSum / count) };
+  rbUpdateSwatch();
+  rbProcess();
+}
+
+function rbCanvasClick(e){
+  if(!rbSrcCtx) return;
+  const canvas = document.getElementById('rb_canvas');
+  const rect = canvas.getBoundingClientRect();
+  if(rect.width === 0 || rect.height === 0) return;
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = Math.min(canvas.width - 1, Math.max(0, Math.round((e.clientX - rect.left) * scaleX)));
+  const y = Math.min(canvas.height - 1, Math.max(0, Math.round((e.clientY - rect.top) * scaleY)));
+  const d = rbSrcCtx.getImageData(x, y, 1, 1).data;
+  rbPickedColor = { r: d[0], g: d[1], b: d[2] };
+  rbUpdateSwatch();
+  rbProcess();
+}
+
+function rbProcess(){
+  if(!rbSrcCtx || !rbPickedColor) return;
+  const w = rbSrcCanvas.width, h = rbSrcCanvas.height;
+  const srcData = rbSrcCtx.getImageData(0, 0, w, h);
+  const src = srcData.data;
+  const out = rbSrcCtx.createImageData(w, h);
+  const dst = out.data;
+
+  const tol = parseInt(document.getElementById('rb_tolerance').value, 10) || 0;
+  const feather = parseInt(document.getElementById('rb_feather').value, 10) || 0;
+  const threshold = (tol / 100) * 300;
+  const halfFeather = Math.max(feather, 1) / 2;
+  const pr = rbPickedColor.r, pg = rbPickedColor.g, pb = rbPickedColor.b;
+
+  for(let i = 0; i < src.length; i += 4){
+    const r = src[i], g = src[i+1], b = src[i+2], a = src[i+3];
+    const dr = r - pr, dg = g - pg, db = b - pb;
+    const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+    let alpha;
+    if(dist <= threshold - halfFeather) alpha = 0;
+    else if(dist >= threshold + halfFeather) alpha = a;
+    else alpha = Math.round(((dist - (threshold - halfFeather)) / (halfFeather * 2)) * a);
+    dst[i] = r; dst[i+1] = g; dst[i+2] = b; dst[i+3] = alpha;
+  }
+
+  const canvas = document.getElementById('rb_canvas');
+  const ctx = canvas.getContext('2d');
+  const bgMode = document.getElementById('rb_bgmode').value;
+  ctx.clearRect(0, 0, w, h);
+  if(bgMode === 'solid'){
+    const color = document.getElementById('rb_bgcolor').value;
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, w, h);
+    rbProcCtx.clearRect(0, 0, w, h);
+    rbProcCtx.putImageData(out, 0, 0);
+    ctx.drawImage(rbProcCanvas, 0, 0);
+  } else {
+    ctx.putImageData(out, 0, 0);
+  }
+}
+
+function rbDownload(format){
+  const canvas = document.getElementById('rb_canvas');
+  if(!canvas || !rbSrcCtx || !rbPickedColor){ setRbStatus('Belum ada foto yang diproses.', true); return; }
+  let filename = (document.getElementById('rb_filename').value || 'foto-tanpa-latar').trim();
+  filename = filename.replace(/\.(png|jpe?g)$/i, '') || 'foto-tanpa-latar';
+
+  if(format === 'jpg'){
+    const bgMode = document.getElementById('rb_bgmode').value;
+    const bgColor = bgMode === 'solid' ? document.getElementById('rb_bgcolor').value : '#ffffff';
+    const tmp = document.createElement('canvas');
+    tmp.width = canvas.width; tmp.height = canvas.height;
+    const tctx = tmp.getContext('2d');
+    tctx.fillStyle = bgColor;
+    tctx.fillRect(0, 0, tmp.width, tmp.height);
+    tctx.drawImage(canvas, 0, 0);
+    const link = document.createElement('a');
+    link.href = tmp.toDataURL('image/jpeg', 0.95);
+    link.download = filename + '.jpg';
+    link.click();
+  } else {
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = filename + '.png';
+    link.click();
+  }
+  setRbStatus('Selesai — foto "' + filename + '.' + format + '" berhasil diunduh.', false);
+}
+
+function rbResetTool(){
+  rbSrcCanvas = null; rbSrcCtx = null;
+  rbProcCanvas = null; rbProcCtx = null;
+  rbPickedColor = null;
+  document.getElementById('rb_workarea').style.display = 'none';
+  document.getElementById('rb_file_input').value = '';
+  setRbStatus('', false);
+}
+
+rbUpdateSliderLabels();
+rbToggleBgColorRow();
+
+(function setupRbDropzone(){
+  const dz = document.getElementById('rb_dropzone');
+  const fileInput = document.getElementById('rb_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files.length) rbHandleFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files.length) rbHandleFile(e.dataTransfer.files[0]);
+  });
+
+  function handlePasteEvent(e){
+    const panel = document.getElementById('panel-removebg');
+    if(!panel || !panel.classList.contains('active')) return;
+    const items = (e.clipboardData || window.clipboardData) ? (e.clipboardData || window.clipboardData).items : null;
+    if(!items) return;
+    for(const item of items){
+      if(item.type && item.type.startsWith('image/')){
+        const f = item.getAsFile();
+        if(f){ e.preventDefault(); rbHandleFile(f); break; }
+      }
+    }
+  }
+  dz.addEventListener('paste', handlePasteEvent);
+  document.addEventListener('paste', handlePasteEvent);
+
+  const canvas = document.getElementById('rb_canvas');
+  if(canvas) canvas.addEventListener('click', rbCanvasClick);
+})();
 
 // ---------- KOMPRES PDF ----------
 let pdfJsLoadPromise = null;
