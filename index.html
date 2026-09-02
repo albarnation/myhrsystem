@@ -1009,7 +1009,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <div style="margin-top:8px;"><button type="button" class="btn-ghost" style="margin:0;" onclick="rbResetTool()">Ganti Foto Lain</button></div>
     </div>
 
-    <div class="note">Cara pakai: unggah foto berlatar polos (pas foto/KTP dengan latar putih/biru/merah/hijau), lalu klik bagian latar belakang pada pratinjau untuk memilih warnanya (atau pakai tombol "Ambil Otomatis dari Tepi" yang menebak warna dari sudut-sudut foto). Naikkan "Toleransi Warna" kalau latar belum terhapus semua, turunkan kalau bagian objek/wajah ikut terhapus; atur "Haluskan Tepi" supaya batas potongan tidak bergerigi/kasar. Unduhan PNG memakai latar transparan (atau warna solid kalau dipilih); unduhan JPG otomatis dipadatkan ke latar warna solid karena format JPG tidak mendukung transparansi. Foto besar otomatis diperkecil ke maksimal 1800px pada sisi terpanjang supaya proses tetap ringan di browser. Fitur ini berbasis kemiripan warna sehingga paling akurat untuk latar belakang polos satu warna — bukan latar bertekstur atau pemandangan.</div>
+    <div class="note">Cara pakai: unggah foto berlatar polos (pas foto/KTP dengan latar putih/biru/merah/hijau), lalu klik bagian latar belakang pada pratinjau untuk memilih warnanya (atau pakai tombol "Ambil Otomatis dari Tepi" yang menebak warna dari sudut-sudut foto). Naikkan "Toleransi Warna" kalau latar belum terhapus semua, turunkan kalau bagian objek/wajah ikut terhapus; atur "Haluskan Tepi" supaya batas potongan tidak bergerigi/kasar. Deteksi memakai kemiripan rona warna (bukan sekadar kecerahan), jadi gradasi bayangan/terang-gelap pada latar tetap terhapus rata tanpa ikut memakan bagian wajah, jilbab, atau baju gelap. Unduhan PNG memakai latar transparan (atau warna solid kalau dipilih); unduhan JPG otomatis dipadatkan ke latar warna solid karena format JPG tidak mendukung transparansi. Foto besar otomatis diperkecil ke maksimal 1800px pada sisi terpanjang supaya proses tetap ringan di browser. Fitur ini paling akurat untuk latar belakang polos satu warna — bukan latar bertekstur atau pemandangan.</div>
   </div>
 
   <!-- ============ KOMPRES PDF ============ -->
@@ -2971,14 +2971,31 @@ function rbProcess(){
 
   const tol = parseInt(document.getElementById('rb_tolerance').value, 10) || 0;
   const feather = parseInt(document.getElementById('rb_feather').value, 10) || 0;
-  const threshold = (tol / 100) * 300;
+  const threshold = (tol / 100) * 160;
   const halfFeather = Math.max(feather, 1) / 2;
   const pr = rbPickedColor.r, pg = rbPickedColor.g, pb = rbPickedColor.b;
 
+  // Bandingkan warna lewat rona (hue/chroma - komponen Cb/Cr), bukan sekadar jarak RGB polos.
+  // Ini penting karena warna latar seringkali tidak rata (ada bayangan/gradasi terang-gelap),
+  // dan jarak RGB polos bisa membuat area abu-abu/hitam (jilbab, jas, rambut) salah dianggap
+  // "mirip" dengan latar berwarna yang agak gelap. Kalau latar yang dipilih berwarna cukup pekat
+  // (merah/biru/hijau dsb.), bobot kecerahan (Y) diperkecil supaya gradasi terang-gelap pada latar
+  // tetap terhapus rata; kalau latar hampir netral (putih/abu/hitam), bobot kecerahan dikembalikan
+  // penuh supaya latar putih tidak ikut menghapus baju/rambut gelap yang sama-sama tak berwarna.
+  const y0 = 0.299*pr + 0.587*pg + 0.114*pb;
+  const cb0 = -0.168736*pr - 0.331264*pg + 0.5*pb + 128;
+  const cr0 = 0.5*pr - 0.418688*pg - 0.081312*pb + 128;
+  const chromaMag0 = Math.sqrt((cb0-128)*(cb0-128) + (cr0-128)*(cr0-128));
+  const colorfulness = Math.max(0, Math.min(1, chromaMag0 / 40));
+  const wY = 1.0 - 0.75 * colorfulness;
+
   for(let i = 0; i < src.length; i += 4){
     const r = src[i], g = src[i+1], b = src[i+2], a = src[i+3];
-    const dr = r - pr, dg = g - pg, db = b - pb;
-    const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+    const y = 0.299*r + 0.587*g + 0.114*b;
+    const cb = -0.168736*r - 0.331264*g + 0.5*b + 128;
+    const cr = 0.5*r - 0.418688*g - 0.081312*b + 128;
+    const dy = y - y0, dcb = cb - cb0, dcr = cr - cr0;
+    const dist = Math.sqrt(wY*dy*dy + dcb*dcb + dcr*dcr);
     let alpha;
     if(dist <= threshold - halfFeather) alpha = 0;
     else if(dist >= threshold + halfFeather) alpha = a;
