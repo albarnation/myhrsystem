@@ -4428,7 +4428,7 @@ async function edRenderPage(pageIndex){
   if(!edOriginalTextItems[pageIndex]){
     try{
       const textContent = await page.getTextContent();
-      const items = [];
+      const rawItems = [];
       textContent.items.forEach(item=>{
         if(!item.str || !item.str.trim()) return;
         const t = item.transform;
@@ -4444,12 +4444,35 @@ async function edRenderPage(pageIndex){
         const p2 = { x: e + h * uV.x, y: f + h * uV.y };
         const p3 = { x: e + w * uH.x + h * uV.x, y: f + w * uH.y + h * uV.y };
         const xs = [p0.x, p1.x, p2.x, p3.x], ys = [p0.y, p1.y, p2.y, p3.y];
-        items.push({
+        rawItems.push({
           text: item.str,
           bbox: { x0: Math.min.apply(null, xs), x1: Math.max.apply(null, xs), y0: Math.min.apply(null, ys), y1: Math.max.apply(null, ys) },
           baseline: { x: p0.x, y: p0.y },
-          fontSize: Math.max(4, scaleY)
+          fontSize: Math.max(4, scaleY),
+          hasEOL: !!item.hasEOL
         });
+      });
+      // PDF sering memecah satu baris teks jadi beberapa potongan kecil (beda font/kerning dsb).
+      // Gabungkan potongan yang sebaris (posisi Y berdekatan, tidak dipisah tanda akhir baris)
+      // jadi satu unit utuh, supaya ketuk di mana saja pada baris itu selalu kena baris penuh —
+      // bukan sepotong kata yang membingungkan.
+      rawItems.sort((x, y)=> (y.baseline.y - x.baseline.y) || (x.baseline.x - y.baseline.x));
+      const items = [];
+      let current = null;
+      rawItems.forEach(it=>{
+        const sameLine = current && Math.abs(it.baseline.y - current.baseline.y) < Math.max(2, current.fontSize * 0.4);
+        if(sameLine){
+          const gap = it.bbox.x0 - current.bbox.x1;
+          current.text += (gap > current.fontSize * 0.15 ? ' ' : '') + it.text;
+          current.bbox.x1 = Math.max(current.bbox.x1, it.bbox.x1);
+          current.bbox.y0 = Math.min(current.bbox.y0, it.bbox.y0);
+          current.bbox.y1 = Math.max(current.bbox.y1, it.bbox.y1);
+          current.fontSize = Math.max(current.fontSize, it.fontSize);
+        } else {
+          current = { text: it.text, bbox: { x0: it.bbox.x0, x1: it.bbox.x1, y0: it.bbox.y0, y1: it.bbox.y1 }, baseline: { x: it.baseline.x, y: it.baseline.y }, fontSize: it.fontSize };
+          items.push(current);
+        }
+        if(it.hasEOL) current = null;
       });
       edOriginalTextItems[pageIndex] = items;
     }catch(err){
@@ -4482,9 +4505,10 @@ function edPdfBBoxToCanvasRect(x0, y0, x1, y1){
 }
 function edHitTestOriginalText(cx, cy){
   const items = edOriginalTextItems[edCurrentPageIndex] || [];
+  const pad = 6;
   for(let i = items.length - 1; i >= 0; i--){
     const r = edPdfBBoxToCanvasRect(items[i].bbox.x0, items[i].bbox.y0, items[i].bbox.x1, items[i].bbox.y1);
-    if(cx >= r.x0 - 2 && cx <= r.x1 + 2 && cy >= r.y0 - 2 && cy <= r.y1 + 2) return i;
+    if(cx >= r.x0 - pad && cx <= r.x1 + pad && cy >= r.y0 - pad && cy <= r.y1 + pad) return i;
   }
   return -1;
 }
