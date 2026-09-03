@@ -1301,6 +1301,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <div id="ed_text_defaults" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
         <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);">Ukuran Font <input type="number" id="ed_text_size" value="14" min="6" max="72" style="width:64px;"></label>
         <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);">Warna <input type="color" id="ed_text_color" value="#DC2626" style="width:44px;height:30px;padding:2px;"></label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);cursor:pointer;"><input type="checkbox" id="ed_text_bold" style="width:auto;"> Tebal (Bold)</label>
       </div>
       <div id="ed_draw_defaults" style="display:none;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
         <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);">Warna Pena <input type="color" id="ed_draw_color" value="#2563EB" style="width:44px;height:30px;padding:2px;"></label>
@@ -1323,7 +1324,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <button class="btn-primary" id="ed_btn" onclick="edGeneratePdf()">Simpan &amp; Unduh PDF</button>
     </div>
 
-    <div class="note">Cara pakai: unggah PDF, pilih halaman lewat strip pratinjau di atas, lalu pilih mode "Tulis Teks" — ketuk pada tulisan yang <b>sudah ada</b> di PDF untuk mengedit isinya (kotak edit akan terisi otomatis dengan teks aslinya), atau ketuk area kosong untuk menulis catatan baru. Ketuk tulisan yang sudah dibuat/diedit untuk mengubah lagi atau menghapusnya. Mode "Gambar Bebas" untuk mencoret bebas (seret jari/mouse; ketuk singkat pada coretan yang sudah ada untuk menghapusnya). Perlu diketahui: karena PDF tidak menyimpan teks sebagai paragraf yang bisa "disunting" langsung, mengedit tulisan asli bekerja dengan cara menutup tulisan lama pakai kotak putih lalu menuliskan teks baru di posisi yang sama persis — jadi hasilnya paling rapi untuk dokumen berlatar putih polos (kalau latar halaman berwarna/berpola di area tulisan tersebut, kotak putihnya akan terlihat). Setiap perubahan otomatis tersimpan per halaman — pindah halaman tidak menghilangkan yang sudah dibuat. Teks baru memakai font standar (Helvetica) sehingga sebagian karakter/simbol khusus mungkin tidak tampil; untuk tanda tangan berupa gambar (bukan coretan tangan), gunakan menu "Watermark, Stempel &amp; Nomor Halaman PDF". Halaman dengan rotasi bawaan (mis. hasil pindai miring) ditampilkan sesuai orientasi asli berkas, bukan rotasi tampilan. Semua proses berjalan sepenuhnya di perangkat ini — file tidak diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
+    <div class="note">Cara pakai: unggah PDF, pilih halaman lewat strip pratinjau di atas, lalu pilih mode "Tulis Teks" — ketuk pada tulisan yang <b>sudah ada</b> di PDF untuk mengedit isinya (kotak edit akan terisi otomatis dengan teks, ukuran, dan status tebal/tidaknya ditebak dari tulisan aslinya — koreksi lewat centang "Tebal (Bold)" kalau tebakannya kurang pas), atau ketuk area kosong untuk menulis catatan baru. Ketuk tulisan yang sudah dibuat/diedit untuk mengubah lagi atau menghapusnya. Mode "Gambar Bebas" untuk mencoret bebas (seret jari/mouse; ketuk singkat pada coretan yang sudah ada untuk menghapusnya). Perlu diketahui: karena PDF tidak menyimpan teks sebagai paragraf yang bisa "disunting" langsung, mengedit tulisan asli bekerja dengan cara menutup tulisan lama pakai kotak putih lalu menuliskan teks baru di posisi yang sama persis — jadi hasilnya paling rapi untuk dokumen berlatar putih polos (kalau latar halaman berwarna/berpola di area tulisan tersebut, kotak putihnya akan terlihat). Setiap perubahan otomatis tersimpan per halaman — pindah halaman tidak menghilangkan yang sudah dibuat. Teks baru memakai font standar (Helvetica/Helvetica Bold) sehingga sebagian karakter/simbol khusus atau gaya lain (miring, jenis font tertentu) mungkin tidak persis sama dengan aslinya; untuk tanda tangan berupa gambar (bukan coretan tangan), gunakan menu "Watermark, Stempel &amp; Nomor Halaman PDF". Halaman dengan rotasi bawaan (mis. hasil pindai miring) ditampilkan sesuai orientasi asli berkas, bukan rotasi tampilan. Semua proses berjalan sepenuhnya di perangkat ini — file tidak diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ HEADCOUNT CALCULATOR ============ -->
@@ -4474,6 +4475,15 @@ async function edRenderPage(pageIndex){
         }
         if(it.hasEOL) current = null;
       });
+      items.forEach(line=>{
+        const nonSpaceLen = line.text.replace(/\s/g, '').length;
+        if(nonSpaceLen >= 3){
+          const avgAdvance = (line.bbox.x1 - line.bbox.x0) / nonSpaceLen;
+          line.bold = (avgAdvance / line.fontSize) > 0.535;
+        } else {
+          line.bold = false;
+        }
+      });
       edOriginalTextItems[pageIndex] = items;
     }catch(err){
       edOriginalTextItems[pageIndex] = [];
@@ -4533,7 +4543,7 @@ function edDrawAnnotation(ctx, a){
     }
     const lineHeight = a.size * 1.25;
     const lines = String(a.text || '').split('\n');
-    ctx.font = (a.size * edRenderScale) + 'px Helvetica, Arial, sans-serif';
+    ctx.font = (a.bold ? 'bold ' : '') + (a.size * edRenderScale) + 'px Helvetica, Arial, sans-serif';
     ctx.fillStyle = a.color;
     ctx.textBaseline = 'alphabetic';
     lines.forEach((line, li)=>{
@@ -4556,7 +4566,7 @@ function edDrawAnnotation(ctx, a){
 
 function edMeasureTextBox(ctx, a){
   const lines = String(a.text || '').split('\n');
-  ctx.font = (a.size * edRenderScale) + 'px Helvetica, Arial, sans-serif';
+  ctx.font = (a.bold ? 'bold ' : '') + (a.size * edRenderScale) + 'px Helvetica, Arial, sans-serif';
   let maxWidth = 0;
   lines.forEach(line=>{ maxWidth = Math.max(maxWidth, ctx.measureText(line).width); });
   const lineHeight = a.size * 1.25;
@@ -4630,6 +4640,7 @@ function edOpenTextEditor(canvasX, canvasY, existingIndex, seed){
   const canvas = document.getElementById('ed_canvas');
   const input = document.getElementById('ed_texteditor_input');
   const delBtn = document.getElementById('ed_texteditor_delete');
+  const boldChk = document.getElementById('ed_text_bold');
 
   edEditingIndex = existingIndex != null && existingIndex >= 0 ? existingIndex : null;
   edPendingCover = null;
@@ -4639,6 +4650,7 @@ function edOpenTextEditor(canvasX, canvasY, existingIndex, seed){
     input.value = a.text;
     document.getElementById('ed_text_size').value = a.size;
     document.getElementById('ed_text_color').value = a.color;
+    boldChk.checked = !!a.bold;
     delBtn.style.display = '';
     edPendingTextPdfPos = { x: a.x, y: a.y };
     edPendingCover = a.cover || null;
@@ -4646,11 +4658,13 @@ function edOpenTextEditor(canvasX, canvasY, existingIndex, seed){
     input.value = seed.text;
     document.getElementById('ed_text_size').value = Math.round(seed.fontSize);
     document.getElementById('ed_text_color').value = '#000000';
+    boldChk.checked = !!seed.bold;
     delBtn.style.display = 'none';
     edPendingTextPdfPos = { x: seed.baseline.x, y: seed.baseline.y };
     edPendingCover = seed.bbox;
   } else {
     input.value = '';
+    boldChk.checked = false;
     delBtn.style.display = 'none';
     edPendingTextPdfPos = edCanvasToPdf(canvasX, canvasY);
   }
@@ -4669,14 +4683,15 @@ function edConfirmText(){
   const text = document.getElementById('ed_texteditor_input').value;
   const size = parseFloat(document.getElementById('ed_text_size').value) || 14;
   const color = document.getElementById('ed_text_color').value;
+  const bold = document.getElementById('ed_text_bold').checked;
   if(!text.trim()){ edCancelText(); return; }
 
   if(!edPageAnnotations[edCurrentPageIndex]) edPageAnnotations[edCurrentPageIndex] = [];
   if(edEditingIndex != null){
     const a = edPageAnnotations[edCurrentPageIndex][edEditingIndex];
-    a.text = text; a.size = size; a.color = color;
+    a.text = text; a.size = size; a.color = color; a.bold = bold;
   } else {
-    edPageAnnotations[edCurrentPageIndex].push({ type: 'text', x: edPendingTextPdfPos.x, y: edPendingTextPdfPos.y, text: text, size: size, color: color, cover: edPendingCover });
+    edPageAnnotations[edCurrentPageIndex].push({ type: 'text', x: edPendingTextPdfPos.x, y: edPendingTextPdfPos.y, text: text, size: size, color: color, bold: bold, cover: edPendingCover });
   }
   edCancelText();
   edRedrawCanvas();
@@ -4804,7 +4819,8 @@ async function edGeneratePdf(){
   try{
     const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
     const pdfDoc = await PDFDocument.load(edArrayBuffer.slice(0));
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const pages = pdfDoc.getPages();
 
     for(const pageIndexStr of Object.keys(edPageAnnotations)){
@@ -4828,10 +4844,11 @@ async function edGeneratePdf(){
           const col = ps2HexToRgb01(a.color);
           const lines = String(a.text || '').split('\n');
           const lineHeight = a.size * 1.25;
+          const useFont = a.bold ? fontBold : fontRegular;
           lines.forEach((line, li)=>{
             if(!line) return;
             try{
-              pdfPage.drawText(line, { x: a.x, y: a.y - li * lineHeight, size: a.size, font: font, color: rgb(col.r, col.g, col.b) });
+              pdfPage.drawText(line, { x: a.x, y: a.y - li * lineHeight, size: a.size, font: useFont, color: rgb(col.r, col.g, col.b) });
             }catch(e){ /* lewati karakter yang tidak didukung font standar */ }
           });
         } else if(a.type === 'stroke' && a.points && a.points.length >= 2){
