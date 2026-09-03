@@ -377,6 +377,7 @@
       <button class="side-link" data-tab="qrcode" title="Buat QR Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3M19 14v3h2M14 19h3v2M19 19v2h2"/></svg><span class="link-label">Buat QR Code</span></button>
       <button class="side-link" data-tab="pdf2word" title="PDF ke Ms Word"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h6l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13 3v5h5"/><path d="M9 17V12l1.5 3L12 12v5M14 12v5h1.6a1.4 1.4 0 0 0 0-5H14z"/></svg><span class="link-label">PDF ke Ms Word</span></button>
       <button class="side-link" data-tab="pdfstamp" title="Watermark, Stempel &amp; Nomor Halaman PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="10.5" cy="14" r="3"/><path d="M9.3 16.6 8 21l2.5-1.3L13 21l-1.3-4.4"/></svg><span class="link-label">Watermark &amp; Stempel PDF</span></button>
+      <button class="side-link" data-tab="editpdf" title="Edit / Tulis di PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13.5 14 8.5l1.5 1.5-5 5H9v-1.5z"/></svg><span class="link-label">Edit / Tulis di PDF</span></button>
     </nav>
   </aside>
 <div class="wrap">
@@ -1009,7 +1010,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <div style="margin-top:8px;"><button type="button" class="btn-ghost" style="margin:0;" onclick="rbResetTool()">Ganti Foto Lain</button></div>
     </div>
 
-    <div class="note">Cara pakai: unggah foto berlatar polos (pas foto/KTP dengan latar putih/biru/merah/hijau), lalu klik bagian latar belakang pada pratinjau untuk memilih warnanya (atau pakai tombol "Ambil Otomatis dari Tepi" yang menebak warna dari sudut-sudut foto). Naikkan "Toleransi Warna" kalau latar belum terhapus semua, turunkan kalau bagian objek/wajah ikut terhapus; atur "Haluskan Tepi" supaya batas potongan tidak bergerigi/kasar. Deteksi memakai kemiripan rona warna (bukan sekadar kecerahan), jadi gradasi bayangan/terang-gelap pada latar tetap terhapus rata tanpa ikut memakan bagian wajah, jilbab, atau baju gelap. Unduhan PNG memakai latar transparan (atau warna solid kalau dipilih); unduhan JPG otomatis dipadatkan ke latar warna solid karena format JPG tidak mendukung transparansi. Foto besar otomatis diperkecil ke maksimal 1800px pada sisi terpanjang supaya proses tetap ringan di browser. Fitur ini paling akurat untuk latar belakang polos satu warna — bukan latar bertekstur atau pemandangan.</div>
+    <div class="note">Cara pakai: unggah foto berlatar polos (pas foto/KTP dengan latar putih/biru/merah/hijau), lalu klik bagian latar belakang pada pratinjau untuk memilih warnanya (atau pakai tombol "Ambil Otomatis dari Tepi" yang menebak warna dari sudut-sudut foto). Naikkan "Toleransi Warna" kalau latar belum terhapus semua, turunkan kalau bagian objek/wajah ikut terhapus; atur "Haluskan Tepi" supaya batas potongan tidak bergerigi/kasar. Deteksi memakai kemiripan rona warna (bukan sekadar kecerahan), jadi gradasi bayangan/terang-gelap pada latar tetap terhapus rata tanpa ikut memakan bagian wajah, jilbab, atau baju gelap; bintik-bintik kecil akibat artefak kompresi foto (mis. di sekitar mata, gigi, atau corak jilbab) juga otomatis dibersihkan/ditutup kembali. Unduhan PNG memakai latar transparan (atau warna solid kalau dipilih); unduhan JPG otomatis dipadatkan ke latar warna solid karena format JPG tidak mendukung transparansi. Foto besar otomatis diperkecil ke maksimal 1800px pada sisi terpanjang supaya proses tetap ringan di browser. Fitur ini paling akurat untuk latar belakang polos satu warna — bukan latar bertekstur atau pemandangan.</div>
   </div>
 
   <!-- ============ KOMPRES PDF ============ -->
@@ -1273,6 +1274,56 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <button class="btn-primary" id="ps2_btn" onclick="ps2Process()">Proses &amp; Unduh PDF</button>
 
     <div class="note">Ketiga fitur bisa dipakai bersamaan atau sendiri-sendiri (nonaktifkan lewat centang di masing-masing bagian). Watermark digambar diagonal transparan di tengah tiap halaman terpilih. Format nomor halaman "dari total" menghitung total dari <em>semua</em> halaman PDF, bukan hanya yang diberi nomor. Semua proses berjalan sepenuhnya di perangkat ini lewat komponen pdf-lib (dimuat sekali dari internet lalu tersimpan di cache browser) — file tidak diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
+  </div>
+
+  <!-- ============ EDIT / TULIS DI PDF ============ -->
+  <div class="panel" id="panel-editpdf">
+    <div class="panel-head"><h2>Edit / Tulis di PDF</h2></div>
+    <div class="desc">Isi formulir, tambah catatan, atau coret-coret langsung di atas halaman PDF — ketuk di mana saja untuk menulis teks, atau gambar bebas (misal untuk tanda tangan/lingkari bagian penting). Perubahan langsung ditulis ke berkas PDF aslinya dan bisa diunduh.</div>
+
+    <div class="section-label">Unggah PDF</div>
+    <div id="ed_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      📄 Klik untuk pilih file PDF, atau seret file ke sini
+      <input type="file" id="ed_file_input" accept="application/pdf,.pdf" style="display:none;">
+    </div>
+    <div id="ed_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div id="ed_workarea" style="display:none;">
+      <div id="ed_thumbstrip" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;"></div>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        <button type="button" class="btn-ghost" id="ed_mode_text" style="margin:0;" onclick="edSetMode('text')">✏️ Tulis Teks</button>
+        <button type="button" class="btn-ghost" id="ed_mode_draw" style="margin:0;" onclick="edSetMode('draw')">🖊️ Gambar Bebas</button>
+        <button type="button" class="btn-ghost" style="margin:0;" onclick="edUndoLast()">↩️ Urungkan Terakhir</button>
+        <button type="button" class="btn-ghost" style="margin:0;color:var(--danger);" onclick="edClearPage()">🗑️ Bersihkan Halaman Ini</button>
+      </div>
+
+      <div id="ed_text_defaults" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);">Ukuran Font <input type="number" id="ed_text_size" value="14" min="6" max="72" style="width:64px;"></label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);">Warna <input type="color" id="ed_text_color" value="#DC2626" style="width:44px;height:30px;padding:2px;"></label>
+      </div>
+      <div id="ed_draw_defaults" style="display:none;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);">Warna Pena <input type="color" id="ed_draw_color" value="#2563EB" style="width:44px;height:30px;padding:2px;"></label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-dim);">Ketebalan <input type="number" id="ed_draw_width" value="2.5" min="0.5" max="12" step="0.5" style="width:64px;"></label>
+      </div>
+
+      <div style="background:var(--panel-2);border-radius:8px;border:1px solid var(--line);padding:8px;text-align:center;position:relative;">
+        <canvas id="ed_canvas" style="max-width:100%;border-radius:4px;display:inline-block;background:#fff;touch-action:none;"></canvas>
+        <div id="ed_texteditor" style="display:none;position:absolute;z-index:10;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.35);padding:10px;width:240px;text-align:left;">
+          <textarea id="ed_texteditor_input" rows="3" style="width:100%;resize:vertical;margin-bottom:8px;" placeholder="Tulis di sini..."></textarea>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="btn-primary" style="margin:0;flex:1;padding:7px;" onclick="edConfirmText()">Simpan</button>
+            <button type="button" class="btn-ghost" style="margin:0;padding:7px 10px;" onclick="edCancelText()">Batal</button>
+            <button type="button" class="btn-ghost" id="ed_texteditor_delete" style="margin:0;padding:7px 10px;color:var(--danger);display:none;" onclick="edDeleteEditingText()">Hapus</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row wide" style="margin-top:10px;"><label>Nama File Output</label><input type="text" id="ed_filename" placeholder="dokumen-edit" value="dokumen-edit"></div>
+      <button class="btn-primary" id="ed_btn" onclick="edGeneratePdf()">Simpan &amp; Unduh PDF</button>
+    </div>
+
+    <div class="note">Cara pakai: unggah PDF, pilih halaman lewat strip pratinjau di atas, lalu pilih mode "Tulis Teks" (ketuk area kosong untuk menulis baru, ketuk tulisan yang sudah ada untuk mengedit/menghapusnya) atau "Gambar Bebas" (seret jari/mouse untuk mencoret; ketuk singkat pada coretan yang sudah ada untuk menghapusnya). Setiap perubahan otomatis tersimpan per halaman — pindah halaman tidak menghilangkan tulisan/coretan yang sudah dibuat. Teks memakai font standar (Helvetica) sehingga sebagian karakter/simbol khusus mungkin tidak tampil; untuk kebutuhan tanda tangan gambar (bukan gambar bebas dari nol), gunakan menu "Watermark, Stempel &amp; Nomor Halaman PDF". Halaman dengan rotasi bawaan (mis. hasil pindai miring) ditampilkan sesuai orientasi asli berkas, bukan rotasi tampilan. Semua proses berjalan sepenuhnya di perangkat ini — file tidak diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ HEADCOUNT CALCULATOR ============ -->
@@ -3003,6 +3054,13 @@ function rbProcess(){
     dst[i] = r; dst[i+1] = g; dst[i+2] = b; dst[i+3] = alpha;
   }
 
+  // Bersihkan bintik-bintik kecil (noise) yang terisolasi — ini wajar muncul dari artefak
+  // kompresi JPEG/pemampatan gambar (warna sedikit "bocor" di detail-detail halus seperti
+  // pinggiran mata, gigi, atau corak jilbab). Kalau sekelompok kecil piksel transparan
+  // dikelilingi mayoritas piksel yang tetap utuh (atau sebaliknya), itu ditutup/dirapikan
+  // kembali supaya hasil akhir tidak bolong-bolong/berbintik.
+  rbDespeckle(dst, w, h);
+
   const canvas = document.getElementById('rb_canvas');
   const ctx = canvas.getContext('2d');
   const bgMode = document.getElementById('rb_bgmode').value;
@@ -3016,6 +3074,52 @@ function rbProcess(){
     ctx.drawImage(rbProcCanvas, 0, 0);
   } else {
     ctx.putImageData(out, 0, 0);
+  }
+}
+
+function rbDespeckle(dst, w, h){
+  const n = w * h;
+  const bin = new Uint8Array(n);
+  for(let i = 0, p = 0; i < n; i++, p += 4){ bin[i] = dst[p+3] >= 128 ? 1 : 0; }
+
+  const iw = w + 1;
+  const integral = new Int32Array(iw * (h + 1));
+  for(let y = 0; y < h; y++){
+    let rowSum = 0;
+    const rowOff = y * w;
+    const intRowOff = (y + 1) * iw;
+    const intPrevRowOff = y * iw;
+    for(let x = 0; x < w; x++){
+      rowSum += bin[rowOff + x];
+      integral[intRowOff + x + 1] = integral[intPrevRowOff + x + 1] + rowSum;
+    }
+  }
+
+  const radius = Math.max(2, Math.round(Math.min(w, h) * 0.004));
+  const keepFraction = 0.5;
+  const flip = new Uint8Array(n);
+  for(let y = 0; y < h; y++){
+    const y0 = Math.max(0, y - radius), y1 = Math.min(h - 1, y + radius);
+    for(let x = 0; x < w; x++){
+      const idx = y * w + x;
+      const cur = bin[idx];
+      const x0 = Math.max(0, x - radius), x1 = Math.min(w - 1, x + radius);
+      const A = integral[y0 * iw + x0];
+      const B = integral[y0 * iw + (x1 + 1)];
+      const C = integral[(y1 + 1) * iw + x0];
+      const D = integral[(y1 + 1) * iw + (x1 + 1)];
+      const sum = D - B - C + A;
+      const area = (x1 - x0 + 1) * (y1 - y0 + 1);
+      const fraction = sum / area;
+      if(cur === 0 && fraction >= keepFraction) flip[idx] = 1;
+      else if(cur === 1 && (1 - fraction) >= keepFraction) flip[idx] = 1;
+    }
+  }
+
+  for(let i = 0, p = 0; i < n; i++, p += 4){
+    if(flip[i]){
+      dst[p+3] = bin[i] === 0 ? 255 : 0;
+    }
   }
 }
 
@@ -4212,6 +4316,445 @@ async function ps2Process(){
     if(e.dataTransfer.files && e.dataTransfer.files[0]) ps2SetFile(e.dataTransfer.files[0]);
   });
 })();
+
+// ---------- EDIT / TULIS DI PDF ----------
+let edArrayBuffer = null;
+let edPdfDoc = null;         // dokumen pdf.js (untuk membaca/menggambar pratinjau)
+let edNumPages = 0;
+let edThumbs = [];           // [{ pageIndex, thumbUrl }]
+let edCurrentPageIndex = 0;
+let edPageAnnotations = {};  // { [pageIndex]: [ {type:'text',x,y,text,size,color} | {type:'stroke',points,color,lineWidth} ] }
+let edMode = 'text';
+let edRenderScale = 1;       // px kanvas per 1 poin PDF, untuk halaman aktif
+let edBaseCanvas = null;     // render halaman aktif TANPA anotasi (cache, supaya redraw cepat)
+let edIsDrawing = false;
+let edActiveStroke = null;
+let edPointerDownPos = null;
+let edEditingIndex = null;   // index anotasi teks yang sedang diedit (null = teks baru)
+let edPendingTextPdfPos = null;
+
+function setEdStatus(msg, isError){
+  const el = document.getElementById('ed_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+async function edHandleFile(file){
+  const isPdf = (file.type && file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+  if(!isPdf){ setEdStatus('File yang dipilih bukan PDF.', true); return; }
+
+  setEdStatus('Memuat komponen pembaca PDF (butuh internet sekali di awal)...', false);
+  try{ await loadPdfJs(); }catch(err){ setEdStatus(err.message, true); return; }
+
+  setEdStatus('Membaca "' + file.name + '"...', false);
+  try{
+    edArrayBuffer = await file.arrayBuffer();
+    edPdfDoc = await window.pdfjsLib.getDocument({ data: edArrayBuffer.slice(0) }).promise;
+    edNumPages = edPdfDoc.numPages;
+    edPageAnnotations = {};
+    edThumbs = [];
+
+    for(let pageNum = 1; pageNum <= edNumPages; pageNum++){
+      setEdStatus('Membuat pratinjau halaman ' + pageNum + ' dari ' + edNumPages + '...', false);
+      const page = await edPdfDoc.getPage(pageNum);
+      const baseViewport = page.getViewport({ scale: 1, rotation: 0 });
+      const scale = 110 / Math.max(baseViewport.width, baseViewport.height);
+      const viewport = page.getViewport({ scale: scale, rotation: 0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(viewport.width));
+      canvas.height = Math.max(1, Math.round(viewport.height));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      edThumbs.push({ pageIndex: pageNum - 1, thumbUrl: canvas.toDataURL('image/jpeg', 0.7) });
+      page.cleanup && page.cleanup();
+    }
+
+    let baseName = (file.name || 'dokumen').replace(/\.pdf$/i, '');
+    document.getElementById('ed_filename').value = baseName + '-edit';
+
+    edCurrentPageIndex = 0;
+    document.getElementById('ed_workarea').style.display = '';
+    edRenderThumbStrip();
+    await edRenderPage(edCurrentPageIndex);
+    setEdStatus('Berhasil dimuat (' + edNumPages + ' halaman). Pilih mode di atas lalu ketuk pada halaman untuk mulai menulis/menggambar.', false);
+  }catch(err){
+    setEdStatus('Gagal membaca PDF: ' + err.message, true);
+  }
+}
+
+function edRenderThumbStrip(){
+  const wrap = document.getElementById('ed_thumbstrip');
+  wrap.innerHTML = edThumbs.map(t=>{
+    const active = t.pageIndex === edCurrentPageIndex;
+    const hasNotes = (edPageAnnotations[t.pageIndex] || []).length > 0;
+    return '<div onclick="edSwitchPage(' + t.pageIndex + ')" style="flex-shrink:0;cursor:pointer;text-align:center;position:relative;">'
+      + '<img src="' + t.thumbUrl + '" style="height:70px;border-radius:5px;border:2px solid ' + (active ? 'var(--accent)' : 'var(--line)') + ';display:block;background:#fff;">'
+      + '<div style="font-size:10px;color:var(--ink-faint);margin-top:2px;">' + (t.pageIndex + 1) + (hasNotes ? ' •' : '') + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+async function edSwitchPage(pageIndex){
+  if(pageIndex === edCurrentPageIndex) return;
+  edCancelText();
+  edCurrentPageIndex = pageIndex;
+  edRenderThumbStrip();
+  await edRenderPage(pageIndex);
+}
+
+async function edRenderPage(pageIndex){
+  setEdStatus('Menyiapkan halaman ' + (pageIndex + 1) + '...', false);
+  const page = await edPdfDoc.getPage(pageIndex + 1);
+  const baseViewport = page.getViewport({ scale: 1, rotation: 0 });
+  const targetMaxDim = 1000;
+  edRenderScale = targetMaxDim / Math.max(baseViewport.width, baseViewport.height);
+  const viewport = page.getViewport({ scale: edRenderScale, rotation: 0 });
+
+  const base = document.createElement('canvas');
+  base.width = Math.max(1, Math.round(viewport.width));
+  base.height = Math.max(1, Math.round(viewport.height));
+  const bctx = base.getContext('2d');
+  bctx.fillStyle = '#FFFFFF';
+  bctx.fillRect(0, 0, base.width, base.height);
+  await page.render({ canvasContext: bctx, viewport: viewport }).promise;
+  page.cleanup && page.cleanup();
+  edBaseCanvas = base;
+
+  const canvas = document.getElementById('ed_canvas');
+  canvas.width = base.width;
+  canvas.height = base.height;
+  edRedrawCanvas();
+  setEdStatus('', false);
+}
+
+function edPdfToCanvas(x, y){
+  const h = edBaseCanvas.height;
+  return { x: x * edRenderScale, y: h - y * edRenderScale };
+}
+function edCanvasToPdf(x, y){
+  const h = edBaseCanvas.height;
+  return { x: x / edRenderScale, y: (h - y) / edRenderScale };
+}
+
+function edRedrawCanvas(extraStroke){
+  const canvas = document.getElementById('ed_canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(edBaseCanvas, 0, 0);
+
+  const list = edPageAnnotations[edCurrentPageIndex] || [];
+  list.forEach(a=> edDrawAnnotation(ctx, a));
+  if(extraStroke) edDrawAnnotation(ctx, extraStroke);
+}
+
+function edDrawAnnotation(ctx, a){
+  if(a.type === 'text'){
+    const lineHeight = a.size * 1.25;
+    const lines = String(a.text || '').split('\n');
+    ctx.font = (a.size * edRenderScale) + 'px Helvetica, Arial, sans-serif';
+    ctx.fillStyle = a.color;
+    ctx.textBaseline = 'alphabetic';
+    lines.forEach((line, li)=>{
+      const p = edPdfToCanvas(a.x, a.y - li * lineHeight);
+      ctx.fillText(line, p.x, p.y);
+    });
+  } else if(a.type === 'stroke' && a.points && a.points.length > 0){
+    ctx.strokeStyle = a.color;
+    ctx.lineWidth = Math.max(1, a.lineWidth * edRenderScale);
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    a.points.forEach((pt, i)=>{
+      const p = edPdfToCanvas(pt.x, pt.y);
+      if(i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+  }
+}
+
+function edMeasureTextBox(ctx, a){
+  const lines = String(a.text || '').split('\n');
+  ctx.font = (a.size * edRenderScale) + 'px Helvetica, Arial, sans-serif';
+  let maxWidth = 0;
+  lines.forEach(line=>{ maxWidth = Math.max(maxWidth, ctx.measureText(line).width); });
+  const lineHeight = a.size * 1.25;
+  const topPdf = a.y + a.size * 0.25;
+  const bottomPdf = a.y - (lines.length - 1) * lineHeight - a.size * 0.3;
+  const topC = edPdfToCanvas(a.x, topPdf);
+  const bottomC = edPdfToCanvas(a.x, bottomPdf);
+  return { x0: topC.x - 3, y0: topC.y - 3, x1: topC.x + maxWidth + 3, y1: bottomC.y + 3 };
+}
+
+function edHitTestText(cx, cy){
+  const canvas = document.getElementById('ed_canvas');
+  const ctx = canvas.getContext('2d');
+  const list = edPageAnnotations[edCurrentPageIndex] || [];
+  for(let i = list.length - 1; i >= 0; i--){
+    if(list[i].type !== 'text') continue;
+    const box = edMeasureTextBox(ctx, list[i]);
+    if(cx >= box.x0 && cx <= box.x1 && cy >= box.y0 && cy <= box.y1) return i;
+  }
+  return -1;
+}
+
+function edPointToSegDist(px, py, x1, y1, x2, y2){
+  const dx = x2 - x1, dy = y2 - y1;
+  const lenSq = dx*dx + dy*dy;
+  let t = lenSq > 0 ? ((px - x1) * dx + (py - y1) * dy) / lenSq : 0;
+  t = Math.max(0, Math.min(1, t));
+  const cx = x1 + t * dx, cy = y1 + t * dy;
+  return Math.hypot(px - cx, py - cy);
+}
+
+function edHitTestStroke(cx, cy){
+  const list = edPageAnnotations[edCurrentPageIndex] || [];
+  const tolerance = 10;
+  for(let i = list.length - 1; i >= 0; i--){
+    if(list[i].type !== 'stroke') continue;
+    const pts = list[i].points.map(pt=> edPdfToCanvas(pt.x, pt.y));
+    if(pts.length === 1){
+      if(Math.hypot(cx - pts[0].x, cy - pts[0].y) <= tolerance) return i;
+      continue;
+    }
+    for(let j = 0; j < pts.length - 1; j++){
+      if(edPointToSegDist(cx, cy, pts[j].x, pts[j].y, pts[j+1].x, pts[j+1].y) <= tolerance) return i;
+    }
+  }
+  return -1;
+}
+
+function edSetMode(mode){
+  edMode = mode;
+  document.getElementById('ed_mode_text').style.borderColor = mode === 'text' ? 'var(--accent)' : '';
+  document.getElementById('ed_mode_draw').style.borderColor = mode === 'draw' ? 'var(--accent)' : '';
+  document.getElementById('ed_text_defaults').style.display = mode === 'text' ? 'flex' : 'none';
+  document.getElementById('ed_draw_defaults').style.display = mode === 'draw' ? 'flex' : 'none';
+  edCancelText();
+}
+
+function edGetCanvasPos(e){
+  const canvas = document.getElementById('ed_canvas');
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: Math.min(canvas.width - 1, Math.max(0, (e.clientX - rect.left) * scaleX)),
+    y: Math.min(canvas.height - 1, Math.max(0, (e.clientY - rect.top) * scaleY))
+  };
+}
+
+function edOpenTextEditor(canvasX, canvasY, existingIndex){
+  const box = document.getElementById('ed_texteditor');
+  const canvas = document.getElementById('ed_canvas');
+  const input = document.getElementById('ed_texteditor_input');
+  const delBtn = document.getElementById('ed_texteditor_delete');
+
+  edEditingIndex = existingIndex != null && existingIndex >= 0 ? existingIndex : null;
+  if(edEditingIndex != null){
+    const a = edPageAnnotations[edCurrentPageIndex][edEditingIndex];
+    input.value = a.text;
+    document.getElementById('ed_text_size').value = a.size;
+    document.getElementById('ed_text_color').value = a.color;
+    delBtn.style.display = '';
+    edPendingTextPdfPos = { x: a.x, y: a.y };
+  } else {
+    input.value = '';
+    delBtn.style.display = 'none';
+    edPendingTextPdfPos = edCanvasToPdf(canvasX, canvasY);
+  }
+
+  let left = canvasX, top = canvasY;
+  const boxW = 240;
+  if(left + boxW > canvas.width) left = Math.max(0, canvas.width - boxW);
+  box.style.left = left + 'px';
+  box.style.top = Math.min(top, Math.max(0, canvas.height - 160)) + 'px';
+  box.style.display = 'block';
+  input.focus();
+}
+
+function edConfirmText(){
+  const text = document.getElementById('ed_texteditor_input').value;
+  const size = parseFloat(document.getElementById('ed_text_size').value) || 14;
+  const color = document.getElementById('ed_text_color').value;
+  if(!text.trim()){ edCancelText(); return; }
+
+  if(!edPageAnnotations[edCurrentPageIndex]) edPageAnnotations[edCurrentPageIndex] = [];
+  if(edEditingIndex != null){
+    const a = edPageAnnotations[edCurrentPageIndex][edEditingIndex];
+    a.text = text; a.size = size; a.color = color;
+  } else {
+    edPageAnnotations[edCurrentPageIndex].push({ type: 'text', x: edPendingTextPdfPos.x, y: edPendingTextPdfPos.y, text: text, size: size, color: color });
+  }
+  edCancelText();
+  edRedrawCanvas();
+  edRenderThumbStrip();
+}
+
+function edDeleteEditingText(){
+  if(edEditingIndex != null){
+    edPageAnnotations[edCurrentPageIndex].splice(edEditingIndex, 1);
+  }
+  edCancelText();
+  edRedrawCanvas();
+  edRenderThumbStrip();
+}
+
+function edCancelText(){
+  document.getElementById('ed_texteditor').style.display = 'none';
+  edEditingIndex = null;
+  edPendingTextPdfPos = null;
+}
+
+function edUndoLast(){
+  const list = edPageAnnotations[edCurrentPageIndex];
+  if(list && list.length) list.pop();
+  edRedrawCanvas();
+  edRenderThumbStrip();
+}
+
+function edClearPage(){
+  edPageAnnotations[edCurrentPageIndex] = [];
+  edCancelText();
+  edRedrawCanvas();
+  edRenderThumbStrip();
+}
+
+(function setupEdDropzoneAndCanvas(){
+  const dz = document.getElementById('ed_dropzone');
+  const fileInput = document.getElementById('ed_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files[0]) edHandleFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) edHandleFile(e.dataTransfer.files[0]);
+  });
+
+  const canvas = document.getElementById('ed_canvas');
+  canvas.addEventListener('pointerdown', (e)=>{
+    if(!edBaseCanvas) return;
+    e.preventDefault();
+    const pos = edGetCanvasPos(e);
+    edPointerDownPos = pos;
+
+    if(edMode === 'text'){
+      const hit = edHitTestText(pos.x, pos.y);
+      edOpenTextEditor(pos.x, pos.y, hit);
+    } else if(edMode === 'draw'){
+      edIsDrawing = true;
+      const pdfPt = edCanvasToPdf(pos.x, pos.y);
+      edActiveStroke = { type: 'stroke', points: [pdfPt], color: document.getElementById('ed_draw_color').value, lineWidth: parseFloat(document.getElementById('ed_draw_width').value) || 2.5 };
+    }
+  });
+  canvas.addEventListener('pointermove', (e)=>{
+    if(!edIsDrawing || !edActiveStroke) return;
+    e.preventDefault();
+    const pos = edGetCanvasPos(e);
+    edActiveStroke.points.push(edCanvasToPdf(pos.x, pos.y));
+    edRedrawCanvas(edActiveStroke);
+  });
+  function edFinishDraw(e){
+    if(!edIsDrawing) return;
+    edIsDrawing = false;
+    const pos = edGetCanvasPos(e);
+    const moved = edPointerDownPos ? Math.hypot(pos.x - edPointerDownPos.x, pos.y - edPointerDownPos.y) : 999;
+    if(moved < 4){
+      const hit = edHitTestStroke(pos.x, pos.y);
+      if(hit >= 0){
+        edPageAnnotations[edCurrentPageIndex].splice(hit, 1);
+        edRenderThumbStrip();
+      }
+    } else if(edActiveStroke && edActiveStroke.points.length >= 2){
+      if(!edPageAnnotations[edCurrentPageIndex]) edPageAnnotations[edCurrentPageIndex] = [];
+      edPageAnnotations[edCurrentPageIndex].push(edActiveStroke);
+      edRenderThumbStrip();
+    }
+    edActiveStroke = null;
+    edRedrawCanvas();
+  }
+  canvas.addEventListener('pointerup', edFinishDraw);
+  canvas.addEventListener('pointerleave', (e)=>{ if(edIsDrawing) edFinishDraw(e); });
+})();
+edSetMode('text');
+
+async function edGeneratePdf(){
+  if(!edArrayBuffer){ setEdStatus('Belum ada PDF yang dimuat.', true); return; }
+  const hasAnyAnnotation = Object.values(edPageAnnotations).some(list=> list && list.length > 0);
+  if(!hasAnyAnnotation){ setEdStatus('Belum ada tulisan/coretan yang ditambahkan.', true); return; }
+
+  setEdStatus('Memuat komponen penyusun PDF...', false);
+  try{ await loadPdfLib(); }catch(err){ setEdStatus(err.message, true); return; }
+
+  let filename = (document.getElementById('ed_filename').value || 'dokumen-edit').trim();
+  filename = filename.replace(/\.pdf$/i, '') || 'dokumen-edit';
+
+  const btn = document.getElementById('ed_btn');
+  btn.disabled = true;
+  setEdStatus('Menulis perubahan ke PDF...', false);
+  try{
+    const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
+    const pdfDoc = await PDFDocument.load(edArrayBuffer.slice(0));
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const pages = pdfDoc.getPages();
+
+    for(const pageIndexStr of Object.keys(edPageAnnotations)){
+      const pageIndex = parseInt(pageIndexStr, 10);
+      const list = edPageAnnotations[pageIndex];
+      if(!list || !list.length || !pages[pageIndex]) continue;
+      const pdfPage = pages[pageIndex];
+
+      list.forEach(a=>{
+        if(a.type === 'text'){
+          const col = ps2HexToRgb01(a.color);
+          const lines = String(a.text || '').split('\n');
+          const lineHeight = a.size * 1.25;
+          lines.forEach((line, li)=>{
+            if(!line) return;
+            try{
+              pdfPage.drawText(line, { x: a.x, y: a.y - li * lineHeight, size: a.size, font: font, color: rgb(col.r, col.g, col.b) });
+            }catch(e){ /* lewati karakter yang tidak didukung font standar */ }
+          });
+        } else if(a.type === 'stroke' && a.points && a.points.length >= 2){
+          const col = ps2HexToRgb01(a.color);
+          for(let i = 0; i < a.points.length - 1; i++){
+            pdfPage.drawLine({
+              start: { x: a.points[i].x, y: a.points[i].y },
+              end: { x: a.points[i+1].x, y: a.points[i+1].y },
+              thickness: a.lineWidth,
+              color: rgb(col.r, col.g, col.b),
+              opacity: 1
+            });
+          }
+        }
+      });
+    }
+
+    const outBytes = await pdfDoc.save();
+    const blob = new Blob([outBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename + '.pdf';
+    link.click();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+    setEdStatus('Selesai — PDF "' + filename + '.pdf" berhasil dibuat dan diunduh.', false);
+  }catch(err){
+    setEdStatus('Gagal menulis PDF: ' + err.message, true);
+  }finally{
+    btn.disabled = false;
+  }
+}
 
 // ---------- HEADCOUNT CALCULATOR ----------
 function calcHeadcount(){
