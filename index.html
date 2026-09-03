@@ -1279,7 +1279,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
   <!-- ============ EDIT / TULIS DI PDF ============ -->
   <div class="panel" id="panel-editpdf">
     <div class="panel-head"><h2>Edit / Tulis di PDF</h2></div>
-    <div class="desc">Isi formulir, tambah catatan, atau coret-coret langsung di atas halaman PDF — ketuk di mana saja untuk menulis teks, atau gambar bebas (misal untuk tanda tangan/lingkari bagian penting). Perubahan langsung ditulis ke berkas PDF aslinya dan bisa diunduh.</div>
+    <div class="desc">Isi formulir, ubah tulisan yang sudah ada, tambah catatan, atau coret-coret langsung di atas halaman PDF — ketuk tulisan asli untuk mengedit isinya, ketuk area kosong untuk menulis baru, atau gambar bebas (misal untuk tanda tangan/lingkari bagian penting). Perubahan langsung ditulis ke berkas PDF aslinya dan bisa diunduh.</div>
 
     <div class="section-label">Unggah PDF</div>
     <div id="ed_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
@@ -1323,7 +1323,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <button class="btn-primary" id="ed_btn" onclick="edGeneratePdf()">Simpan &amp; Unduh PDF</button>
     </div>
 
-    <div class="note">Cara pakai: unggah PDF, pilih halaman lewat strip pratinjau di atas, lalu pilih mode "Tulis Teks" (ketuk area kosong untuk menulis baru, ketuk tulisan yang sudah ada untuk mengedit/menghapusnya) atau "Gambar Bebas" (seret jari/mouse untuk mencoret; ketuk singkat pada coretan yang sudah ada untuk menghapusnya). Setiap perubahan otomatis tersimpan per halaman — pindah halaman tidak menghilangkan tulisan/coretan yang sudah dibuat. Teks memakai font standar (Helvetica) sehingga sebagian karakter/simbol khusus mungkin tidak tampil; untuk kebutuhan tanda tangan gambar (bukan gambar bebas dari nol), gunakan menu "Watermark, Stempel &amp; Nomor Halaman PDF". Halaman dengan rotasi bawaan (mis. hasil pindai miring) ditampilkan sesuai orientasi asli berkas, bukan rotasi tampilan. Semua proses berjalan sepenuhnya di perangkat ini — file tidak diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
+    <div class="note">Cara pakai: unggah PDF, pilih halaman lewat strip pratinjau di atas, lalu pilih mode "Tulis Teks" — ketuk pada tulisan yang <b>sudah ada</b> di PDF untuk mengedit isinya (kotak edit akan terisi otomatis dengan teks aslinya), atau ketuk area kosong untuk menulis catatan baru. Ketuk tulisan yang sudah dibuat/diedit untuk mengubah lagi atau menghapusnya. Mode "Gambar Bebas" untuk mencoret bebas (seret jari/mouse; ketuk singkat pada coretan yang sudah ada untuk menghapusnya). Perlu diketahui: karena PDF tidak menyimpan teks sebagai paragraf yang bisa "disunting" langsung, mengedit tulisan asli bekerja dengan cara menutup tulisan lama pakai kotak putih lalu menuliskan teks baru di posisi yang sama persis — jadi hasilnya paling rapi untuk dokumen berlatar putih polos (kalau latar halaman berwarna/berpola di area tulisan tersebut, kotak putihnya akan terlihat). Setiap perubahan otomatis tersimpan per halaman — pindah halaman tidak menghilangkan yang sudah dibuat. Teks baru memakai font standar (Helvetica) sehingga sebagian karakter/simbol khusus mungkin tidak tampil; untuk tanda tangan berupa gambar (bukan coretan tangan), gunakan menu "Watermark, Stempel &amp; Nomor Halaman PDF". Halaman dengan rotasi bawaan (mis. hasil pindai miring) ditampilkan sesuai orientasi asli berkas, bukan rotasi tampilan. Semua proses berjalan sepenuhnya di perangkat ini — file tidak diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ HEADCOUNT CALCULATOR ============ -->
@@ -4332,6 +4332,8 @@ let edActiveStroke = null;
 let edPointerDownPos = null;
 let edEditingIndex = null;   // index anotasi teks yang sedang diedit (null = teks baru)
 let edPendingTextPdfPos = null;
+let edPendingCover = null;
+let edOriginalTextItems = {};
 
 function setEdStatus(msg, isError){
   const el = document.getElementById('ed_status');
@@ -4354,6 +4356,7 @@ async function edHandleFile(file){
     edPdfDoc = await window.pdfjsLib.getDocument({ data: edArrayBuffer.slice(0) }).promise;
     edNumPages = edPdfDoc.numPages;
     edPageAnnotations = {};
+    edOriginalTextItems = {};
     edThumbs = [];
 
     for(let pageNum = 1; pageNum <= edNumPages; pageNum++){
@@ -4421,6 +4424,39 @@ async function edRenderPage(pageIndex){
   bctx.fillStyle = '#FFFFFF';
   bctx.fillRect(0, 0, base.width, base.height);
   await page.render({ canvasContext: bctx, viewport: viewport }).promise;
+
+  if(!edOriginalTextItems[pageIndex]){
+    try{
+      const textContent = await page.getTextContent();
+      const items = [];
+      textContent.items.forEach(item=>{
+        if(!item.str || !item.str.trim()) return;
+        const t = item.transform;
+        const a = t[0], b = t[1], c = t[2], d = t[3], e = t[4], f = t[5];
+        const scaleX = Math.hypot(a, b) || 1;
+        const scaleY = Math.hypot(c, d) || 1;
+        const uH = { x: a / scaleX, y: b / scaleX };
+        const uV = { x: c / scaleY, y: d / scaleY };
+        const w = item.width || 0;
+        const h = item.height || scaleY;
+        const p0 = { x: e, y: f };
+        const p1 = { x: e + w * uH.x, y: f + w * uH.y };
+        const p2 = { x: e + h * uV.x, y: f + h * uV.y };
+        const p3 = { x: e + w * uH.x + h * uV.x, y: f + w * uH.y + h * uV.y };
+        const xs = [p0.x, p1.x, p2.x, p3.x], ys = [p0.y, p1.y, p2.y, p3.y];
+        items.push({
+          text: item.str,
+          bbox: { x0: Math.min.apply(null, xs), x1: Math.max.apply(null, xs), y0: Math.min.apply(null, ys), y1: Math.max.apply(null, ys) },
+          baseline: { x: p0.x, y: p0.y },
+          fontSize: Math.max(4, scaleY)
+        });
+      });
+      edOriginalTextItems[pageIndex] = items;
+    }catch(err){
+      edOriginalTextItems[pageIndex] = [];
+    }
+  }
+
   page.cleanup && page.cleanup();
   edBaseCanvas = base;
 
@@ -4439,6 +4475,19 @@ function edCanvasToPdf(x, y){
   const h = edBaseCanvas.height;
   return { x: x / edRenderScale, y: (h - y) / edRenderScale };
 }
+function edPdfBBoxToCanvasRect(x0, y0, x1, y1){
+  const c1 = edPdfToCanvas(x0, y0), c2 = edPdfToCanvas(x1, y0), c3 = edPdfToCanvas(x0, y1), c4 = edPdfToCanvas(x1, y1);
+  const xs = [c1.x, c2.x, c3.x, c4.x], ys = [c1.y, c2.y, c3.y, c4.y];
+  return { x0: Math.min.apply(null, xs), x1: Math.max.apply(null, xs), y0: Math.min.apply(null, ys), y1: Math.max.apply(null, ys) };
+}
+function edHitTestOriginalText(cx, cy){
+  const items = edOriginalTextItems[edCurrentPageIndex] || [];
+  for(let i = items.length - 1; i >= 0; i--){
+    const r = edPdfBBoxToCanvasRect(items[i].bbox.x0, items[i].bbox.y0, items[i].bbox.x1, items[i].bbox.y1);
+    if(cx >= r.x0 - 2 && cx <= r.x1 + 2 && cy >= r.y0 - 2 && cy <= r.y1 + 2) return i;
+  }
+  return -1;
+}
 
 function edRedrawCanvas(extraStroke){
   const canvas = document.getElementById('ed_canvas');
@@ -4453,6 +4502,11 @@ function edRedrawCanvas(extraStroke){
 
 function edDrawAnnotation(ctx, a){
   if(a.type === 'text'){
+    if(a.cover){
+      const r = edPdfBBoxToCanvasRect(a.cover.x0, a.cover.y0, a.cover.x1, a.cover.y1);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(r.x0 - 1, r.y0 - 1, (r.x1 - r.x0) + 2, (r.y1 - r.y0) + 2);
+    }
     const lineHeight = a.size * 1.25;
     const lines = String(a.text || '').split('\n');
     ctx.font = (a.size * edRenderScale) + 'px Helvetica, Arial, sans-serif';
@@ -4547,13 +4601,15 @@ function edGetCanvasPos(e){
   };
 }
 
-function edOpenTextEditor(canvasX, canvasY, existingIndex){
+function edOpenTextEditor(canvasX, canvasY, existingIndex, seed){
   const box = document.getElementById('ed_texteditor');
   const canvas = document.getElementById('ed_canvas');
   const input = document.getElementById('ed_texteditor_input');
   const delBtn = document.getElementById('ed_texteditor_delete');
 
   edEditingIndex = existingIndex != null && existingIndex >= 0 ? existingIndex : null;
+  edPendingCover = null;
+
   if(edEditingIndex != null){
     const a = edPageAnnotations[edCurrentPageIndex][edEditingIndex];
     input.value = a.text;
@@ -4561,6 +4617,14 @@ function edOpenTextEditor(canvasX, canvasY, existingIndex){
     document.getElementById('ed_text_color').value = a.color;
     delBtn.style.display = '';
     edPendingTextPdfPos = { x: a.x, y: a.y };
+    edPendingCover = a.cover || null;
+  } else if(seed){
+    input.value = seed.text;
+    document.getElementById('ed_text_size').value = Math.round(seed.fontSize);
+    document.getElementById('ed_text_color').value = '#000000';
+    delBtn.style.display = 'none';
+    edPendingTextPdfPos = { x: seed.baseline.x, y: seed.baseline.y };
+    edPendingCover = seed.bbox;
   } else {
     input.value = '';
     delBtn.style.display = 'none';
@@ -4574,6 +4638,7 @@ function edOpenTextEditor(canvasX, canvasY, existingIndex){
   box.style.top = Math.min(top, Math.max(0, canvas.height - 160)) + 'px';
   box.style.display = 'block';
   input.focus();
+  input.select();
 }
 
 function edConfirmText(){
@@ -4587,7 +4652,7 @@ function edConfirmText(){
     const a = edPageAnnotations[edCurrentPageIndex][edEditingIndex];
     a.text = text; a.size = size; a.color = color;
   } else {
-    edPageAnnotations[edCurrentPageIndex].push({ type: 'text', x: edPendingTextPdfPos.x, y: edPendingTextPdfPos.y, text: text, size: size, color: color });
+    edPageAnnotations[edCurrentPageIndex].push({ type: 'text', x: edPendingTextPdfPos.x, y: edPendingTextPdfPos.y, text: text, size: size, color: color, cover: edPendingCover });
   }
   edCancelText();
   edRedrawCanvas();
@@ -4607,6 +4672,7 @@ function edCancelText(){
   document.getElementById('ed_texteditor').style.display = 'none';
   edEditingIndex = null;
   edPendingTextPdfPos = null;
+  edPendingCover = null;
 }
 
 function edUndoLast(){
@@ -4650,7 +4716,16 @@ function edClearPage(){
 
     if(edMode === 'text'){
       const hit = edHitTestText(pos.x, pos.y);
-      edOpenTextEditor(pos.x, pos.y, hit);
+      if(hit >= 0){
+        edOpenTextEditor(pos.x, pos.y, hit);
+      } else {
+        const origHit = edHitTestOriginalText(pos.x, pos.y);
+        if(origHit >= 0){
+          edOpenTextEditor(pos.x, pos.y, null, edOriginalTextItems[edCurrentPageIndex][origHit]);
+        } else {
+          edOpenTextEditor(pos.x, pos.y, null);
+        }
+      }
     } else if(edMode === 'draw'){
       edIsDrawing = true;
       const pdfPt = edCanvasToPdf(pos.x, pos.y);
@@ -4716,6 +4791,16 @@ async function edGeneratePdf(){
 
       list.forEach(a=>{
         if(a.type === 'text'){
+          if(a.cover){
+            pdfPage.drawRectangle({
+              x: a.cover.x0 - 1,
+              y: a.cover.y0 - 1,
+              width: (a.cover.x1 - a.cover.x0) + 2,
+              height: (a.cover.y1 - a.cover.y0) + 2,
+              color: rgb(1, 1, 1),
+              opacity: 1
+            });
+          }
           const col = ps2HexToRgb01(a.color);
           const lines = String(a.text || '').split('\n');
           const lineHeight = a.size * 1.25;
