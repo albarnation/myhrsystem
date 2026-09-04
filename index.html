@@ -968,7 +968,14 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
   <!-- ============ HAPUS LATAR BELAKANG FOTO ============ -->
   <div class="panel" id="panel-removebg">
     <div class="panel-head"><h2>Hapus Latar Belakang Foto</h2></div>
-    <div class="desc">Hilangkan latar belakang polos (putih, biru, merah, hijau, dll.) dari sebuah foto — cocok untuk pas foto/foto KTP karyawan yang perlu latar transparan atau diganti warna lain sesuai ketentuan instansi/portal. Berbasis kemiripan warna (bukan AI pengenal objek), jadi hasil paling rapi untuk foto berlatar polos satu warna. Diproses sepenuhnya di browser tanpa koneksi internet dan tanpa foto diunggah ke server manapun.</div>
+    <div class="desc">Hilangkan latar belakang dari sebuah foto — cocok untuk pas foto/foto KTP karyawan yang perlu latar transparan atau diganti warna lain sesuai ketentuan instansi/portal. Tersedia 2 metode: "Kesamaan Warna" (cepat, tanpa internet, terbaik untuk latar polos satu warna) atau "AI Deteksi Objek" (mendeteksi orang/objeknya secara otomatis seperti remove.bg, jadi bisa dipakai untuk latar apa pun — tapi butuh internet saat pertama dipakai dan prosesnya lebih lambat).</div>
+
+    <div class="field-row wide"><label>Metode</label>
+      <select id="rb_method" onchange="rbSetMethod(this.value)">
+        <option value="color" selected>Kesamaan Warna — cepat, offline, untuk latar polos satu warna</option>
+        <option value="ai">AI Deteksi Objek — seperti remove.bg, untuk latar apa saja</option>
+      </select>
+    </div>
 
     <div class="section-label">Unggah Foto</div>
     <div id="rb_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
@@ -978,29 +985,36 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <div id="rb_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
 
     <div id="rb_workarea" style="display:none;">
-      <div class="section-label">Pratinjau (klik area latar belakang pada foto untuk memilih warnanya)</div>
+      <div id="rb_preview_label" class="section-label">Pratinjau (klik area latar belakang pada foto untuk memilih warnanya)</div>
       <div style="background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0px;border-radius:8px;border:1px solid var(--line);padding:8px;text-align:center;">
         <canvas id="rb_canvas" style="max-width:100%;max-height:420px;border-radius:4px;cursor:crosshair;display:inline-block;"></canvas>
       </div>
 
-      <div class="field-row"><label>Warna Latar Terpilih</label>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span id="rb_color_swatch" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--line);flex-shrink:0;background:#ffffff;"></span>
-          <button type="button" class="btn-ghost" style="margin:0;" onclick="rbAutoPickColor()">Ambil Otomatis dari Tepi</button>
+      <div id="rb_color_controls">
+        <div class="field-row"><label>Warna Latar Terpilih</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span id="rb_color_swatch" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--line);flex-shrink:0;background:#ffffff;"></span>
+            <button type="button" class="btn-ghost" style="margin:0;" onclick="rbAutoPickColor()">Ambil Otomatis dari Tepi</button>
+          </div>
         </div>
+        <div class="field-row"><label>Toleransi Warna</label><input type="range" id="rb_tolerance" min="5" max="100" value="35" oninput="rbUpdateSliderLabels();rbProcess();" style="width:100%;"></div>
+        <div id="rb_tolerance_label" style="font-size:11px;color:var(--ink-faint);margin-top:-8px;margin-bottom:10px;">Toleransi: 35</div>
+        <div class="field-row"><label>Haluskan Tepi</label><input type="range" id="rb_feather" min="0" max="60" value="15" oninput="rbUpdateSliderLabels();rbProcess();" style="width:100%;"></div>
+        <div id="rb_feather_label" style="font-size:11px;color:var(--ink-faint);margin-top:-8px;margin-bottom:10px;">Haluskan Tepi: 15</div>
       </div>
-      <div class="field-row"><label>Toleransi Warna</label><input type="range" id="rb_tolerance" min="5" max="100" value="35" oninput="rbUpdateSliderLabels();rbProcess();" style="width:100%;"></div>
-      <div id="rb_tolerance_label" style="font-size:11px;color:var(--ink-faint);margin-top:-8px;margin-bottom:10px;">Toleransi: 35</div>
-      <div class="field-row"><label>Haluskan Tepi</label><input type="range" id="rb_feather" min="0" max="60" value="15" oninput="rbUpdateSliderLabels();rbProcess();" style="width:100%;"></div>
-      <div id="rb_feather_label" style="font-size:11px;color:var(--ink-faint);margin-top:-8px;margin-bottom:10px;">Haluskan Tepi: 15</div>
+
+      <div id="rb_ai_controls" style="display:none;margin-bottom:10px;">
+        <div id="rb_ai_status" style="font-size:12px;color:var(--ink-dim);margin-bottom:8px;">Klik tombol di bawah untuk mulai. Pemakaian pertama kali di perangkat/browser ini perlu mengunduh model AI (ukurannya cukup besar, puluhan MB) — setelah itu tersimpan di cache dan lebih cepat untuk foto-foto berikutnya.</div>
+        <button type="button" class="btn-primary" style="margin:0;" onclick="rbProcessAI()">🤖 Proses dengan AI</button>
+      </div>
 
       <div class="field-row"><label>Latar Belakang Hasil</label>
-        <select id="rb_bgmode" onchange="rbToggleBgColorRow();rbProcess();">
+        <select id="rb_bgmode" onchange="rbToggleBgColorRow();rbRefreshComposite();">
           <option value="transparent" selected>Transparan (PNG)</option>
           <option value="solid">Warna Solid</option>
         </select>
       </div>
-      <div class="field-row" id="rb_bgcolor_row" style="display:none;"><label>Pilih Warna Latar Baru</label><input type="color" id="rb_bgcolor" value="#ffffff" oninput="rbProcess();" style="width:60px;height:36px;padding:2px;"></div>
+      <div class="field-row" id="rb_bgcolor_row" style="display:none;"><label>Pilih Warna Latar Baru</label><input type="color" id="rb_bgcolor" value="#ffffff" oninput="rbRefreshComposite();" style="width:60px;height:36px;padding:2px;"></div>
 
       <div class="field-row wide"><label>Nama File Output</label><input type="text" id="rb_filename" placeholder="foto-tanpa-latar" value="foto-tanpa-latar"></div>
 
@@ -1011,7 +1025,7 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
       <div style="margin-top:8px;"><button type="button" class="btn-ghost" style="margin:0;" onclick="rbResetTool()">Ganti Foto Lain</button></div>
     </div>
 
-    <div class="note">Cara pakai: unggah foto berlatar polos (pas foto/KTP dengan latar putih/biru/merah/hijau), lalu klik bagian latar belakang pada pratinjau untuk memilih warnanya (atau pakai tombol "Ambil Otomatis dari Tepi" yang menebak warna dari sudut-sudut foto). Naikkan "Toleransi Warna" kalau latar belum terhapus semua, turunkan kalau bagian objek/wajah ikut terhapus; atur "Haluskan Tepi" supaya batas potongan tidak bergerigi/kasar. Deteksi memakai kemiripan rona warna (bukan sekadar kecerahan), jadi gradasi bayangan/terang-gelap pada latar tetap terhapus rata tanpa ikut memakan bagian wajah, jilbab, atau baju gelap; bintik-bintik kecil akibat artefak kompresi foto (mis. di sekitar mata, gigi, atau corak jilbab) juga otomatis dibersihkan/ditutup kembali. Unduhan PNG memakai latar transparan (atau warna solid kalau dipilih); unduhan JPG otomatis dipadatkan ke latar warna solid karena format JPG tidak mendukung transparansi. Foto besar otomatis diperkecil ke maksimal 1800px pada sisi terpanjang supaya proses tetap ringan di browser. Fitur ini paling akurat untuk latar belakang polos satu warna — bukan latar bertekstur atau pemandangan.</div>
+    <div class="note">Metode <b>Kesamaan Warna</b>: klik bagian latar belakang pada pratinjau untuk memilih warnanya (atau pakai "Ambil Otomatis dari Tepi"), lalu atur "Toleransi Warna" dan "Haluskan Tepi". Terbaik untuk latar belakang polos satu warna (pas foto/KTP studio) — bukan latar bertekstur/pemandangan. Berjalan sepenuhnya offline. Metode <b>AI Deteksi Objek</b>: tinggal klik "Proses dengan AI", sistem otomatis mengenali orang/objek pada foto tanpa perlu peduli warna latarnya — cocok untuk foto dengan latar rumit (bukan cuma warna polos). Butuh koneksi internet saat pertama kali dipakai di perangkat ini (mengunduh model AI), dan prosesnya lebih lambat/berat dibanding metode warna, terutama di HP. Model AI ini memakai pustaka open-source pihak ketiga (@imgly/background-removal, lisensi AGPL) yang dimuat dari internet saat dipakai — foto tetap diproses di perangkat/browser Anda sendiri, bukan diunggah ke server IMG.LY. Kedua metode menghasilkan foto dengan latar transparan (PNG) atau bisa diganti warna solid; unduhan JPG otomatis dipadatkan ke latar warna solid karena format JPG tidak mendukung transparansi.</div>
   </div>
 
   <!-- ============ KOMPRES PDF ============ -->
@@ -2950,6 +2964,95 @@ renderImg2PdfList();
 let rbSrcCanvas = null, rbSrcCtx = null;
 let rbProcCanvas = null, rbProcCtx = null;
 let rbPickedColor = null;
+let rbMethod = 'color';
+let rbOriginalFile = null;
+let rbAiCutoutBitmap = null;
+let rbHasResult = false;
+let imglyBgRemovalLoadPromise = null;
+
+function loadImglyBgRemoval(){
+  if(window.__imglyRemoveBackground) return Promise.resolve();
+  if(imglyBgRemovalLoadPromise) return imglyBgRemovalLoadPromise;
+  imglyBgRemovalLoadPromise = (async ()=>{
+    try{
+      const mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.6.0/+esm');
+      window.__imglyRemoveBackground = mod.removeBackground || mod.default;
+      if(!window.__imglyRemoveBackground) throw new Error('modul tidak menyediakan fungsi removeBackground');
+    }catch(err){
+      imglyBgRemovalLoadPromise = null;
+      throw new Error('Gagal memuat model AI — pastikan perangkat terhubung ke internet. (' + err.message + ')');
+    }
+  })();
+  return imglyBgRemovalLoadPromise;
+}
+
+function rbSetMethod(method){
+  rbMethod = method;
+  document.getElementById('rb_color_controls').style.display = method === 'color' ? '' : 'none';
+  document.getElementById('rb_ai_controls').style.display = method === 'ai' ? '' : 'none';
+  document.getElementById('rb_preview_label').textContent = method === 'color'
+    ? 'Pratinjau (klik area latar belakang pada foto untuk memilih warnanya)'
+    : 'Pratinjau';
+  rbAiCutoutBitmap = null;
+  rbHasResult = false;
+  if(!rbSrcCanvas) return;
+
+  const canvas = document.getElementById('rb_canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(rbSrcCanvas, 0, 0);
+
+  if(method === 'color'){
+    rbAutoPickColor();
+  } else {
+    setRbStatus('Klik "Proses dengan AI" untuk menghapus latar.', false);
+  }
+}
+
+async function rbProcessAI(){
+  if(!rbOriginalFile){ setRbStatus('Belum ada foto yang dimuat.', true); return; }
+  const aiStatusEl = document.getElementById('rb_ai_status');
+  setRbStatus('', false);
+  aiStatusEl.textContent = 'Menyiapkan model AI (unduhan pertama kali di perangkat ini bisa memakan waktu, tergantung koneksi)...';
+  try{
+    await loadImglyBgRemoval();
+    aiStatusEl.textContent = 'Memproses foto dengan AI... ini bisa memakan waktu 10–60 detik tergantung perangkat.';
+    const resultBlob = await window.__imglyRemoveBackground(rbOriginalFile, {
+      progress: (key, current, total)=>{
+        aiStatusEl.textContent = 'Memproses dengan AI (' + key + ': ' + current + '/' + total + ')...';
+      }
+    });
+    const bitmap = await createImageBitmap(resultBlob);
+    rbAiCutoutBitmap = bitmap;
+    rbHasResult = true;
+
+    const canvas = document.getElementById('rb_canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    rbCompositeAiResult();
+    aiStatusEl.textContent = 'Selesai diproses dengan AI. Bisa langsung diunduh, atau ubah dulu "Latar Belakang Hasil" di bawah kalau perlu.';
+  }catch(err){
+    aiStatusEl.textContent = 'Gagal memproses dengan AI: ' + err.message;
+  }
+}
+
+function rbCompositeAiResult(){
+  if(!rbAiCutoutBitmap) return;
+  const canvas = document.getElementById('rb_canvas');
+  const ctx = canvas.getContext('2d');
+  const bgMode = document.getElementById('rb_bgmode').value;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if(bgMode === 'solid'){
+    ctx.fillStyle = document.getElementById('rb_bgcolor').value;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.drawImage(rbAiCutoutBitmap, 0, 0);
+}
+
+function rbRefreshComposite(){
+  if(rbMethod === 'ai') rbCompositeAiResult();
+  else rbProcess();
+}
 
 function setRbStatus(msg, isError){
   const el = document.getElementById('rb_status');
@@ -2964,6 +3067,9 @@ function rbHandleFile(file){
     setRbStatus('Berkas yang dipilih bukan gambar.', true);
     return;
   }
+  rbOriginalFile = file;
+  rbAiCutoutBitmap = null;
+  rbHasResult = false;
   setRbStatus('Memuat foto...', false);
   const url = URL.createObjectURL(file);
   const img = new Image();
@@ -2988,8 +3094,16 @@ function rbHandleFile(file){
 
     URL.revokeObjectURL(url);
     document.getElementById('rb_workarea').style.display = '';
-    rbAutoPickColor();
-    setRbStatus('Foto dimuat (' + w + '×' + h + ' px). Warna latar ditebak otomatis dari sudut foto — klik pada foto untuk mengoreksi kalau kurang tepat.', false);
+    if(rbMethod === 'ai'){
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(rbSrcCanvas, 0, 0);
+      document.getElementById('rb_ai_status').textContent = 'Foto dimuat (' + w + '×' + h + ' px). Klik "Proses dengan AI" untuk menghapus latar.';
+      setRbStatus('', false);
+    } else {
+      rbAutoPickColor();
+      setRbStatus('Foto dimuat (' + w + '×' + h + ' px). Warna latar ditebak otomatis dari sudut foto — klik pada foto untuk mengoreksi kalau kurang tepat.', false);
+    }
   };
   img.onerror = ()=>{ URL.revokeObjectURL(url); setRbStatus('Gagal memuat foto.', true); };
   img.src = url;
@@ -3118,6 +3232,7 @@ function rbProcess(){
   } else {
     ctx.putImageData(out, 0, 0);
   }
+  rbHasResult = true;
 }
 
 function rbDespeckle(dst, w, h){
@@ -3168,7 +3283,7 @@ function rbDespeckle(dst, w, h){
 
 function rbDownload(format){
   const canvas = document.getElementById('rb_canvas');
-  if(!canvas || !rbSrcCtx || !rbPickedColor){ setRbStatus('Belum ada foto yang diproses.', true); return; }
+  if(!canvas || !rbHasResult){ setRbStatus('Belum ada foto yang diproses.', true); return; }
   let filename = (document.getElementById('rb_filename').value || 'foto-tanpa-latar').trim();
   filename = filename.replace(/\.(png|jpe?g)$/i, '') || 'foto-tanpa-latar';
 
@@ -3198,8 +3313,12 @@ function rbResetTool(){
   rbSrcCanvas = null; rbSrcCtx = null;
   rbProcCanvas = null; rbProcCtx = null;
   rbPickedColor = null;
+  rbOriginalFile = null;
+  rbAiCutoutBitmap = null;
+  rbHasResult = false;
   document.getElementById('rb_workarea').style.display = 'none';
   document.getElementById('rb_file_input').value = '';
+  document.getElementById('rb_ai_status').textContent = 'Klik tombol di bawah untuk mulai. Pemakaian pertama kali di perangkat/browser ini perlu mengunduh model AI (ukurannya cukup besar, puluhan MB) — setelah itu tersimpan di cache dan lebih cepat untuk foto-foto berikutnya.';
   setRbStatus('', false);
 }
 
