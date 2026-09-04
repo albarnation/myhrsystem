@@ -376,6 +376,7 @@
       <button class="side-link" data-tab="mergepdf" title="Gabungkan PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h4l3 3v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M12 3v3h3"/><path d="M4 9h3v11a1 1 0 0 0 1 1h9"/></svg><span class="link-label">Gabungkan PDF</span></button>
       <button class="side-link" data-tab="qrcode" title="Buat QR Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3M19 14v3h2M14 19h3v2M19 19v2h2"/></svg><span class="link-label">Buat QR Code</span></button>
       <button class="side-link" data-tab="pdf2word" title="PDF ke Ms Word"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h6l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13 3v5h5"/><path d="M9 17V12l1.5 3L12 12v5M14 12v5h1.6a1.4 1.4 0 0 0 0-5H14z"/></svg><span class="link-label">PDF ke Ms Word</span></button>
+      <button class="side-link" data-tab="pdf2img" title="PDF ke Gambar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h6l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M13 3v5h5"/><rect x="7.5" y="12" width="7" height="5.2" rx="0.6"/><circle cx="9.2" cy="13.7" r="0.6"/><path d="M8 17l2-2 1.3 1.3L13 14l1.5 1.5"/></svg><span class="link-label">PDF ke Gambar</span></button>
       <button class="side-link" data-tab="pdfstamp" title="Watermark, Stempel &amp; Nomor Halaman PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><circle cx="10.5" cy="14" r="3"/><path d="M9.3 16.6 8 21l2.5-1.3L13 21l-1.3-4.4"/></svg><span class="link-label">Watermark &amp; Stempel PDF</span></button>
       <button class="side-link" data-tab="editpdf" title="Edit / Tulis di PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13.5 14 8.5l1.5 1.5-5 5H9v-1.5z"/></svg><span class="link-label">Edit / Tulis di PDF</span></button>
     </nav>
@@ -1181,6 +1182,47 @@ Biaya Lain -lain — Rp 1.000.000</textarea>
     <button class="btn-primary" id="pw_btn" onclick="convertPdfToWord()">Konversi &amp; Unduh Word</button>
 
     <div class="note">Berjalan sepenuhnya di perangkat ini — komponen pembaca PDF (PDF.js), penyusun berkas Word (JSZip), dan OCR (Tesseract.js, hanya dimuat kalau opsi OCR dicentang) diambil sekali dari internet lalu tersimpan di cache browser; file tidak diunggah ke server manapun. Hasil berupa .docx asli yang bisa langsung dibuka & diedit di Microsoft Word/WPS/Google Docs. Karena hanya teks yang diekstrak, periksa kembali hasilnya sebelum dipakai resmi — terutama untuk PDF dengan tabel atau tata letak kompleks. File terkunci password atau rusak mungkin gagal diproses.</div>
+  </div>
+
+  <!-- ============ PDF KE GAMBAR ============ -->
+  <div class="panel" id="panel-pdf2img">
+    <div class="panel-head"><h2>PDF ke Gambar</h2></div>
+    <div class="desc">Ubah setiap halaman PDF jadi gambar (PNG/JPG) — cocok untuk diunggah ke media sosial, dijadikan thumbnail, atau dipakai di aplikasi yang tidak menerima PDF.</div>
+
+    <div class="section-label">Unggah PDF</div>
+    <div id="pi_dropzone" tabindex="0" style="border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;cursor:pointer;background:var(--panel-2);font-size:12.5px;color:var(--ink-dim);">
+      📄 Klik untuk pilih file PDF, atau seret file ke sini
+      <input type="file" id="pi_file_input" accept="application/pdf,.pdf" style="display:none;">
+    </div>
+    <div id="pi_status" style="font-size:12px;color:var(--ink-dim);margin-top:6px;display:none;"></div>
+
+    <div id="pi_workarea" style="display:none;">
+      <div class="section-label">Pilih Halaman</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button type="button" class="btn-ghost" style="margin:0;padding:5px 10px;font-size:11.5px;" onclick="piSelectAll(true)">Pilih Semua</button>
+        <button type="button" class="btn-ghost" style="margin:0;padding:5px 10px;font-size:11.5px;" onclick="piSelectAll(false)">Kosongkan</button>
+      </div>
+      <div id="pi_pagegrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;margin-bottom:12px;"></div>
+
+      <div class="field-row"><label>Format Gambar</label>
+        <select id="pi_format">
+          <option value="png" selected>PNG (tajam, ukuran lebih besar)</option>
+          <option value="jpeg">JPG (ukuran lebih kecil)</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Resolusi</label>
+        <select id="pi_resolution">
+          <option value="standar">Standar — layar (150 DPI)</option>
+          <option value="tinggi" selected>Tinggi — cetak (200 DPI)</option>
+          <option value="sangat_tinggi">Sangat Tinggi (300 DPI)</option>
+        </select>
+      </div>
+      <div class="field-row wide"><label>Nama File Output</label><input type="text" id="pi_filename" placeholder="dokumen-gambar" value=""></div>
+
+      <button class="btn-primary" id="pi_btn" onclick="convertPdfToImages()">Konversi &amp; Unduh Gambar</button>
+    </div>
+
+    <div class="note">Kalau hanya 1 halaman dipilih, hasilnya langsung diunduh sebagai satu berkas gambar. Kalau lebih dari 1 halaman dipilih, semua gambar dibungkus jadi satu berkas .zip (memakai JSZip) supaya tidak perlu mengunduh satu-satu. PNG lebih tajam dan mendukung transparansi tapi ukurannya lebih besar; JPG lebih ringkas tapi memakai kompresi (cocok untuk foto/dokumen berwarna). Semua proses berjalan sepenuhnya di perangkat ini — file tidak diunggah ke server manapun. File terkunci password atau rusak mungkin gagal diproses.</div>
   </div>
 
   <!-- ============ WATERMARK, STEMPEL & NOMOR HALAMAN PDF ============ -->
@@ -4104,6 +4146,176 @@ async function convertPdfToWord(){
     e.preventDefault();
     dz.style.borderColor = 'var(--line)';
     if(e.dataTransfer.files && e.dataTransfer.files[0]) pwSetFile(e.dataTransfer.files[0]);
+  });
+})();
+
+// ---------- PDF KE GAMBAR ----------
+const PI_RESOLUTIONS = {
+  standar: { dpi: 150, label: 'Standar' },
+  tinggi: { dpi: 200, label: 'Tinggi' },
+  sangat_tinggi: { dpi: 300, label: 'Sangat Tinggi' }
+};
+let piArrayBuffer = null;
+let piNumPages = 0;
+let piPages = []; // [{ pageIndex, thumbUrl, selected }]
+
+function setPiStatus(msg, isError){
+  const el = document.getElementById('pi_status');
+  if(!el) return;
+  el.style.display = msg ? '' : 'none';
+  el.textContent = msg || '';
+  el.style.color = isError ? '#F33A6A' : 'var(--ink-dim)';
+}
+
+async function piHandleFile(file){
+  const isPdf = (file.type && file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+  if(!isPdf){ setPiStatus('File yang dipilih bukan PDF.', true); return; }
+
+  setPiStatus('Memuat komponen pembaca PDF (butuh internet sekali di awal)...', false);
+  try{ await loadPdfJs(); }catch(err){ setPiStatus(err.message, true); return; }
+
+  setPiStatus('Membaca "' + file.name + '"...', false);
+  try{
+    piArrayBuffer = await file.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: piArrayBuffer.slice(0) }).promise;
+    piNumPages = pdf.numPages;
+    piPages = [];
+
+    for(let pageNum = 1; pageNum <= piNumPages; pageNum++){
+      setPiStatus('Membuat pratinjau halaman ' + pageNum + ' dari ' + piNumPages + '...', false);
+      const page = await pdf.getPage(pageNum);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const scale = 130 / Math.max(baseViewport.width, baseViewport.height);
+      const viewport = page.getViewport({ scale: scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(viewport.width));
+      canvas.height = Math.max(1, Math.round(viewport.height));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      piPages.push({ pageIndex: pageNum - 1, thumbUrl: canvas.toDataURL('image/jpeg', 0.7), selected: true });
+      page.cleanup && page.cleanup();
+    }
+
+    const baseName = (file.name || 'dokumen').replace(/\.pdf$/i, '').trim() || 'dokumen';
+    document.getElementById('pi_filename').value = baseName + '-gambar';
+
+    document.getElementById('pi_workarea').style.display = '';
+    piRenderGrid();
+    setPiStatus('Berhasil dimuat (' + piNumPages + ' halaman). Semua halaman terpilih secara default.', false);
+  }catch(err){
+    setPiStatus('Gagal membaca PDF: ' + err.message, true);
+  }
+}
+
+function piRenderGrid(){
+  const wrap = document.getElementById('pi_pagegrid');
+  wrap.innerHTML = piPages.map(p=>{
+    return '<div onclick="piToggle(' + p.pageIndex + ')" style="cursor:pointer;text-align:center;position:relative;border-radius:6px;overflow:hidden;border:2px solid ' + (p.selected ? 'var(--accent)' : 'var(--line)') + ';' + (p.selected ? '' : 'opacity:.45;') + '">'
+      + '<img src="' + p.thumbUrl + '" style="width:100%;display:block;background:#fff;">'
+      + '<div style="position:absolute;top:3px;left:3px;background:' + (p.selected ? 'var(--accent)' : 'rgba(0,0,0,.5)') + ';color:#fff;font-size:10px;font-weight:700;border-radius:999px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;">' + (p.selected ? '✓' : (p.pageIndex + 1)) + '</div>'
+      + '<div style="font-size:9.5px;color:var(--ink-faint);padding:2px 0;">Hal. ' + (p.pageIndex + 1) + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function piToggle(pageIndex){
+  const p = piPages.find(x=> x.pageIndex === pageIndex);
+  if(p) p.selected = !p.selected;
+  piRenderGrid();
+}
+
+function piSelectAll(state){
+  piPages.forEach(p=> p.selected = state);
+  piRenderGrid();
+}
+
+async function convertPdfToImages(){
+  if(!piArrayBuffer){ setPiStatus('Belum ada PDF yang dimuat.', true); return; }
+  const selected = piPages.filter(p=> p.selected);
+  if(selected.length === 0){ setPiStatus('Pilih minimal satu halaman.', true); return; }
+
+  const format = document.getElementById('pi_format').value;
+  const ext = format === 'png' ? 'png' : 'jpg';
+  const mime = format === 'png' ? 'image/png' : 'image/jpeg';
+  const resolution = PI_RESOLUTIONS[document.getElementById('pi_resolution').value] || PI_RESOLUTIONS.tinggi;
+  let filename = (document.getElementById('pi_filename').value || 'dokumen-gambar').trim();
+  filename = filename.replace(/\.(png|jpe?g|zip)$/i, '') || 'dokumen-gambar';
+
+  const btn = document.getElementById('pi_btn');
+  btn.disabled = true;
+  try{
+    const pdf = await window.pdfjsLib.getDocument({ data: piArrayBuffer.slice(0) }).promise;
+    const scale = resolution.dpi / 72;
+    const blobs = [];
+
+    for(let i = 0; i < selected.length; i++){
+      const pageIndex = selected[i].pageIndex;
+      setPiStatus('Membuat gambar halaman ' + (pageIndex + 1) + ' (' + (i + 1) + ' dari ' + selected.length + ')...', false);
+      const page = await pdf.getPage(pageIndex + 1);
+      const viewport = page.getViewport({ scale: scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(viewport.width));
+      canvas.height = Math.max(1, Math.round(viewport.height));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      page.cleanup && page.cleanup();
+      const blob = await new Promise(resolve=> canvas.toBlob(resolve, mime, format === 'jpeg' ? 0.92 : undefined));
+      blobs.push({ pageIndex: pageIndex, blob: blob });
+    }
+
+    if(blobs.length === 1){
+      const url = URL.createObjectURL(blobs[0].blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename + '.' + ext;
+      link.click();
+      setTimeout(()=> URL.revokeObjectURL(url), 5000);
+      setPiStatus('Selesai — "' + filename + '.' + ext + '" berhasil diunduh.', false);
+    } else {
+      setPiStatus('Membungkus ' + blobs.length + ' gambar ke dalam .zip...', false);
+      try{ await loadJsZip(); }catch(err){ setPiStatus(err.message, true); btn.disabled = false; return; }
+      const zip = new window.JSZip();
+      const padLen = String(piNumPages).length;
+      blobs.forEach(b=>{
+        const pageLabel = String(b.pageIndex + 1).padStart(padLen, '0');
+        zip.file(filename + '-hal' + pageLabel + '.' + ext, b.blob);
+      });
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename + '.zip';
+      link.click();
+      setTimeout(()=> URL.revokeObjectURL(url), 5000);
+      setPiStatus('Selesai — ' + blobs.length + ' gambar berhasil dibuat dan dibungkus ke "' + filename + '.zip".', false);
+    }
+  }catch(err){
+    setPiStatus('Gagal membuat gambar: ' + err.message, true);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+(function setupPiDropzone(){
+  const dz = document.getElementById('pi_dropzone');
+  const fileInput = document.getElementById('pi_file_input');
+  if(!dz || !fileInput) return;
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    if(e.target.files && e.target.files[0]) piHandleFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', ()=>{ dz.style.borderColor = 'var(--line)'; });
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault();
+    dz.style.borderColor = 'var(--line)';
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) piHandleFile(e.dataTransfer.files[0]);
   });
 })();
 
